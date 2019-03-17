@@ -72,5 +72,6 @@ func main() {
 	rpc.Post("/upload", rpc.Upload)
 
 	// serve
-	rpc.Serve(":3000")
+	port := dflimg.GetPort()
+	rpc.Serve(port)
 }

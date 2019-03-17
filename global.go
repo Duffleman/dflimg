@@ -70,6 +70,17 @@ func ParseConnectionString() string {
 	return v
 }
 
+func GetPort() string {
+	var port string
+
+	port = os.Getenv("DFL_PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	return fmt.Sprintf(":%s", port)
+}
+
 var (
 	// ErrNotFound is an error for not_found
 	ErrNotFound = errors.New("not found")
