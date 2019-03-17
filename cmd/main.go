@@ -62,6 +62,7 @@ func main() {
 	rpc.Use(middleware.Timeout(60 * time.Second))
 
 	// define routes
+	rpc.Get("/", rpc.Homepage)
 	rpc.Get("/health", rpc.HealthCheck)
 	rpc.Get("/{fileID}", rpc.GetFile)
 	rpc.Post("/upload", rpc.Upload)
