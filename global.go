@@ -1,6 +1,9 @@
 package dflimg
 
-import "errors"
+import (
+	"errors"
+	"os"
+)
 
 // Users is a map[string]string for users to upload keys
 var Users = map[string]string{
@@ -21,6 +24,24 @@ const (
 	// RootURL is the root URL this service runs as
 	RootURL = "http://localhost:3000"
 )
+
+func GetEnv(key string) string {
+	var v string
+	switch key {
+	case "salt":
+		v = os.Getenv("DFL_SALT")
+		if v == "" {
+			return Salt
+		}
+	case "root_url":
+		v = os.Getenv("DFL_ROOT_URL")
+		if v == "" {
+			return RootURL
+		}
+	}
+
+	return v
+}
 
 var (
 	// ErrNotFound is an error for not_found

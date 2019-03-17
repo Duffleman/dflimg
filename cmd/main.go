@@ -44,7 +44,9 @@ func main() {
 	// hasher
 	hd := hashids.NewData()
 
-	hd.Salt = dflimg.Salt
+	salt := dflimg.GetEnv("salt")
+
+	hd.Salt = salt
 	hd.MinLength = dflimg.EncodeLength
 
 	hasher, _ := hashids.NewWithData(hd)

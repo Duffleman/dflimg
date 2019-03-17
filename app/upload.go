@@ -48,8 +48,9 @@ func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer) (*dflimg.Upl
 		return nil, err
 	}
 
+	rootURL := dflimg.GetEnv("root_url")
 	hash := a.makeHash(file.Serial)
-	url := fmt.Sprintf("%s/%s", dflimg.RootURL, hash)
+	url := fmt.Sprintf("%s/%s", rootURL, hash)
 
 	return &dflimg.UploadFileResponse{
 		FileID: file.ID,
