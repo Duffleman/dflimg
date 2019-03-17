@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-
-	"github.com/kr/pretty"
 )
 
 // Users is a map[string]string for users to upload keys
@@ -55,14 +53,21 @@ func GetUsers() map[string]string {
 
 	var users map[string]string
 
-	pretty.Println(v)
-
 	err := json.Unmarshal([]byte(v), &users)
 	if err != nil {
 		panic(fmt.Errorf("cannot unmarshal user config: %s", err))
 	}
 
 	return users
+}
+
+func ParseConnectionString() string {
+	v := os.Getenv("PG_OPTS")
+	if v == "" {
+		return "postgres://duffleman@localhost:5432/dflimg?sslmode=disable"
+	}
+
+	return v
 }
 
 var (

@@ -33,10 +33,12 @@ func main() {
 	}
 
 	// postgres db
-	pgdb := pg.Connect(&pg.Options{
-		User:     "duffleman",
-		Database: "dflimg",
-	})
+	dbOpts, err := pg.ParseURL(dflimg.ParseConnectionString())
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	pgdb := pg.Connect(dbOpts)
 	defer pgdb.Close()
 
 	db := dfldb.New(pgdb)
