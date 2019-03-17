@@ -70,15 +70,13 @@ func ParseConnectionString() string {
 	return v
 }
 
-func GetPort() string {
-	var port string
-
-	port = os.Getenv("DFL_PORT")
-	if port == "" {
-		port = "3000"
+func GetAddr() (addr string) {
+	addr = os.Getenv("ADDR")
+	if addr == "" {
+		addr = ":3000"
 	}
 
-	return fmt.Sprintf(":%s", port)
+	return
 }
 
 var (
