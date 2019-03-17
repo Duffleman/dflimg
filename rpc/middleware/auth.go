@@ -15,23 +15,15 @@ func AuthMiddleware(users map[string]string) func(next http.Handler) http.Handle
 			ctx := r.Context()
 			authKey := r.Header.Get("Authorization")
 
-			if authKey == "" {
-				http.Error(w, "access_denied", 500)
-				return
-			}
-
 			for username, key := range users {
 				if key == authKey {
 					ctx = context.WithValue(ctx, UsernameKey, username)
-					next.ServeHTTP(w, r.WithContext(ctx))
-
-					return
 				}
 			}
 
-			http.Error(w, "access_denied", 500)
-			return
+			next.ServeHTTP(w, r.WithContext(ctx))
 
+			return
 		}
 
 		return http.HandlerFunc(fn)

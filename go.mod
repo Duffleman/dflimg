@@ -15,6 +15,7 @@ require (
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/sirupsen/logrus v1.3.0
+	github.com/speps/go-hashids v2.0.0+incompatible
 	golang.org/x/arch v0.0.0-20190226203302-36aee92af9e8 // indirect
 	golang.org/x/net v0.0.0-20190311031020-56fb01167e7d // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
