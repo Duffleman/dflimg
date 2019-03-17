@@ -60,7 +60,7 @@ func main() {
 	rpc.Use(middleware.RequestID)
 	rpc.Use(middleware.RealIP)
 	rpc.Use(middleware.Recoverer)
-	rpc.Use(dflmw.AuthMiddleware(dflimg.Users))
+	rpc.Use(dflmw.AuthMiddleware(dflimg.GetUsers()))
 	rpc.Use(middleware.Timeout(60 * time.Second))
 
 	// define routes

@@ -1,8 +1,12 @@
 package dflimg
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
+
+	"github.com/kr/pretty"
 )
 
 // Users is a map[string]string for users to upload keys
@@ -41,6 +45,24 @@ func GetEnv(key string) string {
 	}
 
 	return v
+}
+
+func GetUsers() map[string]string {
+	v := os.Getenv("DFL_USERS")
+	if v == "" {
+		return Users
+	}
+
+	var users map[string]string
+
+	pretty.Println(v)
+
+	err := json.Unmarshal([]byte(v), &users)
+	if err != nil {
+		panic(fmt.Errorf("cannot unmarshal user config: %s", err))
+	}
+
+	return users
 }
 
 var (
