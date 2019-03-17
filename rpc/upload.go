@@ -3,7 +3,6 @@ package rpc
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -38,7 +37,6 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 
 	res, err := r.app.Upload(ctx, buf)
 	if err != nil {
-		fmt.Println(err)
 		r.logger.WithError(err)
 		w.WriteHeader(500)
 		json.NewEncoder(w).Encode(err)
