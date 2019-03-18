@@ -27,7 +27,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		r.logger.WithError(err)
 		w.WriteHeader(500)
-		json.NewEncoder(w).Encode(err)
+		json.NewEncoder(w).Encode(map[string]string{"code": err.Error()})
 		return
 	}
 	defer file.Close()
@@ -39,7 +39,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		r.logger.WithError(err)
 		w.WriteHeader(500)
-		json.NewEncoder(w).Encode(err)
+		json.NewEncoder(w).Encode(map[string]string{"code": err.Error()})
 		return
 	}
 

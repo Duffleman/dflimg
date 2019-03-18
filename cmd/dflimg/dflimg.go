@@ -22,7 +22,7 @@ func main() {
 	// Setup logger
 	logger := logrus.New()
 	logger.Formatter = &logrus.JSONFormatter{
-		DisableTimestamp: true,
+		DisableTimestamp: false,
 	}
 
 	// setup app dependancies
