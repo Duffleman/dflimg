@@ -4,7 +4,7 @@
 
 Quick file sharing platform. Accepts images, and files.
 
-This is built from scratch in Go, so you need a public facing server to handle requests and the server will need to run Go with postgres.
+This is built from scratch in Go, so you need a public facing server to handle requests and the server will need to run Go with postgres (see [db.md](db.md)).
 
 Requires an AWS account, it uses S3 as a host for the uploaded files.
 
@@ -54,3 +54,29 @@ If the "Accept" header is set to "text/plain":
 ### `GET /{hash}`
 
 Links to the image or file. Serves the content directly!
+
+### `GET /:{label}`
+
+Links to the image or file through one of it's labels. Serves the content directly!
+
+# upload
+
+A CLI tool that allows you to upload files to the above server!
+
+## Install
+
+Install it into your PATH
+
+`go install cmd/upload/upload.go`
+
+## Upload a file
+
+Upload a single file:
+
+`upload {file}`
+
+Upload a file with some labels, you can give it a CSV for labels
+
+`upload --labels=test,srs {file}`
+
+It will attempt to automatically put the URL in your clipboard too!
