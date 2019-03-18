@@ -13,12 +13,17 @@ import (
 	"github.com/go-pg/pg"
 )
 
-func (a *App) GetFile(ctx context.Context, fileID string) (*bytes.Buffer, error) {
-	serial, err := a.decodeHash(fileID)
+// GetFile endpoint that gets a file by it's hash
+func (a *App) GetFile(ctx context.Context, hash string) (*bytes.Buffer, error) {
+	serial, err := a.decodeHash(hash)
 	if err != nil {
 		return nil, err
 	}
 
+	return a.getFileBySerial(ctx, serial)
+}
+
+func (a *App) getFileBySerial(ctx context.Context, serial int) (*bytes.Buffer, error) {
 	file, err := a.db.FindFileBySerial(serial)
 	if err != nil {
 		if err == pg.ErrNoRows {

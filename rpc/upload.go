@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 
 	"dflimg/rpc/middleware"
 )
@@ -23,6 +24,13 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	labelsStr := req.FormValue("labels")
+	var labels []string
+
+	if labelsStr != "" {
+		labels = strings.Split(labelsStr, ",")
+	}
+
 	file, _, err := req.FormFile("file")
 	if err != nil {
 		r.logger.WithError(err)
@@ -35,7 +43,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 	var buf bytes.Buffer
 	io.Copy(&buf, file)
 
-	res, err := r.app.Upload(ctx, buf)
+	res, err := r.app.Upload(ctx, buf, labels)
 	if err != nil {
 		r.logger.WithError(err)
 		w.WriteHeader(500)
@@ -46,8 +54,10 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 	accept := req.Header.Get("Accept")
 
 	if accept == "text/plain" {
+		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte(res.URL))
 	} else {
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(res)
 	}
 

@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -16,13 +17,21 @@ import (
 )
 
 // Upload is an app method that takes in a file and stores it
-func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer) (*dflimg.UploadFileResponse, error) {
+func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer, labels []string) (*dflimg.UploadFileResponse, error) {
 	// get user
 	username := ctx.Value(middleware.UsernameKey).(string)
 	contentType := http.DetectContentType(fileContent.Bytes())
 	fileID := ksuid.Generate("file").String()
 	fileExt := getExtension(contentType)
 	fileKey := fmt.Sprintf("%s/%s%s", dflimg.S3RootKey, fileID, fileExt)
+
+	for _, label := range labels {
+		// TODO: make more efficient
+		_, err := a.db.FindFileByLabel(label)
+		if err == nil {
+			return nil, errors.New("label already taken")
+		}
+	}
 
 	// upload to S3
 	_, err := s3.New(a.aws).PutObject(&s3.PutObjectInput{
@@ -38,7 +47,7 @@ func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer) (*dflimg.Upl
 	}
 
 	// save to DB
-	err = a.db.NewFile(fileID, fileKey, username, contentType)
+	err = a.db.NewFile(fileID, fileKey, username, contentType, labels)
 	if err != nil {
 		return nil, err
 	}
