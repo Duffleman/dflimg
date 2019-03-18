@@ -37,7 +37,6 @@ func main() {
 	}
 
 	file := args[0]
-	_ = strings.Split(*labelStr, ",") // TODO: support labels when server side handles it
 
 	authToken, err := getAuthorisationToken()
 	if err != nil {
@@ -46,7 +45,7 @@ func main() {
 
 	startTime := time.Now()
 
-	body, err := sendFile(authToken, file)
+	body, err := sendFile(authToken, file, *labelStr)
 	if err != nil {
 		fin(err)
 	}
@@ -84,7 +83,7 @@ func parseResponse(res []byte) (*dflimg.UploadFileResponse, error) {
 }
 
 // SendFile uploads the file to the server
-func sendFile(authToken string, filename string) ([]byte, error) {
+func sendFile(authToken, filename, labelStr string) ([]byte, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -93,6 +92,15 @@ func sendFile(authToken string, filename string) ([]byte, error) {
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
+
+	if labelStr != "" {
+		part, err := writer.CreateFormField("labels")
+		if err != nil {
+			return nil, err
+		}
+
+		io.Copy(part, strings.NewReader(labelStr))
+	}
 
 	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
 	if err != nil {
