@@ -10,12 +10,43 @@ When you run this, the shorter your domain is, the better.
 
 Inspired by starbs/yeh
 
+## Env variables to set
+
+```
+PG_OPTS=postgresql://postgres/dflimg?sslmode=prefer
+DFL_USERS={"USERNAME": "PASSWORD"}
+DFL_ROOT_URL=https://dfl.mn
+DFL_SALT=some-long-string-that-works-as-a-salt-for-the-hasher
+ADDR=:8001
+AWS_ACCESS_KEY_ID=AWSKEY
+AWS_SECRET_ACCESS_KEY=AWSSECRET
+AWS_DEFAULT_REGION=AWSREGION
+```
+
 ## Endpoints
 
 ### `upload_file`
 
-Takes a file in the form of multipart/form-data, stores it in S3, keeps a local cached copy for quick retrieval for the next 10 minutes (configurable). Returns  a short URL that links to the file.
+Takes a file in the form of multipart/form-data, returns  a short URL that links to the file. You can set the "Accept" header to modify the response.
+
+```bash
+curl -X POST -H "Accept: text/plain" -H "Authorization: test" -F file=@duffleman.png http://localhost:3000/upload
+```
+
+```json
+{
+    "file_id": "file_000000BdAf7MWsYZ6r5wc18cV2sAS",
+    "hash": "q3A",
+    "url": "https://dfl.mn/q3A"
+}
+```
+
+If the "Accept" header is set to "text/plain":
+
+```
+https://dfl.mn/q3A
+```
 
 ### `/{hash}`
 
-Links to the image or file.
+Links to the image or file. Serves the content directly!
