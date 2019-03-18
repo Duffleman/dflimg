@@ -53,7 +53,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 
 	accept := req.Header.Get("Accept")
 
-	if accept == "text/plain" {
+	if strings.Contains(accept, "text/plain") {
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte(res.URL))
 	} else {

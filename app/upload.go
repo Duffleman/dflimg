@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"dflimg"
 	"dflimg/rpc/middleware"
@@ -22,8 +21,7 @@ func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer, labels []str
 	username := ctx.Value(middleware.UsernameKey).(string)
 	contentType := http.DetectContentType(fileContent.Bytes())
 	fileID := ksuid.Generate("file").String()
-	fileExt := getExtension(contentType)
-	fileKey := fmt.Sprintf("%s/%s%s", dflimg.S3RootKey, fileID, fileExt)
+	fileKey := fmt.Sprintf("%s/%s", dflimg.S3RootKey, fileID)
 
 	for _, label := range labels {
 		// TODO: make more efficient
@@ -66,16 +64,6 @@ func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer, labels []str
 		Hash:   hash,
 		URL:    url,
 	}, err
-}
-
-func getExtension(t string) string {
-	switch t {
-	case "text/plain":
-		return ".txt"
-	default:
-		ext := strings.Split(t, "/")
-		return fmt.Sprintf(".%s", ext[1])
-	}
 }
 
 func (a *App) makeHash(serial int) string {

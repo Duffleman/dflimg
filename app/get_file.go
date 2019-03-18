@@ -5,7 +5,6 @@ import (
 	"context"
 	"dflimg"
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -32,12 +31,9 @@ func (a *App) getFileBySerial(ctx context.Context, serial int) (*bytes.Buffer, e
 		return nil, err
 	}
 
-	fileExt := getExtension(file.Type)
-	fileKey := fmt.Sprintf("%s/%s%s", dflimg.S3RootKey, file.ID, fileExt)
-
 	s3download, err := s3.New(a.aws).GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(dflimg.S3Bucket),
-		Key:    aws.String(fileKey),
+		Key:    aws.String(file.S3),
 	})
 	if err != nil {
 		return nil, err
