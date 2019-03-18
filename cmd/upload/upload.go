@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"dflimg"
 
@@ -43,6 +44,8 @@ func main() {
 		fin(err)
 	}
 
+	startTime := time.Now()
+
 	body, err := sendFile(authToken, file)
 	if err != nil {
 		fin(err)
@@ -53,9 +56,11 @@ func main() {
 		fin(err)
 	}
 
+	duration := time.Now().Sub(startTime)
+
 	clipboard.WriteAll(f.URL)
 
-	fmt.Printf("Done: %s\n", f.URL)
+	fmt.Printf("Done in %s: %s\n", duration.String(), f.URL)
 }
 
 func getAuthorisationToken() (string, error) {
