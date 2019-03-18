@@ -33,7 +33,7 @@ func main() {
 	}
 
 	// postgres db
-	dbOpts, err := pg.ParseURL(dflimg.ParseConnectionString())
+	dbOpts, err := pg.ParseURL(dflimg.GetEnv("pg_connection_string"))
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -72,6 +72,6 @@ func main() {
 	rpc.Post("/upload", rpc.Upload)
 
 	// serve
-	addr := dflimg.GetAddr()
+	addr := dflimg.GetEnv("addr")
 	rpc.Serve(addr)
 }

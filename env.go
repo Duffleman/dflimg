@@ -19,6 +19,16 @@ func GetEnv(key string) string {
 		if v == "" {
 			return RootURL
 		}
+	case "pg_connection_string":
+		v = os.Getenv("PG_OPTS")
+		if v == "" {
+			return PostgresCS
+		}
+	case "addr":
+		v = os.Getenv("ADDR")
+		if v == "" {
+			return DefaultAddr
+		}
 	}
 
 	return v
@@ -38,22 +48,4 @@ func GetUsers() map[string]string {
 	}
 
 	return users
-}
-
-func ParseConnectionString() string {
-	v := os.Getenv("PG_OPTS")
-	if v == "" {
-		return "postgres://duffleman@localhost:5432/dflimg?sslmode=disable"
-	}
-
-	return v
-}
-
-func GetAddr() (addr string) {
-	addr = os.Getenv("ADDR")
-	if addr == "" {
-		addr = ":3000"
-	}
-
-	return
 }

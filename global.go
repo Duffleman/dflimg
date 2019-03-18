@@ -22,6 +22,10 @@ const (
 	EncodeLength = 3
 	// RootURL is the root URL this service runs as
 	RootURL = "http://localhost:3000"
+	// PostgresCS is the default connection string
+	PostgresCS = "postgres://duffleman@localhost:5432/dflimg?sslmode=disable"
+	// DefaultAddr is the default address to listen on
+	DefaultAddr = ":3000"
 )
 
 var (
