@@ -13,22 +13,22 @@ import (
 )
 
 // GetFile endpoint that gets a file by it's hash
-func (a *App) GetFile(ctx context.Context, hash string) (*bytes.Buffer, error) {
+func (a *App) GetFile(ctx context.Context, hash string) (string, *bytes.Buffer, error) {
 	serial, err := a.decodeHash(hash)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
 	return a.getFileBySerial(ctx, serial)
 }
 
-func (a *App) getFileBySerial(ctx context.Context, serial int) (*bytes.Buffer, error) {
+func (a *App) getFileBySerial(ctx context.Context, serial int) (string, *bytes.Buffer, error) {
 	file, err := a.db.FindFileBySerial(serial)
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return nil, dflimg.ErrNotFound
+			return "", nil, dflimg.ErrNotFound
 		}
-		return nil, err
+		return "", nil, err
 	}
 
 	s3download, err := s3.New(a.aws).GetObject(&s3.GetObjectInput{
@@ -36,13 +36,13 @@ func (a *App) getFileBySerial(ctx context.Context, serial int) (*bytes.Buffer, e
 		Key:    aws.String(file.S3),
 	})
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
 	var buf bytes.Buffer
 	io.Copy(&buf, s3download.Body)
 
-	return &buf, nil
+	return file.Type, &buf, nil
 }
 
 func (a *App) decodeHash(hash string) (int, error) {

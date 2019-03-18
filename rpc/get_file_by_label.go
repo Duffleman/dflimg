@@ -13,7 +13,7 @@ func (r *RPC) GetFileByLabel(w http.ResponseWriter, req *http.Request) {
 
 	label := chi.URLParam(req, "label")
 
-	res, err := r.app.GetFileByLabel(ctx, label)
+	fileType, res, err := r.app.GetFileByLabel(ctx, label)
 	if err != nil {
 		r.logger.WithError(err)
 		if err == dflimg.ErrNotFound {
@@ -26,6 +26,7 @@ func (r *RPC) GetFileByLabel(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", fileType)
 	w.Write(res.Bytes())
 
 	return

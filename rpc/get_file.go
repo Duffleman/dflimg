@@ -13,7 +13,7 @@ func (r *RPC) GetFile(w http.ResponseWriter, req *http.Request) {
 
 	fileID := chi.URLParam(req, "fileID")
 
-	res, err := r.app.GetFile(ctx, fileID)
+	fileType, res, err := r.app.GetFile(ctx, fileID)
 	if err != nil {
 		r.logger.WithError(err)
 		if err == dflimg.ErrNotFound {
@@ -26,6 +26,7 @@ func (r *RPC) GetFile(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", fileType)
 	w.Write(res.Bytes())
 
 	return
