@@ -25,13 +25,17 @@ AWS_DEFAULT_REGION=AWSREGION
 
 ## Endpoints
 
-### `upload_file`
+### `POST /upload`
 
 Takes a file in the form of multipart/form-data, returns  a short URL that links to the file. You can set the "Accept" header to modify the response.
 
+#### Request
+
 ```bash
-curl -X POST -H "Accept: text/plain" -H "Authorization: test" -F file=@duffleman.png http://localhost:3000/upload
+curl -X POST -H "Authorization: test" -F file=@duffleman.png https://dfl.mn/upload
 ```
+
+#### Response
 
 ```json
 {
@@ -43,10 +47,8 @@ curl -X POST -H "Accept: text/plain" -H "Authorization: test" -F file=@duffleman
 
 If the "Accept" header is set to "text/plain":
 
-```
-https://dfl.mn/q3A
-```
+`https://dfl.mn/q3A`
 
-### `/{hash}`
+### `GET /{hash}`
 
 Links to the image or file. Serves the content directly!
