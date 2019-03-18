@@ -46,7 +46,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 	accept := req.Header.Get("Accept")
 
 	if accept == "text/plain" {
-		json.NewEncoder(w).Encode(res.URL)
+		w.Write([]byte(res.URL))
 	} else {
 		json.NewEncoder(w).Encode(res)
 	}
