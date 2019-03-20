@@ -19,8 +19,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 
 	key := ctx.Value(middleware.UsernameKey)
 	if key == nil || key == "" {
-		w.WriteHeader(403)
-		json.NewEncoder(w).Encode(map[string]string{"code": "access_denied"})
+		r.handleError(w, req, ErrAccessDenied)
 		return
 	}
 
@@ -33,9 +32,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 
 	file, _, err := req.FormFile("file")
 	if err != nil {
-		r.logger.WithError(err)
-		w.WriteHeader(500)
-		json.NewEncoder(w).Encode(map[string]string{"code": err.Error()})
+		r.handleError(w, req, err)
 		return
 	}
 	defer file.Close()
@@ -45,9 +42,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 
 	res, err := r.app.Upload(ctx, buf, labels)
 	if err != nil {
-		r.logger.WithError(err)
-		w.WriteHeader(500)
-		json.NewEncoder(w).Encode(map[string]string{"code": err.Error()})
+		r.handleError(w, req, err)
 		return
 	}
 

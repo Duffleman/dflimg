@@ -1,11 +1,20 @@
 package rpc
 
 import (
-	"dflimg/app"
+	"encoding/json"
+	"errors"
 	"net/http"
+
+	"dflimg"
+	"dflimg/app"
 
 	"github.com/go-chi/chi"
 	"github.com/sirupsen/logrus"
+)
+
+var (
+	// ErrAccessDenied is an error to show that access is denied
+	ErrAccessDenied = errors.New("access denied")
 )
 
 // RPC is a struct for the RPC server and it's handlers
@@ -43,4 +52,24 @@ func (r *RPC) Post(pattern string, handlerFn http.HandlerFunc) {
 func (r *RPC) Serve(port string) {
 	r.logger.Info("starting web server")
 	http.ListenAndServe(port, r.router)
+}
+
+func (r *RPC) handleError(w http.ResponseWriter, req *http.Request, err error) {
+	r.logger.Error(err)
+
+	switch err {
+	case dflimg.ErrNotFound:
+		w.WriteHeader(404)
+	case ErrAccessDenied:
+		w.WriteHeader(403)
+	default:
+		w.WriteHeader(500)
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"code": err.Error(),
+		"meta": err,
+	})
+
+	return
 }
