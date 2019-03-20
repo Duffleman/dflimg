@@ -13,7 +13,9 @@ func (r *RPC) GetFileByLabel(w http.ResponseWriter, req *http.Request) {
 
 	fileType, res, err := r.app.GetFileByLabel(ctx, label)
 	if err != nil {
-		r.handleError(w, req, err)
+		r.handleError(w, req, err, &map[string]interface{}{
+			"label": label,
+		})
 		return
 	}
 

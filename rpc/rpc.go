@@ -54,15 +54,22 @@ func (r *RPC) Serve(port string) {
 	http.ListenAndServe(port, r.router)
 }
 
-func (r *RPC) handleError(w http.ResponseWriter, req *http.Request, err error) {
-	r.logger.Error(err)
+func (r *RPC) handleError(w http.ResponseWriter, req *http.Request, err error, meta *map[string]interface{}) {
+	l := logrus.NewEntry(r.logger)
+
+	if meta != nil {
+		l = l.WithFields(logrus.Fields(*meta))
+	}
 
 	switch err {
 	case dflimg.ErrNotFound:
+		l.Info(err)
 		w.WriteHeader(404)
 	case ErrAccessDenied:
+		l.Info(err)
 		w.WriteHeader(403)
 	default:
+		l.Warn(err)
 		w.WriteHeader(500)
 	}
 

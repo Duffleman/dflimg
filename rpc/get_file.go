@@ -13,7 +13,9 @@ func (r *RPC) GetFile(w http.ResponseWriter, req *http.Request) {
 
 	fileType, res, err := r.app.GetFile(ctx, fileID)
 	if err != nil {
-		r.handleError(w, req, err)
+		r.handleError(w, req, err, &map[string]interface{}{
+			"fileID": fileID,
+		})
 		return
 	}
 
