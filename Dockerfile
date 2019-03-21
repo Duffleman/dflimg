@@ -16,5 +16,5 @@ ENV ADDR=":80"
 EXPOSE 80
 RUN mkdir -p /usr/local/app
 WORKDIR /usr/local/app
-ENTRYPOINT ["./dflimg"]
-COPY --from=builder /go/bin/dflimg .
+ENTRYPOINT ["./serve"]
+COPY --from=builder /go/bin/serve .
