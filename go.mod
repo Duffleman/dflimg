@@ -17,8 +17,11 @@ require (
 	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/sirupsen/logrus v1.3.0
 	github.com/speps/go-hashids v2.0.0+incompatible
+	github.com/spf13/cobra v0.0.3
+	github.com/spf13/pflag v1.0.3
+	github.com/spf13/viper v1.3.2
 	golang.org/x/arch v0.0.0-20190226203302-36aee92af9e8 // indirect
-	golang.org/x/net v0.0.0-20190311031020-56fb01167e7d // indirect
+	golang.org/x/tools v0.0.0-20190321190150-c5e06eb4cd0c // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	mellium.im/sasl v0.2.1 // indirect
 )

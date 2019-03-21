@@ -1,78 +1,39 @@
 package main
 
 import (
-	"time"
+	"fmt"
+	"os"
 
-	"dflimg"
-	"dflimg/app"
-	dfldb "dflimg/db"
-	dflrpc "dflimg/rpc"
-	dflmw "dflimg/rpc/middleware"
+	cli "dflimg/cmd/dflimg/cmd"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-pg/pg"
-	"github.com/sirupsen/logrus"
-	hashids "github.com/speps/go-hashids"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func main() {
-	// Setup logger
-	logger := logrus.New()
-	logger.Formatter = &logrus.JSONFormatter{
-		DisableTimestamp: false,
+	// Load env variables
+	viper.SetEnvPrefix("DFLIMG")
+	viper.SetDefault("ROOT_URL", "https://dfl.mn")
+
+	viper.AutomaticEnv()
+
+	// Register commands
+	rootCmd.AddCommand(cli.UploadCmd)
+
+	// handle command argumetns
+	cli.UploadCmd.Flags().StringP("labels", "l", "", "A CSV of labels to apply to the uploaded file")
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
+}
 
-	// setup app dependancies
-	// aws
-	s, err := session.NewSession(&aws.Config{Region: aws.String(dflimg.S3Region)})
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	// postgres db
-	dbOpts, err := pg.ParseURL(dflimg.GetEnv("pg_connection_string"))
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	pgdb := pg.Connect(dbOpts)
-	defer pgdb.Close()
-
-	db := dfldb.New(pgdb)
-
-	// hasher
-	hd := hashids.NewData()
-
-	salt := dflimg.GetEnv("salt")
-
-	hd.Salt = salt
-	hd.MinLength = dflimg.EncodeLength
-
-	hasher, _ := hashids.NewWithData(hd)
-
-	// Setup app & rpc
-	router := chi.NewRouter()
-	app := app.New(db, s, hasher)
-	rpc := dflrpc.New(logger, router, app)
-
-	// Add middleware
-	rpc.Use(middleware.RequestID)
-	rpc.Use(middleware.RealIP)
-	rpc.Use(middleware.Recoverer)
-	rpc.Use(dflmw.AuthMiddleware(dflimg.GetUsers()))
-	rpc.Use(middleware.Timeout(60 * time.Second))
-
-	// define routes
-	rpc.Get("/", rpc.Homepage)
-	rpc.Get("/health", rpc.HealthCheck)
-	rpc.Post("/upload", rpc.Upload)
-	rpc.Get("/:{label}", rpc.GetFileByLabel)
-	rpc.Get("/{fileID}", rpc.GetFile)
-
-	// serve
-	addr := dflimg.GetEnv("addr")
-	rpc.Serve(addr)
+var rootCmd = &cobra.Command{
+	Use:   "dflimg",
+	Short: "CLI tool to upload images to a dflimg server",
+	Long:  "A CLI tool to manage files being uploaded, labeled, and removed from your chosen dflimg server",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
 }
