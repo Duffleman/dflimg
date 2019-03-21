@@ -1,5 +1,7 @@
 # dflimg
 
+## server
+
 [DockerHub](https://hub.docker.com/r/duffleman/dflimg)
 
 Quick file sharing platform. Accepts images, and files.
@@ -12,7 +14,7 @@ When you run this, the shorter your domain is, the better.
 
 Inspired by starbs/yeh
 
-## Env variables to set
+### Env variables to set
 
 ```
 PG_OPTS=postgresql://postgres/dflimg?sslmode=prefer
@@ -25,19 +27,19 @@ AWS_SECRET_ACCESS_KEY=AWSSECRET
 AWS_DEFAULT_REGION=AWSREGION
 ```
 
-## Endpoints
+### Endpoints
 
-### `POST /upload`
+#### `POST /upload`
 
 Takes a file in the form of multipart/form-data, returns  a short URL that links to the file. You can set the "Accept" header to modify the response.
 
-#### Request
+##### Request
 
 ```bash
 curl -X POST -H "Authorization: test" -F file=@duffleman.png https://dfl.mn/upload
 ```
 
-#### Response
+##### Response
 
 ```json
 {
@@ -51,32 +53,39 @@ If the "Accept" header is set to "text/plain":
 
 `https://dfl.mn/q3A`
 
-### `GET /{hash}`
+#### `GET /{hash}`
 
 Links to the image or file. Serves the content directly!
 
-### `GET /:{label}`
+#### `GET /:{label}`
 
 Links to the image or file through one of it's labels. Serves the content directly!
 
-# upload
+## client/cli
 
-A CLI tool that allows you to upload files to the above server!
+A CLI tool that allows you to upload files to the above server! Ru
 
-## Install
+### Install
 
 Install it into your PATH
 
-`go install cmd/upload/upload.go`
+`go install cmd/dflimg/...`
 
-## Upload a file
+### Env variables to set
+
+```
+DFLIMG_ROOT_URL=https://dfl.mn
+DFLIMG_AUTH_TOKEN=some-token-thats-on-the-server
+```
+
+### Upload a file
 
 Upload a single file:
 
-`upload {file}`
+`dflimg u {file}`
 
 Upload a file with some labels, you can give it a CSV for labels
 
-`upload --labels=test,srs {file}`
+`dflimg u -l test,srs {file}`
 
 It will attempt to automatically put the URL in your clipboard too!
