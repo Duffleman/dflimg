@@ -2,19 +2,13 @@ package rpc
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 
-	"dflimg"
 	"dflimg/app"
+	"dflimg/dflerr"
 
 	"github.com/go-chi/chi"
 	"github.com/sirupsen/logrus"
-)
-
-var (
-	// ErrAccessDenied is an error to show that access is denied
-	ErrAccessDenied = errors.New("access denied")
 )
 
 // RPC is a struct for the RPC server and it's handlers
@@ -54,29 +48,27 @@ func (r *RPC) Serve(port string) {
 	http.ListenAndServe(port, r.router)
 }
 
-func (r *RPC) handleError(w http.ResponseWriter, req *http.Request, err error, meta *map[string]interface{}) {
+func (r *RPC) handleError(w http.ResponseWriter, req *http.Request, err error) {
 	l := logrus.NewEntry(r.logger)
 
-	if meta != nil {
-		l = l.WithFields(logrus.Fields(*meta))
-	}
-
-	switch err {
-	case dflimg.ErrNotFound:
-		l.Info(err)
-		w.WriteHeader(404)
-	case ErrAccessDenied:
-		l.Info(err)
-		w.WriteHeader(403)
-	default:
+	if v, ok := err.(dflerr.E); ok {
+		switch v.Code {
+		case dflerr.NotFound:
+			l.Info(v, v.Meta, v.Reasons)
+			w.WriteHeader(404)
+		case dflerr.AccessDenied:
+			l.Info(v, v.Meta, v.Reasons)
+			w.WriteHeader(403)
+		default:
+			l.Warn(v, v.Meta, v.Reasons)
+			w.WriteHeader(500)
+		}
+	} else {
 		l.Warn(err)
 		w.WriteHeader(500)
 	}
 
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"code": err.Error(),
-		"meta": err,
-	})
+	json.NewEncoder(w).Encode(err)
 
 	return
 }

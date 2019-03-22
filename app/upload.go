@@ -3,11 +3,11 @@ package app
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 
 	"dflimg"
+	"dflimg/dflerr"
 	"dflimg/rpc/middleware"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -27,7 +27,7 @@ func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer, labels []str
 		// TODO: make more efficient
 		_, err := a.db.FindFileByLabel(label)
 		if err == nil {
-			return nil, errors.New("label already taken")
+			return nil, dflerr.New("label already taken", dflerr.M{"label": label})
 		}
 	}
 

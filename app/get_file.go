@@ -3,9 +3,10 @@ package app
 import (
 	"bytes"
 	"context"
-	"dflimg"
-	"errors"
 	"io"
+
+	"dflimg"
+	"dflimg/dflerr"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -26,7 +27,7 @@ func (a *App) getFileBySerial(ctx context.Context, serial int) (string, *bytes.B
 	file, err := a.db.FindFileBySerial(serial)
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return "", nil, dflimg.ErrNotFound
+			return "", nil, dflerr.New(dflerr.NotFound, nil)
 		}
 		return "", nil, err
 	}
@@ -50,7 +51,7 @@ func (a *App) decodeHash(hash string) (int, error) {
 
 	set, err := a.hasher.DecodeWithError(hash)
 	if len(set) != 1 {
-		return 0, errors.New("expecing 1 item in decoded hash")
+		return 0, dflerr.New("cannot decode hash", dflerr.M{"hash": hash}, dflerr.New("expecting single hashed item in body", nil))
 	}
 
 	return set[0], err

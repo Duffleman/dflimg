@@ -15,14 +15,13 @@ import (
 	"time"
 
 	"dflimg"
+	"dflimg/dflerr"
 
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
-
-var ErrRequestFailure = errors.New("request failure")
 
 var UploadCmd = &cobra.Command{
 	Use:     "upload",
@@ -41,7 +40,7 @@ var UploadCmd = &cobra.Command{
 
 		body, err := sendFile(rootURL, authToken, localFile, label)
 		if err != nil {
-			if err == ErrRequestFailure {
+			if err == dflerr.RequestFailure {
 				var res map[string]interface{}
 				err := json.Unmarshal(body, &res)
 				if err != nil {

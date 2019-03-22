@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"dflimg/dflerr"
 	"dflimg/rpc/middleware"
 )
 
@@ -19,9 +20,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 
 	key := ctx.Value(middleware.UsernameKey)
 	if key == nil || key == "" {
-		r.handleError(w, req, ErrAccessDenied, &map[string]interface{}{
-			"username": key,
-		})
+		r.handleError(w, req, dflerr.New(dflerr.AccessDenied, dflerr.M{"username": key}))
 		return
 	}
 
@@ -34,7 +33,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 
 	file, _, err := req.FormFile("file")
 	if err != nil {
-		r.handleError(w, req, err, nil)
+		r.handleError(w, req, err)
 		return
 	}
 	defer file.Close()
@@ -44,9 +43,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 
 	res, err := r.app.Upload(ctx, buf, labels)
 	if err != nil {
-		r.handleError(w, req, err, &map[string]interface{}{
-			"labels": labels,
-		})
+		r.handleError(w, req, err)
 		return
 	}
 

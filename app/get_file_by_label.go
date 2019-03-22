@@ -3,7 +3,7 @@ package app
 import (
 	"bytes"
 	"context"
-	"dflimg"
+	"dflimg/dflerr"
 
 	"github.com/go-pg/pg"
 )
@@ -13,7 +13,7 @@ func (a *App) GetFileByLabel(ctx context.Context, label string) (string, *bytes.
 	file, err := a.db.FindFileByLabel(label)
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return "", nil, dflimg.ErrNotFound
+			return "", nil, dflerr.New(dflerr.NotFound, nil)
 		}
 		return "", nil, err
 	}

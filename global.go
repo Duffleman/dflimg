@@ -1,9 +1,5 @@
 package dflimg
 
-import (
-	"errors"
-)
-
 // Users is a map[string]string for users to upload keys
 var Users = map[string]string{
 	"Duffleman": "test",
@@ -26,11 +22,6 @@ const (
 	PostgresCS = "postgres://duffleman@localhost:5432/dflimg?sslmode=disable"
 	// DefaultAddr is the default address to listen on
 	DefaultAddr = ":3000"
-)
-
-var (
-	// ErrNotFound is an error for not_found
-	ErrNotFound = errors.New("not found")
 )
 
 // UploadFileResponse is a response for the file upload endpoint
