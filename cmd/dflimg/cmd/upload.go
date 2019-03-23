@@ -3,7 +3,6 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -40,18 +39,6 @@ var UploadCmd = &cobra.Command{
 
 		body, err := sendFile(rootURL, authToken, localFile, label)
 		if err != nil {
-			if err == dflerr.RequestFailure {
-				var res map[string]interface{}
-				err := json.Unmarshal(body, &res)
-				if err != nil {
-					return err
-				}
-
-				if v, ok := res["code"]; ok {
-					return errors.New(v.(string))
-				}
-			}
-
 			return err
 		}
 
@@ -123,7 +110,13 @@ func sendFile(rootURL, authToken, filename string, label *pflag.Flag) ([]byte, e
 	}
 
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return content, ErrRequestFailure
+		var dflE dflerr.E
+		err := json.Unmarshal(content, &dflE)
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, dflE
 	}
 
 	return content, nil
