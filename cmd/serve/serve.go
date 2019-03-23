@@ -70,7 +70,7 @@ func main() {
 	rpc.Get("/health", rpc.HealthCheck)
 	rpc.Post("/upload", rpc.Upload)
 	rpc.Get("/:{label}", rpc.GetFileByLabel)
-	rpc.Get("/{fileID}", rpc.GetFile)
+	rpc.Get("/{hash}", rpc.GetFileByHash)
 
 	// serve
 	addr := dflimg.GetEnv("addr")

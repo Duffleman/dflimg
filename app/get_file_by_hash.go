@@ -13,8 +13,8 @@ import (
 	"github.com/go-pg/pg"
 )
 
-// GetFile endpoint that gets a file by it's hash
-func (a *App) GetFile(ctx context.Context, hash string) (string, *bytes.Buffer, error) {
+// GetFileByHash gets a file by it's hash
+func (a *App) GetFileByHash(ctx context.Context, hash string) (string, *bytes.Buffer, error) {
 	serial, err := a.decodeHash(hash)
 	if err != nil {
 		return "", nil, err
