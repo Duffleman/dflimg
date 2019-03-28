@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-pg/pg"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	hashids "github.com/speps/go-hashids"
 )
