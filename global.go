@@ -1,5 +1,7 @@
 package dflimg
 
+import "time"
+
 // Users is a map[string]string for users to upload keys
 var Users = map[string]string{
 	"Duffleman": "test",
@@ -23,6 +25,28 @@ const (
 	// DefaultAddr is the default address to listen on
 	DefaultAddr = ":3000"
 )
+
+// File is a file entity to host in S3
+type File struct {
+	ID        string    `json:"id"`
+	Serial    int       `json:"serial"`
+	Owner     string    `json:"owner"`
+	S3        string    `json:"s3"`
+	Type      string    `json:"type"`
+	CreatedAt time.Time `json:"created_at"`
+	Shortcuts []string  `json:"shortcuts"`
+}
+
+// Link is a URL shortener entity
+type Link struct {
+	ID        string    `json:"id"`
+	Owner     string    `json:"owner"`
+	URL       string    `json:"url"`
+	NSFW      bool      `json:"nsfw"`
+	Shortcuts []string  `json:"shortcuts"`
+	Comment   string    `json:"comment"`
+	CreatedAt time.Time `json:"created_at"`
+}
 
 // UploadFileResponse is a response for the file upload endpoint
 type UploadFileResponse struct {

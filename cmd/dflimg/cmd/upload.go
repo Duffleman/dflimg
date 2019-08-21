@@ -32,12 +32,12 @@ var UploadCmd = &cobra.Command{
 		startTime := time.Now()
 
 		localFile := args[0]
-		label := cmd.Flag("labels")
+		shortcuts := cmd.Flag("shortcuts")
 
 		rootURL := viper.Get("ROOT_URL").(string)
 		authToken := viper.Get("AUTH_TOKEN").(string)
 
-		body, err := sendFile(rootURL, authToken, localFile, label)
+		body, err := sendFile(rootURL, authToken, localFile, shortcuts)
 		if err != nil {
 			return err
 		}
@@ -61,7 +61,7 @@ var UploadCmd = &cobra.Command{
 }
 
 // SendFile uploads the file to the server
-func sendFile(rootURL, authToken, filename string, label *pflag.Flag) ([]byte, error) {
+func sendFile(rootURL, authToken, filename string, shortcuts *pflag.Flag) ([]byte, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -71,14 +71,14 @@ func sendFile(rootURL, authToken, filename string, label *pflag.Flag) ([]byte, e
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	if label != nil {
-		labels := label.Value.String()
-		part, err := writer.CreateFormField("labels")
+	if shortcuts != nil {
+		shortcutsStr := shortcuts.Value.String()
+		part, err := writer.CreateFormField("shortcuts")
 		if err != nil {
 			return nil, err
 		}
 
-		io.Copy(part, strings.NewReader(labels))
+		io.Copy(part, strings.NewReader(shortcutsStr))
 	}
 
 	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))

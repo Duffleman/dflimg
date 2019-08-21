@@ -21,7 +21,7 @@ func main() {
 	rootCmd.AddCommand(cli.UploadCmd)
 
 	// handle command argumetns
-	cli.UploadCmd.Flags().StringP("labels", "l", "", "A CSV of labels to apply to the uploaded file")
+	cli.UploadCmd.Flags().StringP("shortcuts", "s", "", "A CSV of shortcuts to apply to the uploaded file")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

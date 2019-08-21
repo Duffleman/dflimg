@@ -6,12 +6,12 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func (r *RPC) GetFileByLabel(w http.ResponseWriter, req *http.Request) {
+func (r *RPC) GetFileByShortcut(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	label := chi.URLParam(req, "label")
+	shortcut := chi.URLParam(req, "shortcut")
 
-	fileType, res, err := r.app.GetFileByLabel(ctx, label)
+	fileType, res, err := r.app.GetFileByShortcut(ctx, shortcut)
 	if err != nil {
 		r.handleError(w, req, err)
 		return

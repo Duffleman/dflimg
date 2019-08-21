@@ -9,8 +9,8 @@ import (
 )
 
 // GetFileByLabel gets a file by it's label
-func (a *App) GetFileByLabel(ctx context.Context, label string) (string, *bytes.Buffer, error) {
-	file, err := a.db.FindFileByLabel(label)
+func (a *App) GetFileByShortcut(ctx context.Context, shortcut string) (string, *bytes.Buffer, error) {
+	file, err := a.db.FindFileByShortcut(ctx, shortcut)
 	if err != nil {
 		if err == pg.ErrNoRows {
 			return "", nil, dflerr.New(dflerr.NotFound, nil)

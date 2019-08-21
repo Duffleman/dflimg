@@ -16,23 +16,20 @@ import (
 )
 
 // Upload is an app method that takes in a file and stores it
-func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer, labels []string) (*dflimg.UploadFileResponse, error) {
+func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer, shortcuts []string) (*dflimg.UploadFileResponse, error) {
 	// get user
 	username := ctx.Value(middleware.UsernameKey).(string)
 	contentType := http.DetectContentType(fileContent.Bytes())
 	fileID := ksuid.Generate("file").String()
 	fileKey := fmt.Sprintf("%s/%s", dflimg.S3RootKey, fileID)
 
-	for _, label := range labels {
-		// TODO: make more efficient
-		_, err := a.db.FindFileByLabel(label)
-		if err == nil {
-			return nil, dflerr.New("label already taken", dflerr.M{"label": label})
-		}
+	err := a.db.FindShortcutConflicts(ctx, shortcuts)
+	if err != nil {
+		return nil, dflerr.New("shortcuts already taken", dflerr.M{"shortcuts": shortcuts}, dflerr.Parse(err))
 	}
 
 	// upload to S3
-	_, err := s3.New(a.aws).PutObject(&s3.PutObjectInput{
+	_, err = s3.New(a.aws).PutObject(&s3.PutObjectInput{
 		Bucket:        aws.String(dflimg.S3Bucket),
 		Key:           aws.String(fileKey),
 		ACL:           aws.String("private"),
@@ -45,12 +42,12 @@ func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer, labels []str
 	}
 
 	// save to DB
-	err = a.db.NewFile(fileID, fileKey, username, contentType, labels)
+	err = a.db.NewFile(ctx, fileID, fileKey, username, contentType, shortcuts)
 	if err != nil {
 		return nil, err
 	}
 
-	file, err := a.db.FindFile(fileID)
+	file, err := a.db.FindFile(ctx, fileID)
 	if err != nil {
 		return nil, err
 	}

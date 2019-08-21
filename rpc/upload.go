@@ -24,11 +24,11 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	labelsStr := req.FormValue("labels")
-	var labels []string
+	shortcutsStr := req.FormValue("shortcuts")
+	var shortcuts []string
 
-	if labelsStr != "" {
-		labels = strings.Split(labelsStr, ",")
+	if shortcutsStr != "" {
+		shortcuts = strings.Split(shortcutsStr, ",")
 	}
 
 	file, _, err := req.FormFile("file")
@@ -41,7 +41,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 	var buf bytes.Buffer
 	io.Copy(&buf, file)
 
-	res, err := r.app.Upload(ctx, buf, labels)
+	res, err := r.app.Upload(ctx, buf, shortcuts)
 	if err != nil {
 		r.handleError(w, req, err)
 		return

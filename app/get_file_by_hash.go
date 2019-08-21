@@ -24,7 +24,7 @@ func (a *App) GetFileByHash(ctx context.Context, hash string) (string, *bytes.Bu
 }
 
 func (a *App) getFileBySerial(ctx context.Context, serial int) (string, *bytes.Buffer, error) {
-	file, err := a.db.FindFileBySerial(serial)
+	file, err := a.db.FindFileBySerial(ctx, serial)
 	if err != nil {
 		if err == pg.ErrNoRows {
 			return "", nil, dflerr.New(dflerr.NotFound, nil)
