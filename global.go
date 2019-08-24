@@ -21,36 +21,27 @@ const (
 	// RootURL is the root URL this service runs as
 	RootURL = "http://localhost:3000"
 	// PostgresCS is the default connection string
-	PostgresCS = "postgres://duffleman@localhost:5432/dflimg?sslmode=disable"
+	PostgresCS = "postgres://postgres@localhost:5432/dflimg?sslmode=disable"
 	// DefaultAddr is the default address to listen on
 	DefaultAddr = ":3000"
 )
 
-// File is a file entity to host in S3
-type File struct {
+type Resource struct {
 	ID        string    `json:"id"`
+	Type      string    `json:"type"`
 	Serial    int       `json:"serial"`
 	Owner     string    `json:"owner"`
-	S3        string    `json:"s3"`
-	Type      string    `json:"type"`
-	CreatedAt time.Time `json:"created_at"`
-	Shortcuts []string  `json:"shortcuts"`
-}
-
-// Link is a URL shortener entity
-type Link struct {
-	ID        string    `json:"id"`
-	Owner     string    `json:"owner"`
-	URL       string    `json:"url"`
+	Link      string    `json:"link"`
 	NSFW      bool      `json:"nsfw"`
+	MimeType  *string   `json:"mime_type"`
 	Shortcuts []string  `json:"shortcuts"`
-	Comment   string    `json:"comment"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// UploadFileResponse is a response for the file upload endpoint
-type UploadFileResponse struct {
-	FileID string `json:"file_id"`
-	Hash   string `json:"hash"`
-	URL    string `json:"url"`
+// ResponseCreatedResponse is a response for creating resources
+type ResponseCreatedResponse struct {
+	ResourceID string `json:"resource_id"`
+	Type       string `json:"type"`
+	Hash       string `json:"hash"`
+	URL        string `json:"url"`
 }

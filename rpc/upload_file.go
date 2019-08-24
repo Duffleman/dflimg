@@ -11,11 +11,8 @@ import (
 	"dflimg/rpc/middleware"
 )
 
-const maxUploadSize = 100 * 1024 // 100 MB
-const uploadPath = "./tmp"
-
-// Upload is an RPC handler for uploading a file
-func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
+// UploadFile is an RPC handler for uploading a file
+func (r *RPC) UploadFile(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
 	key := ctx.Value(middleware.UsernameKey)
@@ -41,7 +38,7 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 	var buf bytes.Buffer
 	io.Copy(&buf, file)
 
-	res, err := r.app.Upload(ctx, buf, shortcuts)
+	res, err := r.app.UploadFile(ctx, buf, shortcuts)
 	if err != nil {
 		r.handleError(w, req, err)
 		return

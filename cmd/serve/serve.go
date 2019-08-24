@@ -66,9 +66,8 @@ func main() {
 	// define routes
 	rpc.Get("/", rpc.Homepage)
 	rpc.Get("/health", rpc.HealthCheck)
-	rpc.Post("/upload", rpc.Upload)
-	rpc.Get("/:{shortcut}", rpc.GetFileByShortcut)
-	rpc.Get("/{hash}", rpc.GetFileByHash)
+	rpc.Post("/upload_file", rpc.UploadFile)
+	rpc.Get("/{input}", rpc.GetResource)
 
 	// serve
 	addr := dflimg.GetEnv("addr")

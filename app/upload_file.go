@@ -15,8 +15,8 @@ import (
 	"github.com/cuvva/ksuid"
 )
 
-// Upload is an app method that takes in a file and stores it
-func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer, shortcuts []string) (*dflimg.UploadFileResponse, error) {
+// UploadFile is an app method that takes in a file and stores it
+func (a *App) UploadFile(ctx context.Context, fileContent bytes.Buffer, shortcuts []string) (*dflimg.ResponseCreatedResponse, error) {
 	// get user
 	username := ctx.Value(middleware.UsernameKey).(string)
 	contentType := http.DetectContentType(fileContent.Bytes())
@@ -47,7 +47,7 @@ func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer, shortcuts []
 		return nil, err
 	}
 
-	file, err := a.db.FindFile(ctx, fileID)
+	file, err := a.db.FindResource(ctx, fileID)
 	if err != nil {
 		return nil, err
 	}
@@ -56,10 +56,11 @@ func (a *App) Upload(ctx context.Context, fileContent bytes.Buffer, shortcuts []
 	hash := a.makeHash(file.Serial)
 	url := fmt.Sprintf("%s/%s", rootURL, hash)
 
-	return &dflimg.UploadFileResponse{
-		FileID: file.ID,
-		Hash:   hash,
-		URL:    url,
+	return &dflimg.ResponseCreatedResponse{
+		ResourceID: file.ID,
+		Type:       file.Type,
+		Hash:       hash,
+		URL:        url,
 	}, err
 }
 
