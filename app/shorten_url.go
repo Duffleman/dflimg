@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	"dflimg"
 	"dflimg/dflerr"
@@ -20,10 +21,19 @@ func (a *App) ShortenURL(ctx context.Context, url string, shortcuts []string) (*
 	}
 
 	// save to DB
-	err = a.db.NewURL(ctx, urlID, url, username, shortcuts)
+	urlRes, err := a.db.NewURL(ctx, urlID, url, username, shortcuts)
 	if err != nil {
 		return nil, err
 	}
 
-	return a.CreateResource(ctx, urlID)
+	rootURL := dflimg.GetEnv("root_url")
+	hash := a.makeHash(urlRes.Serial)
+	fullURL := fmt.Sprintf("%s/%s", rootURL, hash)
+
+	return &dflimg.ResponseCreatedResponse{
+		ResourceID: urlRes.ID,
+		Type:       urlRes.Type,
+		Hash:       hash,
+		URL:        fullURL,
+	}, nil
 }

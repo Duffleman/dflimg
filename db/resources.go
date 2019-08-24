@@ -24,7 +24,7 @@ func (db *DB) FindShortcutConflicts(ctx context.Context, shortcuts []string) err
 	query, values, err := b.
 		Select("id").
 		From("resources").
-		Where("shortcuts @> ANY($1)", shortcuts).
+		Where("shortcuts @> $1", pq.Array(shortcuts)).
 		Limit(1).
 		ToSql()
 
@@ -55,7 +55,7 @@ func (db *DB) FindResource(ctx context.Context, id string) (*dflimg.Resource, er
 		return nil, err
 	}
 
-	return db.findOne(ctx, query, values)
+	return db.queryOne(ctx, query, values)
 }
 
 // FindResourceBySerial retrieves a resource from the database by it's serial allocation
@@ -73,7 +73,7 @@ func (db *DB) FindResourceBySerial(ctx context.Context, serial int) (*dflimg.Res
 		return nil, err
 	}
 
-	return db.findOne(ctx, query, values)
+	return db.queryOne(ctx, query, values)
 }
 
 // FindResourceByShortcut retrieves a resource from the database by one of it's shortcuts
@@ -92,10 +92,10 @@ func (db *DB) FindResourceByShortcut(ctx context.Context, shortcut string) (*dfl
 		return nil, err
 	}
 
-	return db.findOne(ctx, query, values)
+	return db.queryOne(ctx, query, values)
 }
 
-func (db *DB) findOne(ctx context.Context, query string, values []interface{}) (*dflimg.Resource, error) {
+func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) (*dflimg.Resource, error) {
 	row := db.pg.QueryRowContext(ctx, query, values...)
 
 	res := &dflimg.Resource{}
