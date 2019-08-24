@@ -29,21 +29,22 @@ AWS_DEFAULT_REGION=AWSREGION
 
 ### Endpoints
 
-#### `POST /upload`
+#### `POST /upload_file`
 
 Takes a file in the form of multipart/form-data, returns  a short URL that links to the file. You can set the "Accept" header to modify the response.
 
 ##### Request
 
 ```bash
-curl -X POST -H "Authorization: test" -F file=@duffleman.png https://dfl.mn/upload
+curl -X POST -H "Authorization: test" -F file=@duffleman.png https://dfl.mn/upload_file
 ```
 
 ##### Response
 
 ```json
 {
-    "file_id": "file_000000BdAf7MWsYZ6r5wc18cV2sAS",
+    "resource_id": "file_000000BdAf7MWsYZ6r5wc18cV2sAS",
+    "type": "file",
     "hash": "q3A",
     "url": "https://dfl.mn/q3A"
 }
@@ -55,15 +56,15 @@ If the "Accept" header is set to "text/plain":
 
 #### `GET /{hash}`
 
-Links to the image or file. Serves the content directly!
+Links to the resource. Serves the content directly!
 
-#### `GET /:{label}`
+#### `GET /:{shortcut}`
 
-Links to the image or file through one of it's labels. Serves the content directly!
+Links to the resource through one of it's shortcuts. Serves the content directly!
 
 ## client/cli
 
-A CLI tool that allows you to upload files to the above server! Ru
+A CLI tool that allows you to upload files to the above server! More information on this soon.
 
 ### Install
 
