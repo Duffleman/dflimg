@@ -42,26 +42,12 @@ func (a *App) UploadFile(ctx context.Context, fileContent bytes.Buffer, shortcut
 	}
 
 	// save to DB
-	err = a.db.NewFile(ctx, fileID, fileKey, username, contentType, shortcuts)
+	err = a.db.NewFile(ctx, fileID, fileKey, contentType, username, shortcuts)
 	if err != nil {
 		return nil, err
 	}
 
-	file, err := a.db.FindResource(ctx, fileID)
-	if err != nil {
-		return nil, err
-	}
-
-	rootURL := dflimg.GetEnv("root_url")
-	hash := a.makeHash(file.Serial)
-	url := fmt.Sprintf("%s/%s", rootURL, hash)
-
-	return &dflimg.ResponseCreatedResponse{
-		ResourceID: file.ID,
-		Type:       file.Type,
-		Hash:       hash,
-		URL:        url,
-	}, err
+	return a.CreateResource(ctx, fileID)
 }
 
 func (a *App) makeHash(serial int) string {

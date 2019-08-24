@@ -8,7 +8,6 @@ import (
 	"dflimg"
 
 	"github.com/go-chi/chi"
-	"github.com/kr/pretty"
 )
 
 // ShortcutCharacter marks the character used to find shortcuts
@@ -32,8 +31,6 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 		r.handleError(w, req, err)
 		return
 	}
-
-	pretty.Println(resource)
 
 	switch resource.Type {
 	case "file":

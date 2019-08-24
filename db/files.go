@@ -7,7 +7,7 @@ import (
 )
 
 // NewFile inserts a new file into the database
-func (db *DB) NewFile(ctx context.Context, id, s3, owner, mimetype string, shortcuts []string) error {
+func (db *DB) NewFile(ctx context.Context, id, s3, mimetype, owner string, shortcuts []string) error {
 	b := NewQueryBuilder()
 
 	query, values, err := b.
