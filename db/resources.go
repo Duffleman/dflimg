@@ -3,10 +3,11 @@ package db
 import (
 	"context"
 	"database/sql"
-	"dflimg"
-	"dflimg/dflerr"
 	"errors"
 	"fmt"
+
+	"dflimg"
+	"dflimg/dflerr"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/lib/pq"

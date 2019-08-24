@@ -1,12 +1,13 @@
 package rpc
 
 import (
-	"dflimg/dflerr"
-	"dflimg/rpc/middleware"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
+
+	"dflimg/dflerr"
+	"dflimg/rpc/middleware"
 )
 
 func (r *RPC) ShortenURL(w http.ResponseWriter, req *http.Request) {
