@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -33,11 +34,12 @@ var UploadCmd = &cobra.Command{
 
 		localFile := args[0]
 		shortcuts := cmd.Flag("shortcuts")
+		nsfw := cmd.Flag("nsfw")
 
 		rootURL := viper.Get("ROOT_URL").(string)
 		authToken := viper.Get("AUTH_TOKEN").(string)
 
-		body, err := sendFile(rootURL, authToken, localFile, shortcuts)
+		body, err := sendFile(rootURL, authToken, localFile, shortcuts, nsfw)
 		if err != nil {
 			return err
 		}
@@ -61,7 +63,7 @@ var UploadCmd = &cobra.Command{
 }
 
 // SendFile uploads the file to the server
-func sendFile(rootURL, authToken, filename string, shortcuts *pflag.Flag) ([]byte, error) {
+func sendFile(rootURL, authToken, filename string, shortcuts, nsfw *pflag.Flag) ([]byte, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -81,6 +83,16 @@ func sendFile(rootURL, authToken, filename string, shortcuts *pflag.Flag) ([]byt
 		io.Copy(part, strings.NewReader(shortcutsStr))
 	}
 
+	if nsfw != nil {
+		nsfwStr := nsfw.Value.String()
+		part, err := writer.CreateFormField("nsfw")
+		if err != nil {
+			return nil, err
+		}
+
+		io.Copy(part, strings.NewReader(nsfwStr))
+	}
+
 	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
 	if err != nil {
 		return nil, err
@@ -89,7 +101,7 @@ func sendFile(rootURL, authToken, filename string, shortcuts *pflag.Flag) ([]byt
 	io.Copy(part, file)
 	writer.Close()
 
-	request, err := http.NewRequest("POST", fmt.Sprintf("%s/upload", rootURL), body)
+	request, err := http.NewRequest("POST", fmt.Sprintf("%s/upload_file", rootURL), body)
 	if err != nil {
 		return nil, err
 	}
@@ -109,6 +121,10 @@ func sendFile(rootURL, authToken, filename string, shortcuts *pflag.Flag) ([]byt
 		return nil, err
 	}
 
+	if len(content) == 0 {
+		return nil, errors.New("empty response body")
+	}
+
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		var dflE dflerr.E
 		err := json.Unmarshal(content, &dflE)
@@ -122,8 +138,8 @@ func sendFile(rootURL, authToken, filename string, shortcuts *pflag.Flag) ([]byt
 	return content, nil
 }
 
-func parseResponse(res []byte) (*dflimg.UploadFileResponse, error) {
-	var file dflimg.UploadFileResponse
+func parseResponse(res []byte) (*dflimg.ResponseCreatedResponse, error) {
+	var file dflimg.ResponseCreatedResponse
 
 	err := json.Unmarshal(res, &file)
 	if err != nil {
