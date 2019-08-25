@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"dflimg"
 	"dflimg/dflerr"
 	"dflimg/rpc/middleware"
 )
@@ -22,7 +23,16 @@ func (r *RPC) UploadFile(w http.ResponseWriter, req *http.Request) {
 	}
 
 	shortcutsStr := req.FormValue("shortcuts")
+	nsfwStr := req.FormValue("nsfw")
 	var shortcuts []string
+	var nsfw bool
+
+	switch nsfwStr {
+	case "true":
+		nsfw = true
+	default:
+		nsfw = false
+	}
 
 	if shortcutsStr != "" {
 		shortcuts = strings.Split(shortcutsStr, ",")
@@ -38,7 +48,14 @@ func (r *RPC) UploadFile(w http.ResponseWriter, req *http.Request) {
 	var buf bytes.Buffer
 	io.Copy(&buf, file)
 
-	res, err := r.app.UploadFile(ctx, buf, shortcuts)
+	resourceReq := &dflimg.CreateResourceRequest{
+		Type:      "file",
+		File:      buf,
+		Shortcuts: shortcuts,
+		NSFW:      nsfw,
+	}
+
+	res, err := r.app.UploadFile(ctx, resourceReq)
 	if err != nil {
 		r.handleError(w, req, err)
 		return

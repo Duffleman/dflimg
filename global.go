@@ -1,6 +1,7 @@
 package dflimg
 
 import (
+	"bytes"
 	"strings"
 	"time"
 )
@@ -71,4 +72,12 @@ type ResponseCreatedResponse struct {
 	Type       string `json:"type"`
 	Hash       string `json:"hash"`
 	URL        string `json:"url"`
+}
+
+type CreateResourceRequest struct {
+	Type      string       `json:"type"`
+	File      bytes.Buffer `json:"file"`
+	URL       string       `json:"url"`
+	Shortcuts []string     `json:"shortcuts"`
+	NSFW      bool         `json:"nsfw"`
 }

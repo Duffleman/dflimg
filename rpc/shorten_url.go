@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"dflimg"
 	"dflimg/dflerr"
 	"dflimg/rpc/middleware"
 )
@@ -21,7 +22,16 @@ func (r *RPC) ShortenURL(w http.ResponseWriter, req *http.Request) {
 
 	shortcutsStr := req.FormValue("shortcuts")
 	urlStr := req.FormValue("url")
+	nsfwStr := req.FormValue("nsfw")
 	var shortcuts []string
+	var nsfw bool
+
+	switch nsfwStr {
+	case "true":
+		nsfw = true
+	default:
+		nsfw = false
+	}
 
 	if urlStr == "" {
 		err := errors.New("missing url")
@@ -33,7 +43,14 @@ func (r *RPC) ShortenURL(w http.ResponseWriter, req *http.Request) {
 		shortcuts = strings.Split(shortcutsStr, ",")
 	}
 
-	res, err := r.app.ShortenURL(ctx, urlStr, shortcuts)
+	resourceReq := &dflimg.CreateResourceRequest{
+		Type:      "file",
+		URL:       urlStr,
+		Shortcuts: shortcuts,
+		NSFW:      nsfw,
+	}
+
+	res, err := r.app.ShortenURL(ctx, resourceReq)
 	if err != nil {
 		r.handleError(w, req, err)
 		return

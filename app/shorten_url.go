@@ -11,17 +11,17 @@ import (
 	"github.com/cuvva/ksuid"
 )
 
-func (a *App) ShortenURL(ctx context.Context, url string, shortcuts []string) (*dflimg.ResponseCreatedResponse, error) {
+func (a *App) ShortenURL(ctx context.Context, req *dflimg.CreateResourceRequest) (*dflimg.ResponseCreatedResponse, error) {
 	username := ctx.Value(middleware.UsernameKey).(string)
 	urlID := ksuid.Generate("url").String()
 
-	err := a.db.FindShortcutConflicts(ctx, shortcuts)
+	err := a.db.FindShortcutConflicts(ctx, req.Shortcuts)
 	if err != nil {
-		return nil, dflerr.New("shortcuts already taken", dflerr.M{"shortcuts": shortcuts}, dflerr.Parse(err))
+		return nil, dflerr.New("shortcuts already taken", dflerr.M{"shortcuts": req.Shortcuts}, dflerr.Parse(err))
 	}
 
 	// save to DB
-	urlRes, err := a.db.NewURL(ctx, urlID, url, username, shortcuts)
+	urlRes, err := a.db.NewURL(ctx, urlID, req.URL, username, req.Shortcuts, req.NSFW)
 	if err != nil {
 		return nil, err
 	}

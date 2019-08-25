@@ -85,8 +85,8 @@ Upload a single file:
 
 `dflimg u {file}`
 
-Upload a file with some labels, you can give it a CSV for labels
+Upload a file with some shorcuts, you can give it a CSV for the shortcuts
 
-`dflimg u -l test,srs {file}`
+`dflimg u -s test,srs {file}`
 
 It will attempt to automatically put the URL in your clipboard too!

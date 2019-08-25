@@ -16,16 +16,16 @@ import (
 )
 
 // UploadFile is an app method that takes in a file and stores it
-func (a *App) UploadFile(ctx context.Context, fileContent bytes.Buffer, shortcuts []string) (*dflimg.ResponseCreatedResponse, error) {
+func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateResourceRequest) (*dflimg.ResponseCreatedResponse, error) {
 	// get user
 	username := ctx.Value(middleware.UsernameKey).(string)
-	contentType := http.DetectContentType(fileContent.Bytes())
+	contentType := http.DetectContentType(req.File.Bytes())
 	fileID := ksuid.Generate("file").String()
 	fileKey := fmt.Sprintf("%s/%s", dflimg.S3RootKey, fileID)
 
-	err := a.db.FindShortcutConflicts(ctx, shortcuts)
+	err := a.db.FindShortcutConflicts(ctx, req.Shortcuts)
 	if err != nil {
-		return nil, dflerr.New("shortcuts already taken", dflerr.M{"shortcuts": shortcuts}, dflerr.Parse(err))
+		return nil, dflerr.New("shortcuts already taken", dflerr.M{"shortcuts": req.Shortcuts}, dflerr.Parse(err))
 	}
 
 	// upload to S3
@@ -33,8 +33,8 @@ func (a *App) UploadFile(ctx context.Context, fileContent bytes.Buffer, shortcut
 		Bucket:        aws.String(dflimg.S3Bucket),
 		Key:           aws.String(fileKey),
 		ACL:           aws.String("private"),
-		Body:          bytes.NewReader(fileContent.Bytes()),
-		ContentLength: aws.Int64(int64(fileContent.Len())),
+		Body:          bytes.NewReader(req.File.Bytes()),
+		ContentLength: aws.Int64(int64(req.File.Len())),
 		ContentType:   aws.String(contentType),
 	})
 	if err != nil {
@@ -42,7 +42,7 @@ func (a *App) UploadFile(ctx context.Context, fileContent bytes.Buffer, shortcut
 	}
 
 	// save to DB
-	fileRes, err := a.db.NewFile(ctx, fileID, fileKey, contentType, username, shortcuts)
+	fileRes, err := a.db.NewFile(ctx, fileID, fileKey, contentType, username, req.Shortcuts, req.NSFW)
 	if err != nil {
 		return nil, err
 	}
