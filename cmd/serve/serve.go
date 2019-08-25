@@ -73,6 +73,7 @@ func main() {
 	rpc.Get("/health", rpc.HealthCheck)
 	rpc.Post("/upload_file", rpc.UploadFile)
 	rpc.Post("/shorten_url", rpc.ShortenURL)
+	rpc.Get("/list_labels", rpc.ListLabels)
 	rpc.Get("/{input}", rpc.GetResource)
 
 	// serve

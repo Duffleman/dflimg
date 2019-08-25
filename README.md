@@ -62,6 +62,21 @@ Links to the resource. Serves the content directly!
 
 Links to the resource through one of it's shortcuts. Serves the content directly!
 
+#### `GET /list_labels`
+
+Returns a list of usable labels
+
+##### Response
+
+```json
+[
+    {
+        "id": "label_000000Bjb0S6DSIaTiW8hSaAo6OOy",
+        "name": "education"
+    }
+]
+```
+
 ## client/cli
 
 A CLI tool that allows you to upload files to the above server! More information on this soon.

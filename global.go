@@ -43,6 +43,11 @@ type Resource struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type Label struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 // StringifyLabels returns the labels for display
 func (r *Resource) StringifyLabels() []string {
 	if len(r.Labels) == 0 {
