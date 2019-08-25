@@ -23,6 +23,7 @@ require (
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.2
 	golang.org/x/arch v0.0.0-20190226203302-36aee92af9e8 // indirect
+	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f
 	golang.org/x/tools v0.0.0-20190321190150-c5e06eb4cd0c // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	mellium.im/sasl v0.2.1 // indirect

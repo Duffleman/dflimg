@@ -5,6 +5,8 @@ import (
 
 	"dflimg"
 	"dflimg/dflerr"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func (a *App) GetResourceByHash(ctx context.Context, hash string) (*dflimg.Resource, error) {
@@ -13,7 +15,28 @@ func (a *App) GetResourceByHash(ctx context.Context, hash string) (*dflimg.Resou
 		return nil, err
 	}
 
-	return a.db.FindResourceBySerial(ctx, serial)
+	var resource *dflimg.Resource
+	var labels []string
+
+	g, gctx := errgroup.WithContext(ctx)
+
+	g.Go(func() (err error) {
+		resource, err = a.db.FindResourceBySerial(gctx, serial)
+		return err
+	})
+
+	g.Go(func() (err error) {
+		labels, err = a.db.GetLabelsBySerial(gctx, serial)
+		return err
+	})
+
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+
+	resource.Labels = labels
+
+	return resource, nil
 }
 
 func (a *App) decodeHash(hash string) (int, error) {

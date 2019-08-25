@@ -1,6 +1,9 @@
 package dflimg
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // Users is a map[string]string for users to upload keys
 var Users = map[string]string{
@@ -35,7 +38,31 @@ type Resource struct {
 	NSFW      bool      `json:"nsfw"`
 	MimeType  *string   `json:"mime_type"`
 	Shortcuts []string  `json:"shortcuts"`
+	Labels    []string  `json:"labels"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+// StringifyLabels returns the labels for display
+func (r *Resource) StringifyLabels() []string {
+	if len(r.Labels) == 0 {
+		return nil
+	}
+
+	labels := make([]string, len(r.Labels))
+
+	for k, l := range r.Labels {
+		switch l {
+		case "nsfw":
+			fallthrough
+		case "nsfl":
+			labels[k] = strings.ToUpper(l)
+			break
+		default:
+			labels[k] = strings.ToTitle(l)
+		}
+	}
+
+	return labels
 }
 
 // ResponseCreatedResponse is a response for creating resources

@@ -120,3 +120,65 @@ func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) 
 
 	return res, nil
 }
+
+// GetLabelsBySerial returns labels associated with a resource
+func (db *DB) GetLabelsBySerial(ctx context.Context, serial int) ([]string, error) {
+	b := NewQueryBuilder()
+
+	query, values, err := b.
+		Select("l.name").
+		From("resources r").
+		Join("labels_resources lr ON lr.resource_id = r.id").
+		Join("labels l ON l.id = lr.label_id").
+		Where(sq.Eq{
+			"r.serial": serial,
+		}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	return db.queryLabels(ctx, query, values)
+}
+
+// GetLabelsByShortcut returns labels associated with a resource
+func (db *DB) GetLabelsByShortcut(ctx context.Context, shortcut string) ([]string, error) {
+	b := NewQueryBuilder()
+
+	s := fmt.Sprintf("{%s}", shortcut[1:])
+
+	query, values, err := b.
+		Select("l.name").
+		From("resources r").
+		Join("labels_resources lr ON lr.resource_id = r.id").
+		Join("labels l ON l.id = lr.label_id").
+		Where("r.shortcuts @> $1::text[]", s).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	return db.queryLabels(ctx, query, values)
+}
+
+func (db *DB) queryLabels(ctx context.Context, query string, values []interface{}) ([]string, error) {
+	rows, err := db.pg.QueryContext(ctx, query, values...)
+	if err != nil {
+		return nil, err
+	}
+
+	labels := []string{}
+
+	for rows.Next() {
+		var s string
+
+		err := rows.Scan(&s)
+		if err != nil {
+			return nil, err
+		}
+
+		labels = append(labels, s)
+	}
+
+	return labels, nil
+}

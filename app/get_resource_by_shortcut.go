@@ -4,8 +4,31 @@ import (
 	"context"
 
 	"dflimg"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func (a *App) GetResourceByShortcut(ctx context.Context, shortcut string) (*dflimg.Resource, error) {
-	return a.db.FindResourceByShortcut(ctx, shortcut)
+	var resource *dflimg.Resource
+	var labels []string
+
+	g, gctx := errgroup.WithContext(ctx)
+
+	g.Go(func() (err error) {
+		resource, err = a.db.FindResourceByShortcut(gctx, shortcut)
+		return err
+	})
+
+	g.Go(func() (err error) {
+		labels, err = a.db.GetLabelsByShortcut(gctx, shortcut)
+		return err
+	})
+
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+
+	resource.Labels = labels
+
+	return resource, nil
 }

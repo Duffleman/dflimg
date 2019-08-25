@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"errors"
+	"html/template"
 	"net/http"
 	"strings"
 
@@ -30,6 +31,23 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		r.handleError(w, req, err)
 		return
+	}
+
+	if resource.NSFW {
+		if _, ok := req.URL.Query()["primed"]; !ok {
+			labelStr := resource.StringifyLabels()
+
+			tpl, err := template.ParseFiles("resources/nsfw.html")
+			if err != nil {
+				r.handleError(w, req, err)
+				return
+			}
+			tpl.Execute(w, map[string]interface{}{
+				"resource": resource,
+				"labels":   labelStr,
+			})
+			return
+		}
 	}
 
 	switch resource.Type {
