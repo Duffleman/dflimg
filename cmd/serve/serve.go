@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"net/http"
 	"time"
 
 	"dflimg"
@@ -65,6 +66,10 @@ func main() {
 
 	// define routes
 	rpc.Get("/", rpc.Homepage)
+	rpc.Get("/favicon.ico", func(w http.ResponseWriter, req *http.Request) {
+		http.Error(w, "Not Found", 404)
+		return
+	})
 	rpc.Get("/health", rpc.HealthCheck)
 	rpc.Post("/upload_file", rpc.UploadFile)
 	rpc.Post("/shorten_url", rpc.ShortenURL)
