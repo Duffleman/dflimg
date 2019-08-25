@@ -1,21 +1,17 @@
 package rpc
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
+	"errors"
 	"net/http"
 	"strings"
 
+	"dflimg"
 	"dflimg/dflerr"
 	"dflimg/rpc/middleware"
 )
 
-const maxUploadSize = 100 * 1024 // 100 MB
-const uploadPath = "./tmp"
-
-// Upload is an RPC handler for uploading a file
-func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
+func (r *RPC) ShortenURL(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
 	key := ctx.Value(middleware.UsernameKey)
@@ -24,24 +20,37 @@ func (r *RPC) Upload(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	labelsStr := req.FormValue("labels")
-	var labels []string
+	shortcutsStr := req.FormValue("shortcuts")
+	urlStr := req.FormValue("url")
+	nsfwStr := req.FormValue("nsfw")
+	var shortcuts []string
+	var nsfw bool
 
-	if labelsStr != "" {
-		labels = strings.Split(labelsStr, ",")
+	switch nsfwStr {
+	case "true":
+		nsfw = true
+	default:
+		nsfw = false
 	}
 
-	file, _, err := req.FormFile("file")
-	if err != nil {
+	if urlStr == "" {
+		err := errors.New("missing url")
 		r.handleError(w, req, err)
 		return
 	}
-	defer file.Close()
 
-	var buf bytes.Buffer
-	io.Copy(&buf, file)
+	if shortcutsStr != "" {
+		shortcuts = strings.Split(shortcutsStr, ",")
+	}
 
-	res, err := r.app.Upload(ctx, buf, labels)
+	resourceReq := &dflimg.CreateResourceRequest{
+		Type:      "file",
+		URL:       urlStr,
+		Shortcuts: shortcuts,
+		NSFW:      nsfw,
+	}
+
+	res, err := r.app.ShortenURL(ctx, resourceReq)
 	if err != nil {
 		r.handleError(w, req, err)
 		return

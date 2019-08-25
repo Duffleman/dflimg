@@ -1,6 +1,8 @@
 package main
 
 import (
+	"database/sql"
+	"net/http"
 	"time"
 
 	"dflimg"
@@ -13,7 +15,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-pg/pg"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	hashids "github.com/speps/go-hashids"
@@ -33,13 +34,10 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	// postgres db
-	dbOpts, err := pg.ParseURL(dflimg.GetEnv("pg_connection_string"))
+	pgdb, err := sql.Open("postgres", dflimg.GetEnv("pg_connection_string"))
 	if err != nil {
 		logger.Fatal(err)
 	}
-
-	pgdb := pg.Connect(dbOpts)
 	defer pgdb.Close()
 
 	db := dfldb.New(pgdb)
@@ -68,10 +66,14 @@ func main() {
 
 	// define routes
 	rpc.Get("/", rpc.Homepage)
+	rpc.Get("/favicon.ico", func(w http.ResponseWriter, req *http.Request) {
+		http.Error(w, "Not Found", 404)
+		return
+	})
 	rpc.Get("/health", rpc.HealthCheck)
-	rpc.Post("/upload", rpc.Upload)
-	rpc.Get("/:{label}", rpc.GetFileByLabel)
-	rpc.Get("/{hash}", rpc.GetFileByHash)
+	rpc.Post("/upload_file", rpc.UploadFile)
+	rpc.Post("/shorten_url", rpc.ShortenURL)
+	rpc.Get("/{input}", rpc.GetResource)
 
 	// serve
 	addr := dflimg.GetEnv("addr")

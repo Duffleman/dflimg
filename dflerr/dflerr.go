@@ -26,3 +26,9 @@ func New(code string, meta M, reasons ...E) E {
 func (e E) Error() string {
 	return e.Code
 }
+
+func Parse(err error) E {
+	return E{
+		Code: err.Error(),
+	}
+}

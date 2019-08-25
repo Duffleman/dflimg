@@ -1,5 +1,11 @@
 package dflimg
 
+import (
+	"bytes"
+	"strings"
+	"time"
+)
+
 // Users is a map[string]string for users to upload keys
 var Users = map[string]string{
 	"Duffleman": "test",
@@ -19,14 +25,59 @@ const (
 	// RootURL is the root URL this service runs as
 	RootURL = "http://localhost:3000"
 	// PostgresCS is the default connection string
-	PostgresCS = "postgres://duffleman@localhost:5432/dflimg?sslmode=disable"
+	PostgresCS = "postgres://postgres@localhost:5432/dflimg?sslmode=disable"
 	// DefaultAddr is the default address to listen on
 	DefaultAddr = ":3000"
 )
 
-// UploadFileResponse is a response for the file upload endpoint
-type UploadFileResponse struct {
-	FileID string `json:"file_id"`
-	Hash   string `json:"hash"`
-	URL    string `json:"url"`
+type Resource struct {
+	ID        string    `json:"id"`
+	Type      string    `json:"type"`
+	Serial    int       `json:"serial"`
+	Owner     string    `json:"owner"`
+	Link      string    `json:"link"`
+	NSFW      bool      `json:"nsfw"`
+	MimeType  *string   `json:"mime_type"`
+	Shortcuts []string  `json:"shortcuts"`
+	Labels    []string  `json:"labels"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// StringifyLabels returns the labels for display
+func (r *Resource) StringifyLabels() []string {
+	if len(r.Labels) == 0 {
+		return nil
+	}
+
+	labels := make([]string, len(r.Labels))
+
+	for k, l := range r.Labels {
+		switch l {
+		case "nsfw":
+			fallthrough
+		case "nsfl":
+			labels[k] = strings.ToUpper(l)
+			break
+		default:
+			labels[k] = strings.ToTitle(l)
+		}
+	}
+
+	return labels
+}
+
+// ResponseCreatedResponse is a response for creating resources
+type ResponseCreatedResponse struct {
+	ResourceID string `json:"resource_id"`
+	Type       string `json:"type"`
+	Hash       string `json:"hash"`
+	URL        string `json:"url"`
+}
+
+type CreateResourceRequest struct {
+	Type      string       `json:"type"`
+	File      bytes.Buffer `json:"file"`
+	URL       string       `json:"url"`
+	Shortcuts []string     `json:"shortcuts"`
+	NSFW      bool         `json:"nsfw"`
 }

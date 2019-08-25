@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"dflimg/dflerr"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,13 +10,8 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
-
-	"dflimg"
-	"dflimg/dflerr"
 
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
@@ -23,23 +19,23 @@ import (
 	"github.com/spf13/viper"
 )
 
-var UploadCmd = &cobra.Command{
-	Use:     "upload",
-	Aliases: []string{"u"},
-	Short:   "Upload a file",
-	Long:    "Upload a file from your local machine to a dflimg server",
+var ShortenURLCmd = &cobra.Command{
+	Use:     "shorten",
+	Aliases: []string{"s"},
+	Short:   "Shorten a URL",
+	Long:    "Shorten a URL",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		startTime := time.Now()
 
-		localFile := args[0]
+		urlStr := args[0]
 		shortcuts := cmd.Flag("shortcuts")
 		nsfw := cmd.Flag("nsfw")
 
 		rootURL := viper.Get("ROOT_URL").(string)
 		authToken := viper.Get("AUTH_TOKEN").(string)
 
-		body, err := sendFile(rootURL, authToken, localFile, shortcuts, nsfw)
+		body, err := shortenURL(rootURL, authToken, urlStr, shortcuts, nsfw)
 		if err != nil {
 			return err
 		}
@@ -62,14 +58,7 @@ var UploadCmd = &cobra.Command{
 	},
 }
 
-// SendFile uploads the file to the server
-func sendFile(rootURL, authToken, filename string, shortcuts, nsfw *pflag.Flag) ([]byte, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
+func shortenURL(rootURL, authToken, urlStr string, shortcuts, nsfw *pflag.Flag) ([]byte, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -93,15 +82,15 @@ func sendFile(rootURL, authToken, filename string, shortcuts, nsfw *pflag.Flag) 
 		io.Copy(part, strings.NewReader(nsfwStr))
 	}
 
-	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	part, err := writer.CreateFormField("url")
 	if err != nil {
 		return nil, err
 	}
 
-	io.Copy(part, file)
+	io.Copy(part, strings.NewReader(urlStr))
 	writer.Close()
 
-	request, err := http.NewRequest("POST", fmt.Sprintf("%s/upload_file", rootURL), body)
+	request, err := http.NewRequest("POST", fmt.Sprintf("%s/shorten_url", rootURL), body)
 	if err != nil {
 		return nil, err
 	}
@@ -136,15 +125,4 @@ func sendFile(rootURL, authToken, filename string, shortcuts, nsfw *pflag.Flag) 
 	}
 
 	return content, nil
-}
-
-func parseResponse(res []byte) (*dflimg.ResponseCreatedResponse, error) {
-	var file dflimg.ResponseCreatedResponse
-
-	err := json.Unmarshal(res, &file)
-	if err != nil {
-		return nil, err
-	}
-
-	return &file, nil
 }
