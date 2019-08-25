@@ -85,8 +85,20 @@ Upload a single file:
 
 `dflimg u {file}`
 
-Upload a file with some shorcuts, you can give it a CSV for the shortcuts
+Upload a file with some shorcuts, you can give it a CSV for the shortcuts (`-s`)
 
 `dflimg u -s test,srs {file}`
 
+Upload a file, mark it as NSFW (`-n`)
+
+`dflimg u -n {file}`
+
 It will attempt to automatically put the URL in your clipboard too!
+
+### Shorten URL
+
+Shorten a URL
+
+`dflimg s {url}`
+
+See other params above.
