@@ -2,16 +2,13 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
-	"net/http"
 	"strings"
 	"time"
 
-	"dflimg/dflerr"
+	"dflimg/cmd/dflimg/http"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,7 +29,7 @@ var TagResourceCmd = &cobra.Command{
 		rootURL := viper.Get("ROOT_URL").(string)
 		authToken := viper.Get("AUTH_TOKEN").(string)
 
-		_, err := tagResource(rootURL, authToken, urlStr, tagsStr)
+		err := tagResource(rootURL, authToken, urlStr, tagsStr)
 		if err != nil {
 			return err
 		}
@@ -45,55 +42,27 @@ var TagResourceCmd = &cobra.Command{
 	},
 }
 
-func tagResource(rootURL, authToken, urlStr, tagsStr string) ([]byte, error) {
+func tagResource(rootURL, authToken, urlStr, tagsStr string) error {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
 	part, err := writer.CreateFormField("url")
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	io.Copy(part, strings.NewReader(urlStr))
 
 	part, err = writer.CreateFormField("tags")
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	io.Copy(part, strings.NewReader(tagsStr))
 
 	writer.Close()
 
-	request, err := http.NewRequest("POST", fmt.Sprintf("%s/tag_resource", rootURL), body)
-	if err != nil {
-		return nil, err
-	}
+	c := http.New(rootURL, authToken)
 
-	request.Header.Add("Content-Type", writer.FormDataContentType())
-	request.Header.Add("Authorization", authToken)
-	client := &http.Client{}
-
-	response, err := client.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	content, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		var dflE dflerr.E
-		err := json.Unmarshal(content, &dflE)
-		if err != nil {
-			return nil, err
-		}
-
-		return nil, dflE
-	}
-
-	return content, nil
+	return c.Request("POST", "tag_resource", body, writer.FormDataContentType(), nil)
 }

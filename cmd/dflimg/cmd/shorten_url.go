@@ -2,16 +2,14 @@ package cmd
 
 import (
 	"bytes"
-	"dflimg/dflerr"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
-	"net/http"
 	"strings"
 	"time"
+
+	"dflimg"
+	"dflimg/cmd/dflimg/http"
 
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
@@ -40,25 +38,20 @@ var ShortenURLCmd = &cobra.Command{
 			return err
 		}
 
-		r, err := parseResponse(body)
-		if err != nil {
-			return err
-		}
-
-		err = clipboard.WriteAll(r.URL)
+		err = clipboard.WriteAll(body.URL)
 		if err != nil {
 			fmt.Println("Could not copy to clipboard. Please copy the URL manually")
 		}
 
 		duration := time.Now().Sub(startTime)
 
-		fmt.Printf("Done in %s: %s\n", duration, r.URL)
+		fmt.Printf("Done in %s: %s\n", duration, body.URL)
 
 		return nil
 	},
 }
 
-func shortenURL(rootURL, authToken, urlStr string, shortcuts, nsfw *pflag.Flag) ([]byte, error) {
+func shortenURL(rootURL, authToken, urlStr string, shortcuts, nsfw *pflag.Flag) (*dflimg.CreateResourceResponse, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -90,39 +83,10 @@ func shortenURL(rootURL, authToken, urlStr string, shortcuts, nsfw *pflag.Flag) 
 	io.Copy(part, strings.NewReader(urlStr))
 	writer.Close()
 
-	request, err := http.NewRequest("POST", fmt.Sprintf("%s/shorten_url", rootURL), body)
-	if err != nil {
-		return nil, err
-	}
+	c := http.New(rootURL, authToken)
 
-	request.Header.Add("Content-Type", writer.FormDataContentType())
-	request.Header.Add("Authorization", authToken)
-	client := &http.Client{}
+	res := &dflimg.CreateResourceResponse{}
+	err = c.Request("POST", "shorten_url", body, writer.FormDataContentType(), res)
 
-	response, err := client.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	content, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(content) == 0 {
-		return nil, errors.New("empty response body")
-	}
-
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		var dflE dflerr.E
-		err := json.Unmarshal(content, &dflE)
-		if err != nil {
-			return nil, err
-		}
-
-		return nil, dflE
-	}
-
-	return content, nil
+	return res, err
 }
