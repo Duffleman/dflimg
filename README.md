@@ -74,7 +74,7 @@ Links to the resource. Serves the content directly!
 
 Links to the resource through one of it's shortcuts. Serves the content directly!
 
-#### `GET /list_labels`
+#### `GET /list_labels`
 
 Returns a list of usable labels
 
@@ -122,7 +122,7 @@ Upload a file, mark it as NSFW (`-n`)
 
 It will attempt to automatically put the URL in your clipboard too!
 
-### Shorten URL
+### Shorten URL
 
 Shorten a URL
 
@@ -136,7 +136,7 @@ See other params above.
 
 Where labels is a CSV of labels to apply. The labels must exist on the server.
 
-### Copy a URL
+### Copy a URL
 
 When given a long URL leading to an image, it'll attempt to download the file and reupload it to the dflimg server.
 
