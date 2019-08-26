@@ -16,7 +16,7 @@ import (
 )
 
 // UploadFile is an app method that takes in a file and stores it
-func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateResourceRequest) (*dflimg.ResponseCreatedResponse, error) {
+func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateResourceRequest) (*dflimg.CreateResourceResponse, error) {
 	// get user
 	username := ctx.Value(middleware.UsernameKey).(string)
 	contentType := http.DetectContentType(req.File.Bytes())
@@ -51,7 +51,7 @@ func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateResourceRequest)
 	hash := a.makeHash(fileRes.Serial)
 	fullURL := fmt.Sprintf("%s/%s", rootURL, hash)
 
-	return &dflimg.ResponseCreatedResponse{
+	return &dflimg.CreateResourceResponse{
 		ResourceID: fileRes.ID,
 		Type:       fileRes.Type,
 		Hash:       hash,

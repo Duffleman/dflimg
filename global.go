@@ -71,8 +71,8 @@ func (r *Resource) StringifyLabels() []string {
 	return labels
 }
 
-// ResponseCreatedResponse is a response for creating resources
-type ResponseCreatedResponse struct {
+// CreateResourceResponse is a response for creating resources
+type CreateResourceResponse struct {
 	ResourceID string `json:"resource_id"`
 	Type       string `json:"type"`
 	Hash       string `json:"hash"`

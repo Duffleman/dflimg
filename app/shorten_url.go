@@ -11,7 +11,7 @@ import (
 	"github.com/cuvva/ksuid"
 )
 
-func (a *App) ShortenURL(ctx context.Context, req *dflimg.CreateResourceRequest) (*dflimg.ResponseCreatedResponse, error) {
+func (a *App) ShortenURL(ctx context.Context, req *dflimg.CreateResourceRequest) (*dflimg.CreateResourceResponse, error) {
 	username := ctx.Value(middleware.UsernameKey).(string)
 	urlID := ksuid.Generate("url").String()
 
@@ -30,7 +30,7 @@ func (a *App) ShortenURL(ctx context.Context, req *dflimg.CreateResourceRequest)
 	hash := a.makeHash(urlRes.Serial)
 	fullURL := fmt.Sprintf("%s/%s", rootURL, hash)
 
-	return &dflimg.ResponseCreatedResponse{
+	return &dflimg.CreateResourceResponse{
 		ResourceID: urlRes.ID,
 		Type:       urlRes.Type,
 		Hash:       hash,
