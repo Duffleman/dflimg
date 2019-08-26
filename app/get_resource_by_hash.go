@@ -16,7 +16,7 @@ func (a *App) GetResourceByHash(ctx context.Context, hash string) (*dflimg.Resou
 	}
 
 	var resource *dflimg.Resource
-	var labels []string
+	var labels []*dflimg.Label
 
 	g, gctx := errgroup.WithContext(ctx)
 

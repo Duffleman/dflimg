@@ -4,15 +4,9 @@ import (
 	"errors"
 	"html/template"
 	"net/http"
-	"strings"
-
-	"dflimg"
 
 	"github.com/go-chi/chi"
 )
-
-// ShortcutCharacter marks the character used to find shortcuts
-const ShortcutCharacter = ":"
 
 // GetResource gets a resource and handles the response for it
 func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
@@ -20,14 +14,7 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 
 	input := chi.URLParam(req, "input")
 
-	var resource *dflimg.Resource
-	var err error
-
-	if strings.HasPrefix(input, ShortcutCharacter) {
-		resource, err = r.app.GetResourceByShortcut(ctx, input)
-	} else {
-		resource, err = r.app.GetResourceByHash(ctx, input)
-	}
+	resource, err := r.app.GetResource(ctx, input)
 	if err != nil {
 		r.handleError(w, req, err)
 		return

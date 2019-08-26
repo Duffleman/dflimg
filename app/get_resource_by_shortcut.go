@@ -10,7 +10,7 @@ import (
 
 func (a *App) GetResourceByShortcut(ctx context.Context, shortcut string) (*dflimg.Resource, error) {
 	var resource *dflimg.Resource
-	var labels []string
+	var labels []*dflimg.Label
 
 	g, gctx := errgroup.WithContext(ctx)
 

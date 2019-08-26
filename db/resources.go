@@ -122,11 +122,11 @@ func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) 
 }
 
 // GetLabelsBySerial returns labels associated with a resource
-func (db *DB) GetLabelsBySerial(ctx context.Context, serial int) ([]string, error) {
+func (db *DB) GetLabelsBySerial(ctx context.Context, serial int) ([]*dflimg.Label, error) {
 	b := NewQueryBuilder()
 
 	query, values, err := b.
-		Select("l.name").
+		Select("l.id, l.name").
 		From("resources r").
 		Join("labels_resources lr ON lr.resource_id = r.id").
 		Join("labels l ON l.id = lr.label_id").
@@ -142,13 +142,13 @@ func (db *DB) GetLabelsBySerial(ctx context.Context, serial int) ([]string, erro
 }
 
 // GetLabelsByShortcut returns labels associated with a resource
-func (db *DB) GetLabelsByShortcut(ctx context.Context, shortcut string) ([]string, error) {
+func (db *DB) GetLabelsByShortcut(ctx context.Context, shortcut string) ([]*dflimg.Label, error) {
 	b := NewQueryBuilder()
 
 	s := fmt.Sprintf("{%s}", shortcut[1:])
 
 	query, values, err := b.
-		Select("l.name").
+		Select("l.id, l.name").
 		From("resources r").
 		Join("labels_resources lr ON lr.resource_id = r.id").
 		Join("labels l ON l.id = lr.label_id").
@@ -159,26 +159,4 @@ func (db *DB) GetLabelsByShortcut(ctx context.Context, shortcut string) ([]strin
 	}
 
 	return db.queryLabels(ctx, query, values)
-}
-
-func (db *DB) queryLabels(ctx context.Context, query string, values []interface{}) ([]string, error) {
-	rows, err := db.pg.QueryContext(ctx, query, values...)
-	if err != nil {
-		return nil, err
-	}
-
-	labels := []string{}
-
-	for rows.Next() {
-		var s string
-
-		err := rows.Scan(&s)
-		if err != nil {
-			return nil, err
-		}
-
-		labels = append(labels, s)
-	}
-
-	return labels, nil
 }

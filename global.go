@@ -39,7 +39,7 @@ type Resource struct {
 	NSFW      bool      `json:"nsfw"`
 	MimeType  *string   `json:"mime_type"`
 	Shortcuts []string  `json:"shortcuts"`
-	Labels    []string  `json:"labels"`
+	Labels    []*Label  `json:"labels"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -57,14 +57,14 @@ func (r *Resource) StringifyLabels() []string {
 	labels := make([]string, len(r.Labels))
 
 	for k, l := range r.Labels {
-		switch l {
+		switch l.Name {
 		case "nsfw":
 			fallthrough
 		case "nsfl":
-			labels[k] = strings.ToUpper(l)
+			labels[k] = strings.ToUpper(l.Name)
 			break
 		default:
-			labels[k] = strings.ToTitle(l)
+			labels[k] = strings.ToTitle(l.Name)
 		}
 	}
 
