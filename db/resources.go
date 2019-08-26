@@ -160,3 +160,20 @@ func (db *DB) GetLabelsByShortcut(ctx context.Context, shortcut string) ([]*dfli
 
 	return db.queryLabels(ctx, query, values)
 }
+
+// SetNSFW sets a resource NSFW bool
+func (db *DB) SetNSFW(ctx context.Context, resourceID string, state bool) error {
+	b := NewQueryBuilder()
+
+	query, values, err := b.
+		Update("resources").
+		Set("nsfw", state).
+		Where(sq.Eq{"id": resourceID}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = db.pg.ExecContext(ctx, query, values...)
+	return err
+}
