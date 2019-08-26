@@ -21,6 +21,7 @@ func main() {
 	rootCmd.AddCommand(cli.UploadCmd)
 	rootCmd.AddCommand(cli.ShortenURLCmd)
 	rootCmd.AddCommand(cli.TagResourceCmd)
+	rootCmd.AddCommand(cli.CopyURLCmd)
 
 	// handle command argumetns
 	cli.UploadCmd.Flags().StringP("shortcuts", "s", "", "A CSV of shortcuts to apply to the uploaded file")
@@ -28,6 +29,9 @@ func main() {
 
 	cli.ShortenURLCmd.Flags().StringP("shortcuts", "s", "", "A CSV of shortcuts to apply to the shortened URL")
 	cli.ShortenURLCmd.Flags().BoolP("nsfw", "n", false, "Is the link NSFW?")
+
+	cli.CopyURLCmd.Flags().StringP("shortcuts", "s", "", "A CSV of shortcuts to apply to the URL/file")
+	cli.CopyURLCmd.Flags().BoolP("nsfw", "n", false, "Is the link NSFW?")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

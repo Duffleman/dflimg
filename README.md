@@ -54,6 +54,18 @@ If the "Accept" header is set to "text/plain":
 
 `https://dfl.mn/q3A`
 
+#### `POST /tag_resource`
+
+Tags a resource with a label. It requires `tags` which is a CSV set of tags, and `url` which is either a full URL or just the hash of a resource.
+
+See [`POST /upload_file`](https://github.com/Duffleman/dflimg-go#post-upload_file) for the expected response.
+
+#### `POST /shorten_url`
+
+Shorten a URL. It requires `url` which is the URL to shorten. You can apply `nsfw` and `shortcuts` here too.
+
+See [`POST /upload_file`](https://github.com/Duffleman/dflimg-go#post-upload_file) for the expected response.
+
 #### `GET /{hash}`
 
 Links to the resource. Serves the content directly!
@@ -117,3 +129,17 @@ Shorten a URL
 `dflimg s {url}`
 
 See other params above.
+
+### Tag a resource
+
+`dflimg t {url} {labels}`
+
+Where labels is a CSV of labels to apply. The labels must exist on the server.
+
+### Copy a URL
+
+When given a long URL leading to an image, it'll attempt to download the file and reupload it to the dflimg server.
+
+`dflimg c {url}`
+
+`-n` for NSFW works here, along with `-s` for shortcuts.
