@@ -16,6 +16,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	_ "github.com/lib/pq"
+	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"
 	hashids "github.com/speps/go-hashids"
 )
@@ -52,9 +53,12 @@ func main() {
 
 	hasher, _ := hashids.NewWithData(hd)
 
+	// Cache
+	cache := cache.New(30*time.Minute, 1*time.Hour)
+
 	// Setup app & rpc
 	router := chi.NewRouter()
-	app := app.New(db, s, hasher)
+	app := app.New(db, s, hasher, cache)
 	rpc := dflrpc.New(logger, router, app)
 
 	// Add middleware
