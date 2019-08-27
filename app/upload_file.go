@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/cuvva/ksuid"
+	cache "github.com/patrickmn/go-cache"
 )
 
 // UploadFile is an app method that takes in a file and stores it
@@ -46,6 +47,9 @@ func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateResourceRequest)
 	if err != nil {
 		return nil, err
 	}
+
+	cacheKey := fmt.Sprintf("file/%s", fileRes.Link)
+	a.cache.Set(cacheKey, req.File.Bytes(), cache.DefaultExpiration)
 
 	rootURL := dflimg.GetEnv("root_url")
 	hash := a.makeHash(fileRes.Serial)
