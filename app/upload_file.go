@@ -30,7 +30,7 @@ func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateResourceRequest)
 	}
 
 	// upload to S3
-	_, err = s3.New(a.aws).PutObject(&s3.PutObjectInput{
+	_, err = s3.New(a.aws).PutObjectWithContext(ctx, &s3.PutObjectInput{
 		Bucket:        aws.String(dflimg.S3Bucket),
 		Key:           aws.String(fileKey),
 		ACL:           aws.String("private"),

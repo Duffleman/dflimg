@@ -21,7 +21,7 @@ func (a *App) GetS3File(ctx context.Context, resource *dflimg.Resource) ([]byte,
 		return file.([]byte), nil
 	}
 
-	s3download, err := s3.New(a.aws).GetObject(&s3.GetObjectInput{
+	s3download, err := s3.New(a.aws).GetObjectWithContext(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(dflimg.S3Bucket),
 		Key:    aws.String(resource.Link),
 	})
