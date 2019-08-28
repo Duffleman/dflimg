@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"dflimg"
 	"dflimg/dflerr"
@@ -49,7 +50,11 @@ func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateResourceRequest)
 	}
 
 	cacheKey := fmt.Sprintf("file/%s", fileRes.Link)
-	a.cache.Set(cacheKey, req.File.Bytes(), cache.DefaultExpiration)
+	now := time.Now()
+	a.cache.Set(cacheKey, &CacheItem{
+		Content: req.File.Bytes(),
+		ModTime: &now,
+	}, cache.DefaultExpiration)
 
 	rootURL := dflimg.GetEnv("root_url")
 	hash := a.makeHash(fileRes.Serial)

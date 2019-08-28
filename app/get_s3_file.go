@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"dflimg"
 
@@ -13,32 +14,42 @@ import (
 	cache "github.com/patrickmn/go-cache"
 )
 
+type CacheItem struct {
+	Content []byte
+	ModTime *time.Time
+}
+
 // GetS3File returns a file from the cache, or S3
-func (a *App) GetS3File(ctx context.Context, resource *dflimg.Resource) ([]byte, error) {
+func (a *App) GetS3File(ctx context.Context, resource *dflimg.Resource) ([]byte, *time.Time, error) {
 	cacheKey := fmt.Sprintf("file/%s", resource.Link)
 
-	if file, found := a.cache.Get(cacheKey); found {
-		return file.([]byte), nil
+	if item, found := a.cache.Get(cacheKey); found {
+		i := item.(*CacheItem)
+
+		return i.Content, i.ModTime, nil
 	}
 
-	s3download, err := s3.New(a.aws).GetObjectWithContext(ctx, &s3.GetObjectInput{
+	s3item, err := s3.New(a.aws).GetObjectWithContext(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(dflimg.S3Bucket),
 		Key:    aws.String(resource.Link),
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var buf bytes.Buffer
 
-	_, err = io.Copy(&buf, s3download.Body)
+	_, err = io.Copy(&buf, s3item.Body)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	bytes := buf.Bytes()
 
-	a.cache.Set(cacheKey, bytes, cache.DefaultExpiration)
+	a.cache.Set(cacheKey, &CacheItem{
+		Content: bytes,
+		ModTime: s3item.LastModified,
+	}, cache.DefaultExpiration)
 
-	return bytes, nil
+	return bytes, s3item.LastModified, nil
 }
