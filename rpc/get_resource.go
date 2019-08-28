@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"bytes"
 	"errors"
 	"html/template"
 	"net/http"
@@ -29,10 +30,13 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 				r.handleError(w, req, err)
 				return
 			}
-			tpl.Execute(w, map[string]interface{}{
+			err = tpl.Execute(w, map[string]interface{}{
 				"resource": resource,
 				"labels":   labelStr,
 			})
+			if err != nil {
+				r.handleError(w, req, err)
+			}
 			return
 		}
 	}
@@ -41,13 +45,14 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 	case "file":
 		w.Header().Set("Content-Type", *resource.MimeType)
 
-		bytes, err := r.app.GetS3File(ctx, resource)
+		b, modtime, err := r.app.GetS3File(ctx, resource)
 		if err != nil {
 			r.handleError(w, req, err)
 			return
 		}
 
-		w.Write(bytes)
+		reader := bytes.NewReader(b)
+		http.ServeContent(w, req, input, *modtime, reader)
 		return
 	case "url":
 		w.Header().Set("Content-Type", "") // Needed for redirect to work
