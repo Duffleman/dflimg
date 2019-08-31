@@ -22,6 +22,7 @@ func main() {
 	rootCmd.AddCommand(cli.ShortenURLCmd)
 	rootCmd.AddCommand(cli.TagResourceCmd)
 	rootCmd.AddCommand(cli.CopyURLCmd)
+	rootCmd.AddCommand(cli.ScreenshotCmd)
 
 	// handle command argumetns
 	cli.UploadCmd.Flags().StringP("shortcuts", "s", "", "A CSV of shortcuts to apply to the uploaded file")
