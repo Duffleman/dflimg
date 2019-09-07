@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"bytes"
+	"dflimg/dflerr"
 	"errors"
 	"html/template"
 	"net/http"
@@ -18,6 +19,11 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 	resource, err := r.app.GetResource(ctx, input)
 	if err != nil {
 		r.handleError(w, req, err)
+		return
+	}
+
+	if resource.DeletedAt != nil {
+		r.handleError(w, req, dflerr.New("not_found", nil))
 		return
 	}
 
