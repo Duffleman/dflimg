@@ -31,16 +31,17 @@ const (
 )
 
 type Resource struct {
-	ID        string    `json:"id"`
-	Type      string    `json:"type"`
-	Serial    int       `json:"serial"`
-	Owner     string    `json:"owner"`
-	Link      string    `json:"link"`
-	NSFW      bool      `json:"nsfw"`
-	MimeType  *string   `json:"mime_type"`
-	Shortcuts []string  `json:"shortcuts"`
-	Labels    []*Label  `json:"labels"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        string     `json:"id"`
+	Type      string     `json:"type"`
+	Serial    int        `json:"serial"`
+	Owner     string     `json:"owner"`
+	Link      string     `json:"link"`
+	NSFW      bool       `json:"nsfw"`
+	MimeType  *string    `json:"mime_type"`
+	Shortcuts []string   `json:"shortcuts"`
+	Labels    []*Label   `json:"labels"`
+	CreatedAt time.Time  `json:"created_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 type Label struct {

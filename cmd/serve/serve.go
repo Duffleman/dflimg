@@ -79,6 +79,7 @@ func main() {
 	rpc.Post("/shorten_url", rpc.ShortenURL)
 	rpc.Get("/list_labels", rpc.ListLabels)
 	rpc.Post("/tag_resource", rpc.TagResource)
+	rpc.Post("/delete_resource", rpc.DeleteResource)
 	rpc.Get("/{input}", rpc.GetResource)
 
 	// serve

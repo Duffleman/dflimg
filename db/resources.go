@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"dflimg"
 	"dflimg/dflerr"
@@ -45,7 +46,7 @@ func (db *DB) FindResource(ctx context.Context, id string) (*dflimg.Resource, er
 	b := NewQueryBuilder()
 
 	query, values, err := b.
-		Select("id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at").
+		Select("id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at, deleted_at").
 		From("resources").
 		Where(sq.Eq{
 			"id": id,
@@ -63,7 +64,7 @@ func (db *DB) FindResourceBySerial(ctx context.Context, serial int) (*dflimg.Res
 	b := NewQueryBuilder()
 
 	query, values, err := b.
-		Select("id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at").
+		Select("id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at, deleted_at").
 		From("resources").
 		Where(sq.Eq{
 			"serial": serial,
@@ -83,7 +84,7 @@ func (db *DB) FindResourceByShortcut(ctx context.Context, shortcut string) (*dfl
 	s := fmt.Sprintf("{%s}", shortcut[1:])
 
 	query, values, err := b.
-		Select("r.id, r.type, r.serial, r.owner, r.link, r.nsfw, r.mime_type, r.shortcuts, r.created_at").
+		Select("r.id, r.type, r.serial, r.owner, r.link, r.nsfw, r.mime_type, r.shortcuts, r.created_at, r.deleted_at").
 		From("resources r").
 		Where("r.shortcuts @> $1::text[]", s).
 		Limit(1).
@@ -110,6 +111,7 @@ func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) 
 		&res.MimeType,
 		pq.Array(&res.Shortcuts),
 		&res.CreatedAt,
+		&res.DeletedAt,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -121,46 +123,6 @@ func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) 
 	return res, nil
 }
 
-// GetLabelsBySerial returns labels associated with a resource
-func (db *DB) GetLabelsBySerial(ctx context.Context, serial int) ([]*dflimg.Label, error) {
-	b := NewQueryBuilder()
-
-	query, values, err := b.
-		Select("l.id, l.name").
-		From("resources r").
-		Join("labels_resources lr ON lr.resource_id = r.id").
-		Join("labels l ON l.id = lr.label_id").
-		Where(sq.Eq{
-			"r.serial": serial,
-		}).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	return db.queryLabels(ctx, query, values)
-}
-
-// GetLabelsByShortcut returns labels associated with a resource
-func (db *DB) GetLabelsByShortcut(ctx context.Context, shortcut string) ([]*dflimg.Label, error) {
-	b := NewQueryBuilder()
-
-	s := fmt.Sprintf("{%s}", shortcut[1:])
-
-	query, values, err := b.
-		Select("l.id, l.name").
-		From("resources r").
-		Join("labels_resources lr ON lr.resource_id = r.id").
-		Join("labels l ON l.id = lr.label_id").
-		Where("r.shortcuts @> $1::text[]", s).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	return db.queryLabels(ctx, query, values)
-}
-
 // SetNSFW sets a resource NSFW bool
 func (db *DB) SetNSFW(ctx context.Context, resourceID string, state bool) error {
 	b := NewQueryBuilder()
@@ -168,6 +130,50 @@ func (db *DB) SetNSFW(ctx context.Context, resourceID string, state bool) error 
 	query, values, err := b.
 		Update("resources").
 		Set("nsfw", state).
+		Where(sq.Eq{"id": resourceID}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = db.pg.ExecContext(ctx, query, values...)
+	return err
+}
+
+// TagResource tags a resource with a label, it is idempotant
+func (db *DB) TagResource(ctx context.Context, resourceID string, tags []*dflimg.Label) error {
+	b := NewQueryBuilder()
+
+	builder := b.
+		Insert("labels_resources").
+		Columns("label_id, resource_id")
+
+	for _, t := range tags {
+		builder = builder.Values(t.ID, resourceID)
+	}
+
+	builder = builder.Suffix("ON CONFLICT (label_id, resource_id) DO NOTHING")
+
+	query, values, err := builder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = db.pg.ExecContext(ctx, query, values...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteResource soft-deletes a resource
+func (db *DB) DeleteResource(ctx context.Context, resourceID string) error {
+	b := NewQueryBuilder()
+
+	query, values, err := b.
+		Update("resources").
+		Set("deleted_at", time.Now()).
 		Where(sq.Eq{"id": resourceID}).
 		ToSql()
 	if err != nil {

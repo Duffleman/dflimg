@@ -16,7 +16,7 @@ func (db *DB) NewURL(ctx context.Context, id, url, owner string, shortcuts []str
 		Insert("resources").
 		Columns("id, type, owner, link, shortcuts, nsfw").
 		Values(id, "url", owner, url, pq.Array(shortcuts), nsfw).
-		Suffix("RETURNING id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at").
+		Suffix("RETURNING id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at, deleted_at").
 		ToSql()
 	if err != nil {
 		return nil, err

@@ -12,7 +12,8 @@ CREATE TABLE resources (
     nsfw bool NOT NULL DEFAULT false,
     mime_type text,
     shortcuts text[],
-    created_at timestamp with time zone NOT NULL DEFAULT now()
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    deleted_at timestamp with time zone
 );
 
 CREATE TABLE labels (
