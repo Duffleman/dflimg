@@ -16,7 +16,7 @@ func (db *DB) NewFile(ctx context.Context, id, s3, mimetype, owner string, short
 		Insert("resources").
 		Columns("id, type, owner, link, mime_type, shortcuts, nsfw").
 		Values(id, "file", owner, s3, mimetype, pq.Array(shortcuts), nsfw).
-		Suffix("RETURNING id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at").
+		Suffix("RETURNING id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at, deleted_at").
 		ToSql()
 	if err != nil {
 		return nil, err

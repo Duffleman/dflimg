@@ -49,6 +49,10 @@ func (r *RPC) Serve(port string) {
 }
 
 func (r *RPC) handleError(w http.ResponseWriter, req *http.Request, err error) {
+	if err == nil {
+		return
+	}
+
 	l := logrus.NewEntry(r.logger)
 
 	if v, ok := err.(dflerr.E); ok {

@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"dflimg"
 
@@ -38,6 +39,46 @@ func (db *DB) GetLabelsByName(ctx context.Context, names []string) ([]*dflimg.La
 	return db.queryLabels(ctx, query, values)
 }
 
+// GetLabelsBySerial returns labels associated with a resource
+func (db *DB) GetLabelsBySerial(ctx context.Context, serial int) ([]*dflimg.Label, error) {
+	b := NewQueryBuilder()
+
+	query, values, err := b.
+		Select("l.id, l.name").
+		From("resources r").
+		Join("labels_resources lr ON lr.resource_id = r.id").
+		Join("labels l ON l.id = lr.label_id").
+		Where(sq.Eq{
+			"r.serial": serial,
+		}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	return db.queryLabels(ctx, query, values)
+}
+
+// GetLabelsByShortcut returns labels associated with a resource
+func (db *DB) GetLabelsByShortcut(ctx context.Context, shortcut string) ([]*dflimg.Label, error) {
+	b := NewQueryBuilder()
+
+	s := fmt.Sprintf("{%s}", shortcut[1:])
+
+	query, values, err := b.
+		Select("l.id, l.name").
+		From("resources r").
+		Join("labels_resources lr ON lr.resource_id = r.id").
+		Join("labels l ON l.id = lr.label_id").
+		Where("r.shortcuts @> $1::text[]", s).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	return db.queryLabels(ctx, query, values)
+}
+
 func (db *DB) queryLabels(ctx context.Context, query string, values []interface{}) ([]*dflimg.Label, error) {
 	rows, err := db.pg.QueryContext(ctx, query, values...)
 	if err != nil {
@@ -58,31 +99,4 @@ func (db *DB) queryLabels(ctx context.Context, query string, values []interface{
 	}
 
 	return labels, nil
-}
-
-// TagResource tags a resource with a label, it is idempotant
-func (db *DB) TagResource(ctx context.Context, resourceID string, tags []*dflimg.Label) error {
-	b := NewQueryBuilder()
-
-	builder := b.
-		Insert("labels_resources").
-		Columns("label_id, resource_id")
-
-	for _, t := range tags {
-		builder = builder.Values(t.ID, resourceID)
-	}
-
-	builder = builder.Suffix("ON CONFLICT (label_id, resource_id) DO NOTHING")
-
-	query, values, err := builder.ToSql()
-	if err != nil {
-		return err
-	}
-
-	_, err = db.pg.ExecContext(ctx, query, values...)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
