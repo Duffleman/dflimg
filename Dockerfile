@@ -12,6 +12,8 @@ RUN go install -v ./cmd/...
 
 FROM alpine
 RUN apk add --no-cache ca-certificates tzdata
+COPY ./ca-certificate.crt /usr/local/share/ca-certificates/ca-certificate.crt
+RUN chmod 644 /usr/local/share/ca-certificates/ca-certificate.crt && update-ca-certificates
 ENV ADDR=":80"
 EXPOSE 80
 RUN mkdir -p /usr/local/app
