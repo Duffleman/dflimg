@@ -72,7 +72,11 @@ func (r *RPC) handleError(w http.ResponseWriter, req *http.Request, err error) {
 		w.WriteHeader(500)
 	}
 
-	json.NewEncoder(w).Encode(err)
+	if v, ok := err.(dflerr.E); ok {
+		json.NewEncoder(w).Encode(v)
+	} else {
+		json.NewEncoder(w).Encode(dflerr.New("unknown", dflerr.M{"error": err.Error()}))
+	}
 
 	return
 }
