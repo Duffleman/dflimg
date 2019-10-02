@@ -12,7 +12,7 @@ import (
 func (a *App) GetResourceByHash(ctx context.Context, hash string) (*dflimg.Resource, error) {
 	serial, err := a.decodeHash(hash)
 	if err != nil {
-		return nil, err
+		return nil, dflerr.New(dflerr.NotFound, nil)
 	}
 
 	var resource *dflimg.Resource
