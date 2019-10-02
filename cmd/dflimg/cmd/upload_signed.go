@@ -4,17 +4,13 @@ import (
 	"bytes"
 	"dflimg"
 	"fmt"
-	"io"
-	"mime/multipart"
+	"io/ioutil"
 	"net/http"
-	"os"
-	"strconv"
-	"strings"
 	"time"
 
 	dhttp "dflimg/cmd/dflimg/http"
 
-	"github.com/kr/pretty"
+	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -37,65 +33,41 @@ var UploadSignedCmd = &cobra.Command{
 			return err
 		}
 
-		pretty.Println(body)
+		err = clipboard.WriteAll(body.URL)
+		if err != nil {
+			fmt.Println("Could not copy to clipboard. Please copy the URL manually")
+		}
 
 		duration := time.Now().Sub(startTime)
 
-		fmt.Printf("Done in %s\n", duration)
+		fmt.Printf("Done in %s: %s\n", duration, body.URL)
 
 		return nil
 	},
 }
 
 // SendFileAWS uploads the file to AWS
-func sendFileAWS(rootURL, authToken, filename string) (*dflimg.CreateResourceResponse, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	buffer := make([]byte, 512)
-
-	_, err = file.Read(buffer)
+func sendFileAWS(rootURL, authToken, filename string) (*dflimg.CreateSignedURLResponse, error) {
+	file, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	contentType := http.DetectContentType(buffer)
+	contentType := http.DetectContentType(file)
 
-	fi, err := file.Stat()
-	if err != nil {
-		return nil, err
+	reqBody := &dflimg.CreateSignedURLRequest{
+		ContentType: contentType,
 	}
-
-	contentLength := fi.Size()
-
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormField("content-type")
-	if err != nil {
-		return nil, err
-	}
-	io.Copy(part, strings.NewReader(contentType))
-
-	part, err = writer.CreateFormField("content-length")
-	if err != nil {
-		return nil, err
-	}
-	io.Copy(part, strings.NewReader(strconv.FormatInt(contentLength, 10)))
-
-	writer.Close()
 
 	c := dhttp.New(rootURL, authToken)
 
 	res := &dflimg.CreateSignedURLResponse{}
-	err = c.Request("POST", "created_signed_url", body, writer.FormDataContentType(), res)
+	err = c.JSONRequest("POST", "created_signed_url", reqBody, res)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("PUT", res.URL, file)
+	req, err := http.NewRequest("PUT", res.S3Link, bytes.NewReader(file))
 	if err != nil {
 		return nil, err
 	}
@@ -105,5 +77,5 @@ func sendFileAWS(rootURL, authToken, filename string) (*dflimg.CreateResourceRes
 		return nil, err
 	}
 
-	return nil, nil
+	return res, nil
 }

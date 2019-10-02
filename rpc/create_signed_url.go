@@ -3,9 +3,9 @@ package rpc
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"strings"
 
+	"dflimg"
 	"dflimg/dflerr"
 	"dflimg/rpc/middleware"
 )
@@ -21,15 +21,14 @@ func (r *RPC) CreatedSignedURL(w http.ResponseWriter, req *http.Request) {
 	}
 	username := ctx.Value(middleware.UsernameKey).(string)
 
-	contentType := req.FormValue("content-type")
-	contentLengthStr := req.FormValue("content-length")
-	contentLength, err := strconv.Atoi(contentLengthStr)
+	body := &dflimg.CreateSignedURLRequest{}
+	err := json.NewDecoder(req.Body).Decode(body)
 	if err != nil {
 		r.handleError(w, req, err)
 		return
 	}
 
-	res, err := r.app.CreatedSignedURL(ctx, username, contentType, contentLength, nil, false)
+	res, err := r.app.CreatedSignedURL(ctx, username, body)
 	if err != nil {
 		r.handleError(w, req, err)
 		return
