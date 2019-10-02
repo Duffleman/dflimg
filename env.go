@@ -29,6 +29,11 @@ func GetEnv(key string) string {
 		if v == "" {
 			return DefaultAddr
 		}
+	case "redis_addr":
+		v = os.Getenv("REDIS_ADDR")
+		if v == "" {
+			return DefaultRedisAddr
+		}
 	}
 
 	return v

@@ -15,8 +15,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
-	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"
 	hashids "github.com/speps/go-hashids"
 )
@@ -35,6 +35,7 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	// database (postgres)
 	pgdb, err := sql.Open("postgres", dflimg.GetEnv("pg_connection_string"))
 	if err != nil {
 		logger.Fatal(err)
@@ -54,11 +55,22 @@ func main() {
 	hasher, _ := hashids.NewWithData(hd)
 
 	// Cache
-	cache := cache.New(30*time.Minute, 1*time.Hour)
+	// cache := cache.New(30*time.Minute, 1*time.Hour)
+	redisAddr := dflimg.GetEnv("redis_addr")
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     redisAddr,
+		Password: "",
+		DB:       0,
+	})
+	_, err = redisClient.Ping().Result()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	redis := app.NewCache(redisClient)
 
 	// Setup app & rpc
 	router := chi.NewRouter()
-	app := app.New(db, s, hasher, cache)
+	app := app.New(db, s, hasher, redis)
 	rpc := dflrpc.New(logger, router, app)
 
 	// Add middleware
