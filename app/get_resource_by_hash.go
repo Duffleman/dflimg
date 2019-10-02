@@ -9,6 +9,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// GetResourceByHash returns a resource when given a hash
 func (a *App) GetResourceByHash(ctx context.Context, hash string) (*dflimg.Resource, error) {
 	serial, err := a.decodeHash(hash)
 	if err != nil {

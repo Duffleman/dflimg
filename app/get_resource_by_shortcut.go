@@ -8,6 +8,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// GetResourceByShortcut returns a resource from a :shortcut
 func (a *App) GetResourceByShortcut(ctx context.Context, shortcut string) (*dflimg.Resource, error) {
 	var resource *dflimg.Resource
 	var labels []*dflimg.Label

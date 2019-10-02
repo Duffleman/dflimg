@@ -13,11 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-type CacheItem struct {
-	Content []byte     `json:"content"`
-	ModTime *time.Time `json:"modtime"`
-}
-
 // GetS3File returns a file from the cache, or S3
 func (a *App) GetS3File(ctx context.Context, resource *dflimg.Resource) ([]byte, *time.Time, error) {
 	cacheKey := fmt.Sprintf("file/%s", resource.Link)

@@ -11,6 +11,12 @@ import (
 // DefaultExpiration is the default expiration of items stored in redis
 const DefaultExpiration = 1 * time.Hour
 
+// CacheItem is an item that can be stored in the cache
+type CacheItem struct {
+	Content []byte     `json:"content"`
+	ModTime *time.Time `json:"modtime"`
+}
+
 // Cache is a wrapper around redis for easy consumption
 type Cache struct {
 	client *redis.Client

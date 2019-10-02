@@ -5,6 +5,7 @@ import (
 	"dflimg/dflerr"
 )
 
+// TagResource tags a resource after it has been uploaded
 func (a *App) TagResource(ctx context.Context, resourceID string, tags []string) error {
 	labels, err := a.db.GetLabelsByName(ctx, tags)
 	if err != nil {

@@ -11,6 +11,7 @@ import (
 	"github.com/cuvva/ksuid"
 )
 
+// ShortenURL shortens a URL
 func (a *App) ShortenURL(ctx context.Context, req *dflimg.CreateResourceRequest) (*dflimg.CreateResourceResponse, error) {
 	username := ctx.Value(middleware.UsernameKey).(string)
 	urlID := ksuid.Generate("url").String()
