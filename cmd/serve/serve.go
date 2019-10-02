@@ -75,6 +75,7 @@ func main() {
 		return
 	})
 	rpc.Get("/health", rpc.HealthCheck)
+	rpc.Get("/robots.txt", rpc.Robots)
 	rpc.Post("/upload_file", rpc.UploadFile)
 	rpc.Post("/shorten_url", rpc.ShortenURL)
 	rpc.Get("/list_labels", rpc.ListLabels)
