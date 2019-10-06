@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"dflimg"
-	"fmt"
 	"time"
 
 	"dflimg/cmd/dflimg/http"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -29,10 +29,11 @@ var DeleteResourceCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		notify("Resource deleted", urlStr)
 
 		duration := time.Now().Sub(startTime)
 
-		fmt.Printf("Done in %s\n", duration)
+		log.Infof("Done in %s\n", duration)
 
 		return nil
 	},

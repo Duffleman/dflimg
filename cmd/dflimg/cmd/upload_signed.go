@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -11,6 +10,7 @@ import (
 	dhttp "dflimg/cmd/dflimg/http"
 
 	"github.com/atotto/clipboard"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -44,19 +44,21 @@ var UploadSignedCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Printf("File prepared: %s (%s)\n", resource.URL, time.Now().Sub(filePrepStart))
+		log.Infof("File prepared: %s (%s)\n", resource.URL, time.Now().Sub(filePrepStart))
 
 		err = clipboard.WriteAll(resource.URL)
 		if err != nil {
-			fmt.Printf("Could not copy to clipboard. Please copy the URL manually")
+			log.Warn("Could not copy to clipboard. Please copy the URL manually")
 		}
+		notify("Image prepared", resource.URL)
 
 		err = sendFileAWS(resource.S3Link, file)
 		if err != nil {
 			return err
 		}
+		notify("Image uploaded", "")
 
-		fmt.Printf("Done in %s\n", time.Now().Sub(startTime))
+		log.Infof("Done in %s\n", time.Now().Sub(startTime))
 
 		return nil
 	},

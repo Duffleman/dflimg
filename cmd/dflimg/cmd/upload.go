@@ -3,7 +3,6 @@ package cmd
 import (
 	"bytes"
 	"dflimg"
-	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
@@ -14,6 +13,7 @@ import (
 	"dflimg/cmd/dflimg/http"
 
 	"github.com/atotto/clipboard"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -42,12 +42,13 @@ var UploadCmd = &cobra.Command{
 
 		err = clipboard.WriteAll(body.URL)
 		if err != nil {
-			fmt.Println("Could not copy to clipboard. Please copy the URL manually")
+			log.Warn("Could not copy to clipboard. Please copy the URL manually")
 		}
+		notify("Image uploaded", body.URL)
 
 		duration := time.Now().Sub(startTime)
 
-		fmt.Printf("Done in %s: %s\n", duration, body.URL)
+		log.Infof("Done in %s: %s\n", duration, body.URL)
 
 		return nil
 	},

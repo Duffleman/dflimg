@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/atotto/clipboard"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -42,8 +43,9 @@ var ShortenURLCmd = &cobra.Command{
 		if err != nil {
 			fmt.Println("Could not copy to clipboard. Please copy the URL manually")
 		}
+		notify("URL Shortened", body.URL)
 
-		fmt.Printf("Done: %s\n", body.URL)
+		log.Infof("Done: %s\n", body.URL)
 
 		return nil
 	},
