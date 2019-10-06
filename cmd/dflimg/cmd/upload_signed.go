@@ -71,7 +71,7 @@ func prepareUpload(rootURL, authToken string, file []byte) (res *dflimg.CreateSi
 
 	c := dhttp.New(rootURL, authToken)
 
-	err = c.JSONRequest("POST", "created_signed_url", reqBody, &res)
+	err = c.JSONRequest("POST", "create_signed_url", reqBody, &res)
 
 	return
 }

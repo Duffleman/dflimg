@@ -13,9 +13,9 @@ import (
 	pkgerr "github.com/pkg/errors"
 )
 
-// CreatedSignedURL creates a file resource, but instead of accepting the file
+// CreateSignedURL creates a file resource, but instead of accepting the file
 // it generates a signed URL
-func (a *App) CreatedSignedURL(ctx context.Context, username string, req *dflimg.CreateSignedURLRequest) (*dflimg.CreateSignedURLResponse, error) {
+func (a *App) CreateSignedURL(ctx context.Context, username string, req *dflimg.CreateSignedURLRequest) (*dflimg.CreateSignedURLResponse, error) {
 	fileID := ksuid.Generate("file").String()
 	fileKey := fmt.Sprintf("%s/%s", dflimg.S3RootKey, fileID)
 

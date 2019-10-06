@@ -10,8 +10,8 @@ import (
 	"dflimg/rpc/middleware"
 )
 
-// CreatedSignedURL creates a signed URL for file uploads
-func (r *RPC) CreatedSignedURL(w http.ResponseWriter, req *http.Request) {
+// CreateSignedURL creates a signed URL for file uploads
+func (r *RPC) CreateSignedURL(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
 	key := ctx.Value(middleware.UsernameKey)
@@ -28,7 +28,7 @@ func (r *RPC) CreatedSignedURL(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res, err := r.app.CreatedSignedURL(ctx, username, body)
+	res, err := r.app.CreateSignedURL(ctx, username, body)
 	if err != nil {
 		r.handleError(w, req, err)
 		return
