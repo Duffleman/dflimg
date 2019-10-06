@@ -25,8 +25,9 @@ func (a *App) CreatedSignedURL(ctx context.Context, username string, req *dflimg
 	}
 
 	s3req, _ := s3.New(a.aws).PutObjectRequest(&s3.PutObjectInput{
-		Bucket: aws.String(dflimg.S3Bucket),
-		Key:    aws.String(fileKey),
+		Bucket:      aws.String(dflimg.S3Bucket),
+		Key:         aws.String(fileKey),
+		ContentType: aws.String(req.ContentType),
 	})
 
 	url, err := s3req.Presign(15 * time.Minute)
