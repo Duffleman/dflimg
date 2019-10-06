@@ -94,7 +94,7 @@ func main() {
 	rpc.Get("/list_labels", rpc.ListLabels)
 	rpc.Post("/tag_resource", rpc.TagResource)
 	rpc.Post("/delete_resource", rpc.DeleteResource)
-	rpc.Get("/{input}", rpc.GetResource)
+	rpc.Get("/{query}", rpc.GetResource)
 
 	// serve
 	addr := dflimg.GetEnv("addr")

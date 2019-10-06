@@ -2,8 +2,8 @@ package rpc
 
 import (
 	"dflimg"
+	"encoding/json"
 	"net/http"
-	"strings"
 
 	"dflimg/dflerr"
 	"dflimg/rpc/middleware"
@@ -12,20 +12,21 @@ import (
 func (r *RPC) DeleteResource(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	username := ctx.Value(middleware.UsernameKey)
-	if username == nil || username == "" {
+	key := ctx.Value(middleware.UsernameKey)
+	if key == nil || key == "" {
 		r.handleError(w, req, dflerr.New(dflerr.AccessDenied, nil))
 		return
 	}
+	username := ctx.Value(middleware.UsernameKey).(string)
 
-	input := req.FormValue("input")
-	rootURL := dflimg.GetEnv("root_url") + "/"
-
-	if strings.HasPrefix(input, rootURL) {
-		input = strings.TrimPrefix(input, rootURL)
+	body := &dflimg.IdentifyResource{}
+	err := json.NewDecoder(req.Body).Decode(body)
+	if err != nil {
+		r.handleError(w, req, err)
+		return
 	}
 
-	resource, err := r.app.GetResource(ctx, input)
+	resource, err := r.app.GetResource(ctx, body.Query)
 	if err != nil {
 		r.handleError(w, req, err)
 		return

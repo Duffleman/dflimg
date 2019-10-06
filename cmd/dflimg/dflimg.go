@@ -21,7 +21,6 @@ func main() {
 	rootCmd.AddCommand(cli.UploadCmd)
 	rootCmd.AddCommand(cli.UploadSignedCmd)
 	rootCmd.AddCommand(cli.ShortenURLCmd)
-	rootCmd.AddCommand(cli.TagResourceCmd)
 	rootCmd.AddCommand(cli.CopyURLCmd)
 	rootCmd.AddCommand(cli.ScreenshotCmd)
 	rootCmd.AddCommand(cli.DeleteResourceCmd)

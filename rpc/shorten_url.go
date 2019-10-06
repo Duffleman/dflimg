@@ -20,37 +20,22 @@ func (r *RPC) ShortenURL(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	shortcutsStr := req.FormValue("shortcuts")
-	urlStr := req.FormValue("url")
-	nsfwStr := req.FormValue("nsfw")
-	var shortcuts []string
-	var nsfw bool
-
-	switch nsfwStr {
-	case "true":
-		nsfw = true
-	default:
-		nsfw = false
+	body := &dflimg.CreateResourceRequest{}
+	err := json.NewDecoder(req.Body).Decode(body)
+	if err != nil {
+		r.handleError(w, req, err)
+		return
 	}
 
-	if urlStr == "" {
+	if body.URL == "" {
 		err := errors.New("missing url")
 		r.handleError(w, req, err)
 		return
 	}
 
-	if shortcutsStr != "" {
-		shortcuts = strings.Split(shortcutsStr, ",")
-	}
+	body.Type = "URL"
 
-	resourceReq := &dflimg.CreateResourceRequest{
-		Type:      "file",
-		URL:       urlStr,
-		Shortcuts: shortcuts,
-		NSFW:      nsfw,
-	}
-
-	res, err := r.app.ShortenURL(ctx, resourceReq)
+	res, err := r.app.ShortenURL(ctx, body)
 	if err != nil {
 		r.handleError(w, req, err)
 		return

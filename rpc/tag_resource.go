@@ -1,8 +1,8 @@
 package rpc
 
 import (
+	"encoding/json"
 	"net/http"
-	"strings"
 
 	"dflimg"
 	"dflimg/dflerr"
@@ -12,45 +12,32 @@ import (
 func (r *RPC) TagResource(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	user := ctx.Value(middleware.UsernameKey)
-	if user == nil || user == "" {
-		r.handleError(w, req, dflerr.New(dflerr.AccessDenied, dflerr.M{"username": user}))
+	key := ctx.Value(middleware.UsernameKey)
+	if key == nil || key == "" {
+		r.handleError(w, req, dflerr.New(dflerr.AccessDenied, dflerr.M{"username": key}))
 		return
 	}
+	username := ctx.Value(middleware.UsernameKey).(string)
 
-	urlStr := req.FormValue("url")
-	if urlStr == "" {
-		r.handleError(w, req, dflerr.New(dflerr.RequestFailure, dflerr.M{"missing_key": "url"}))
-		return
-	}
-
-	tagsStr := req.FormValue("tags")
-	if tagsStr == "" {
-		r.handleError(w, req, dflerr.New(dflerr.RequestFailure, dflerr.M{"missing_key": "tags"}))
-		return
-	}
-
-	tags := strings.Split(tagsStr, ",")
-
-	entry := urlStr
-	rootURL := dflimg.GetEnv("root_url") + "/"
-
-	if strings.HasPrefix(urlStr, rootURL) {
-		entry = strings.TrimPrefix(urlStr, rootURL)
-	}
-
-	resource, err := r.app.GetResource(ctx, entry)
+	body := &dflimg.TagResourceRequest{}
+	err := json.NewDecoder(req.Body).Decode(body)
 	if err != nil {
 		r.handleError(w, req, err)
 		return
 	}
 
-	if resource.Owner != user {
+	resource, err := r.app.GetResource(ctx, body.Query)
+	if err != nil {
+		r.handleError(w, req, err)
+		return
+	}
+
+	if resource.Owner != username {
 		r.handleError(w, req, dflerr.New(dflerr.AccessDenied, nil))
 		return
 	}
 
-	err = r.app.TagResource(ctx, resource.ID, tags)
+	err = r.app.TagResource(ctx, resource.ID, body.Labels, body.NSFW)
 	if err != nil {
 		r.handleError(w, req, err)
 	}

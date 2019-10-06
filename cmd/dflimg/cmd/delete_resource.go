@@ -1,11 +1,8 @@
 package cmd
 
 import (
-	"bytes"
+	"dflimg"
 	"fmt"
-	"io"
-	"mime/multipart"
-	"strings"
 	"time"
 
 	"dflimg/cmd/dflimg/http"
@@ -42,19 +39,11 @@ var DeleteResourceCmd = &cobra.Command{
 }
 
 func deleteResource(rootURL, authToken, urlStr string) error {
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-
-	part, err := writer.CreateFormField("input")
-	if err != nil {
-		return err
+	body := &dflimg.IdentifyResource{
+		Query: urlStr,
 	}
-
-	io.Copy(part, strings.NewReader(urlStr))
-
-	writer.Close()
 
 	c := http.New(rootURL, authToken)
 
-	return c.Request("POST", "delete_resource", body, writer.FormDataContentType(), nil)
+	return c.JSONRequest("POST", "delete_resource", body, nil)
 }

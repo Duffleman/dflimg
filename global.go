@@ -103,3 +103,13 @@ type CreateSignedURLResponse struct {
 	URL        string `json:"url"`
 	S3Link     string `json:"s3link"`
 }
+
+type IdentifyResource struct {
+	Query string `json:"query"`
+}
+
+type TagResourceRequest struct {
+	IdentifyResource
+	Labels []string
+	NSFW   bool
+}

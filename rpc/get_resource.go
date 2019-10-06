@@ -14,9 +14,9 @@ import (
 func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	input := chi.URLParam(req, "input")
+	query := chi.URLParam(req, "query")
 
-	resource, err := r.app.GetResource(ctx, input)
+	resource, err := r.app.GetResource(ctx, query)
 	if err != nil {
 		r.handleError(w, req, err)
 		return
@@ -58,7 +58,7 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 		}
 
 		reader := bytes.NewReader(b)
-		http.ServeContent(w, req, input, *modtime, reader)
+		http.ServeContent(w, req, query, *modtime, reader)
 		return
 	case "url":
 		w.Header().Set("Content-Type", "") // Needed for redirect to work
@@ -68,5 +68,4 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 		r.handleError(w, req, errors.New("unknown resource type"))
 		return
 	}
-
 }
