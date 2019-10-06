@@ -2,18 +2,25 @@ package cmd
 
 import (
 	"bytes"
-	"dflimg"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 
+	"dflimg"
 	dhttp "dflimg/cmd/dflimg/http"
 
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+func setup() (rootURL, authToken string) {
+	rootURL = viper.Get("ROOT_URL").(string)
+	authToken = viper.Get("AUTH_TOKEN").(string)
+
+	return
+}
 
 var UploadSignedCmd = &cobra.Command{
 	Use:   "signed-upload",
@@ -23,36 +30,39 @@ var UploadSignedCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		startTime := time.Now()
 
+		rootURL, authToken := setup()
+
 		localFile := args[0]
 
-		rootURL := viper.Get("ROOT_URL").(string)
-		authToken := viper.Get("AUTH_TOKEN").(string)
-
-		body, err := sendFileAWS(rootURL, authToken, localFile)
+		file, err := ioutil.ReadFile(localFile)
 		if err != nil {
 			return err
 		}
 
-		err = clipboard.WriteAll(body.URL)
+		filePrepStart := time.Now()
+		resource, err := prepareUpload(rootURL, authToken, file)
 		if err != nil {
-			fmt.Println("Could not copy to clipboard. Please copy the URL manually")
+			return err
+		}
+		fmt.Printf("File prepared: %s (%s)\n", resource.URL, time.Now().Sub(filePrepStart))
+
+		err = clipboard.WriteAll(resource.URL)
+		if err != nil {
+			fmt.Printf("Could not copy to clipboard. Please copy the URL manually")
 		}
 
-		duration := time.Now().Sub(startTime)
+		err = sendFileAWS(resource.S3Link, file)
+		if err != nil {
+			return err
+		}
 
-		fmt.Printf("Done in %s: %s\n", duration, body.URL)
+		fmt.Printf("Done in %s\n", time.Now().Sub(startTime))
 
 		return nil
 	},
 }
 
-// SendFileAWS uploads the file to AWS
-func sendFileAWS(rootURL, authToken, filename string) (*dflimg.CreateSignedURLResponse, error) {
-	file, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
+func prepareUpload(rootURL, authToken string, file []byte) (res *dflimg.CreateSignedURLResponse, err error) {
 	contentType := http.DetectContentType(file)
 
 	reqBody := &dflimg.CreateSignedURLRequest{
@@ -61,21 +71,26 @@ func sendFileAWS(rootURL, authToken, filename string) (*dflimg.CreateSignedURLRe
 
 	c := dhttp.New(rootURL, authToken)
 
-	res := &dflimg.CreateSignedURLResponse{}
-	err = c.JSONRequest("POST", "created_signed_url", reqBody, res)
+	err = c.JSONRequest("POST", "created_signed_url", reqBody, &res)
+
+	return
+}
+
+// SendFileAWS uploads the file to AWS
+func sendFileAWS(signedURL string, file []byte) error {
+	contentType := http.DetectContentType(file)
+
+	req, err := http.NewRequest("PUT", signedURL, bytes.NewReader(file))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	req, err := http.NewRequest("PUT", res.S3Link, bytes.NewReader(file))
-	if err != nil {
-		return nil, err
-	}
+	req.Header.Set("Content-Type", contentType)
 
 	_, err = http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return res, nil
+	return err
 }
