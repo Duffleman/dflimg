@@ -35,6 +35,6 @@ var ScreenshotCmd = &cobra.Command{
 			return nil
 		}
 
-		return UploadCmd.RunE(cmd, []string{tmpDir})
+		return UploadSignedCmd.RunE(cmd, []string{tmpDir})
 	},
 }

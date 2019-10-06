@@ -64,7 +64,7 @@ var UploadSignedCmd = &cobra.Command{
 	},
 }
 
-func prepareUpload(rootURL, authToken string, file []byte) (res *dflimg.CreateSignedURLResponse, err error) {
+func prepareUpload(rootURL, authToken string, file []byte) (*dflimg.CreateSignedURLResponse, error) {
 	contentType := http.DetectContentType(file)
 
 	reqBody := &dflimg.CreateSignedURLRequest{
@@ -73,9 +73,10 @@ func prepareUpload(rootURL, authToken string, file []byte) (res *dflimg.CreateSi
 
 	c := dhttp.New(rootURL, authToken)
 
-	err = c.JSONRequest("POST", "create_signed_url", reqBody, &res)
+	res := &dflimg.CreateSignedURLResponse{}
+	err := c.JSONRequest("POST", "create_signed_url", reqBody, &res)
 
-	return
+	return res, err
 }
 
 // SendFileAWS uploads the file to AWS
