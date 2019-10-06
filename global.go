@@ -89,3 +89,17 @@ type CreateResourceRequest struct {
 	Shortcuts []string     `json:"shortcuts"`
 	NSFW      bool         `json:"nsfw"`
 }
+
+type CreateSignedURLRequest struct {
+	ContentType string   `json:"content_type"`
+	Shortcuts   []string `json:"shortcuts"`
+	NSFW        bool     `json:"nsfw"`
+}
+
+type CreateSignedURLResponse struct {
+	ResourceID string `json:"resource_id"`
+	Type       string `json:"type"`
+	Hash       string `json:"hash"`
+	URL        string `json:"url"`
+	S3Link     string `json:"s3link"`
+}

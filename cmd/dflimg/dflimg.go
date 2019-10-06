@@ -19,6 +19,7 @@ func main() {
 
 	// Register commands
 	rootCmd.AddCommand(cli.UploadCmd)
+	rootCmd.AddCommand(cli.UploadSignedCmd)
 	rootCmd.AddCommand(cli.ShortenURLCmd)
 	rootCmd.AddCommand(cli.TagResourceCmd)
 	rootCmd.AddCommand(cli.CopyURLCmd)

@@ -26,13 +26,32 @@ func New(rootURL, authToken string) *Client {
 	}
 }
 
+func (c *Client) JSONRequest(method, url string, body, response interface{}) error {
+	jsonRaw, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	request, err := http.NewRequest(method, fmt.Sprintf("%s/%s", c.RootURL, url), bytes.NewBuffer(jsonRaw))
+	if err != nil {
+		return err
+	}
+
+	return c.doRequest(request, response)
+}
+
 func (c *Client) Request(method, url string, body *bytes.Buffer, formType string, response interface{}) error {
-	request, err := http.NewRequest("POST", fmt.Sprintf("%s/%s", c.RootURL, url), body)
+	request, err := http.NewRequest(method, fmt.Sprintf("%s/%s", c.RootURL, url), body)
 	if err != nil {
 		return err
 	}
 
 	request.Header.Add("Content-Type", formType)
+
+	return c.doRequest(request, response)
+}
+
+func (c *Client) doRequest(request *http.Request, response interface{}) error {
 	request.Header.Add("Authorization", c.authToken)
 
 	res, err := c.http.Do(request)
