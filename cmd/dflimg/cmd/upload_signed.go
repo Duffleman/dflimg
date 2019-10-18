@@ -23,10 +23,11 @@ func setup() (rootURL, authToken string) {
 }
 
 var UploadSignedCmd = &cobra.Command{
-	Use:   "signed-upload",
-	Short: "Upload a file to a signed URL",
-	Long:  "Upload a file from your local machine to AWS",
-	Args:  cobra.ExactArgs(1),
+	Use:     "signed-upload",
+	Aliases: []string{"us"},
+	Short:   "Upload a file to a signed URL",
+	Long:    "Upload a file from your local machine to AWS",
+	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		startTime := time.Now()
 

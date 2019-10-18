@@ -12,6 +12,10 @@ import (
 func (db *DB) NewURL(ctx context.Context, id, url, owner string, shortcuts []string, nsfw bool) (*dflimg.Resource, error) {
 	b := NewQueryBuilder()
 
+	if len(shortcuts) < 1 {
+		shortcuts = nil
+	}
+
 	query, values, err := b.
 		Insert("resources").
 		Columns("id, type, owner, link, shortcuts, nsfw").
