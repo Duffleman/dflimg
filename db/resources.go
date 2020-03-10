@@ -96,22 +96,22 @@ func (db *DB) FindResourceByShortcut(ctx context.Context, shortcut string) (*dfl
 }
 
 func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) (*dflimg.Resource, error) {
+	row := db.pg.QueryRow(ctx, query, values...)
+
 	res := &dflimg.Resource{}
 
-	err := db.pg.
-		QueryRow(ctx, query, values...).
-		Scan(
-			&res.ID,
-			&res.Type,
-			&res.Serial,
-			&res.Owner,
-			&res.Link,
-			&res.NSFW,
-			&res.MimeType,
-			&res.Shortcuts,
-			&res.CreatedAt,
-			&res.DeletedAt,
-		)
+	err := row.Scan(
+		&res.ID,
+		&res.Type,
+		&res.Serial,
+		&res.Owner,
+		&res.Link,
+		&res.NSFW,
+		&res.MimeType,
+		&res.Shortcuts,
+		&res.CreatedAt,
+		&res.DeletedAt,
+	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, dflerr.New(dflerr.NotFound, nil)
