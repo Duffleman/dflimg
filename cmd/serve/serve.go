@@ -1,7 +1,7 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"net/http"
 	"time"
 
@@ -16,7 +16,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-redis/redis"
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v4"
 	"github.com/sirupsen/logrus"
 	hashids "github.com/speps/go-hashids"
 )
@@ -36,11 +36,10 @@ func main() {
 	}
 
 	// database (postgres)
-	pgdb, err := sql.Open("postgres", dflimg.GetEnv("pg_connection_string"))
+	pgdb, err := pgx.Connect(context.Background(), dflimg.GetEnv("pg_connection_string"))
 	if err != nil {
 		logger.Fatal(err)
 	}
-	defer pgdb.Close()
 
 	db := dfldb.New(pgdb)
 

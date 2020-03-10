@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -11,7 +10,7 @@ import (
 	"dflimg/dflerr"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/lib/pq"
+	"github.com/jackc/pgx"
 )
 
 // FindShortcutConflicts returns error if a shortcut is already taken
@@ -25,16 +24,16 @@ func (db *DB) FindShortcutConflicts(ctx context.Context, shortcuts []string) err
 	query, values, err := b.
 		Select("id").
 		From("resources").
-		Where("shortcuts @> $1", pq.Array(shortcuts)).
+		Where("shortcuts @> $1", shortcuts).
 		Limit(1).
 		ToSql()
 
-	row := db.pg.QueryRowContext(ctx, query, values...)
+	row := db.pg.QueryRow(ctx, query, values...)
 
 	var id string
 	err = row.Scan(&id)
 
-	if err == sql.ErrNoRows {
+	if err == pgx.ErrNoRows {
 		return nil
 	}
 
@@ -97,7 +96,7 @@ func (db *DB) FindResourceByShortcut(ctx context.Context, shortcut string) (*dfl
 }
 
 func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) (*dflimg.Resource, error) {
-	row := db.pg.QueryRowContext(ctx, query, values...)
+	row := db.pg.QueryRow(ctx, query, values...)
 
 	res := &dflimg.Resource{}
 
@@ -109,12 +108,12 @@ func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) 
 		&res.Link,
 		&res.NSFW,
 		&res.MimeType,
-		pq.Array(&res.Shortcuts),
+		&res.Shortcuts,
 		&res.CreatedAt,
 		&res.DeletedAt,
 	)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == pgx.ErrNoRows {
 			return nil, dflerr.New(dflerr.NotFound, nil)
 		}
 		return nil, err
@@ -136,7 +135,7 @@ func (db *DB) SetNSFW(ctx context.Context, resourceID string, state bool) error 
 		return err
 	}
 
-	_, err = db.pg.ExecContext(ctx, query, values...)
+	_, err = db.pg.Exec(ctx, query, values...)
 	return err
 }
 
@@ -159,7 +158,7 @@ func (db *DB) TagResource(ctx context.Context, resourceID string, tags []*dflimg
 		return err
 	}
 
-	_, err = db.pg.ExecContext(ctx, query, values...)
+	_, err = db.pg.Exec(ctx, query, values...)
 	if err != nil {
 		return err
 	}
@@ -180,6 +179,6 @@ func (db *DB) DeleteResource(ctx context.Context, resourceID string) error {
 		return err
 	}
 
-	_, err = db.pg.ExecContext(ctx, query, values...)
+	_, err = db.pg.Exec(ctx, query, values...)
 	return err
 }
