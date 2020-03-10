@@ -80,7 +80,7 @@ func (db *DB) GetLabelsByShortcut(ctx context.Context, shortcut string) ([]*dfli
 }
 
 func (db *DB) queryLabels(ctx context.Context, query string, values []interface{}) ([]*dflimg.Label, error) {
-	rows, err := db.pg.QueryContext(ctx, query, values...)
+	rows, err := db.pg.Query(ctx, query, values...)
 	if err != nil {
 		return nil, err
 	}

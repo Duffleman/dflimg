@@ -1,18 +1,17 @@
 package db
 
 import (
-	"database/sql"
-
 	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 // DB is a wrapper around the PG wrapper for easy function calls
 type DB struct {
-	pg *sql.DB
+	pg *pgxpool.Pool
 }
 
 // New creates a new instance of a PG connection
-func New(pg *sql.DB) *DB {
+func New(pg *pgxpool.Pool) *DB {
 	return &DB{
 		pg: pg,
 	}
