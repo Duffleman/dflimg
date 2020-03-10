@@ -10,7 +10,7 @@ import (
 	"dflimg/dflerr"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v4"
 )
 
 // FindShortcutConflicts returns error if a shortcut is already taken
@@ -33,7 +33,7 @@ func (db *DB) FindShortcutConflicts(ctx context.Context, shortcuts []string) err
 	var id string
 	err = row.Scan(&id)
 
-	if err.Error() == pgx.ErrNoRows.Error() {
+	if err == pgx.ErrNoRows {
 		return nil
 	}
 
@@ -113,7 +113,7 @@ func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) 
 			&res.DeletedAt,
 		)
 	if err != nil {
-		if err.Error() == pgx.ErrNoRows.Error() {
+		if err == pgx.ErrNoRows {
 			return nil, dflerr.New(dflerr.NotFound, nil)
 		}
 		return nil, err
