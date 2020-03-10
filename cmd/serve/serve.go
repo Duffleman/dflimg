@@ -16,7 +16,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-redis/redis"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/sirupsen/logrus"
 	hashids "github.com/speps/go-hashids"
 )
@@ -36,7 +36,12 @@ func main() {
 	}
 
 	// database (postgres)
-	pgdb, err := pgx.Connect(context.Background(), dflimg.GetEnv("pg_connection_string"))
+	poolConfig, err := pgxpool.ParseConfig(dflimg.GetEnv("pg_connection_string"))
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	pgdb, err := pgxpool.ConnectConfig(context.Background(), poolConfig)
 	if err != nil {
 		logger.Fatal(err)
 	}
