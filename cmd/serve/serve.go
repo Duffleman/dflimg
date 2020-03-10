@@ -41,6 +41,8 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	poolConfig.ConnConfig.PreferSimpleProtocol = true
+
 	pgdb, err := pgxpool.ConnectConfig(context.Background(), poolConfig)
 	if err != nil {
 		logger.Fatal(err)
