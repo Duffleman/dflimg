@@ -28,10 +28,15 @@ func (db *DB) FindShortcutConflicts(ctx context.Context, shortcuts []string) err
 		Limit(1).
 		ToSql()
 
-	row := db.pg.QueryRow(ctx, query, values...)
+	conn, err := db.pg.Acquire(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
 
 	var id string
-	err = row.Scan(&id)
+
+	err = conn.QueryRow(ctx, query, values...).Scan(&id)
 
 	if err == pgx.ErrNoRows {
 		return nil
@@ -96,11 +101,15 @@ func (db *DB) FindResourceByShortcut(ctx context.Context, shortcut string) (*dfl
 }
 
 func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) (*dflimg.Resource, error) {
-	row := db.pg.QueryRow(ctx, query, values...)
-
 	res := &dflimg.Resource{}
 
-	err := row.Scan(
+	conn, err := db.pg.Acquire(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	err = conn.QueryRow(ctx, query, values...).Scan(
 		&res.ID,
 		&res.Type,
 		&res.Serial,
@@ -135,7 +144,13 @@ func (db *DB) SetNSFW(ctx context.Context, resourceID string, state bool) error 
 		return err
 	}
 
-	_, err = db.pg.Exec(ctx, query, values...)
+	conn, err := db.pg.Acquire(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(ctx, query, values...)
 	return err
 }
 
@@ -158,7 +173,13 @@ func (db *DB) TagResource(ctx context.Context, resourceID string, tags []*dflimg
 		return err
 	}
 
-	_, err = db.pg.Exec(ctx, query, values...)
+	conn, err := db.pg.Acquire(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(ctx, query, values...)
 	if err != nil {
 		return err
 	}
@@ -179,6 +200,12 @@ func (db *DB) DeleteResource(ctx context.Context, resourceID string) error {
 		return err
 	}
 
-	_, err = db.pg.Exec(ctx, query, values...)
+	conn, err := db.pg.Acquire(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(ctx, query, values...)
 	return err
 }
