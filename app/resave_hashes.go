@@ -7,13 +7,18 @@ import (
 	"dflimg"
 )
 
+type errOnce struct {
+	sync.Once
+	err error
+}
+
 // ResaveHashes finds all resources without a saved hash and saves it to the DB
 func (a *App) ResaveHashes(ctx context.Context) error {
 	resources, err := a.db.ListResourcesWithoutHash(ctx)
 	if err != nil {
 		return err
 	}
-	errCh := make(chan error, 1)
+	errOne := &errOnce{}
 	c := make(chan *dflimg.ShortFormResource)
 	wg := &sync.WaitGroup{}
 
@@ -22,6 +27,10 @@ func (a *App) ResaveHashes(ctx context.Context) error {
 	// empty immediately had it happened after the workers
 	go func() {
 		for _, r := range resources {
+			if errOne.err != nil {
+				break
+			}
+
 			c <- r
 		}
 		close(c)
@@ -29,20 +38,15 @@ func (a *App) ResaveHashes(ctx context.Context) error {
 
 	for i := 0; i < 3; i++ {
 		wg.Add(1)
-		go a.doDaWork(ctx, wg, c, errCh)
-	}
-
-	if len(errCh) > 0 {
-		err := <-errCh
-		return err
+		go a.doDaWork(ctx, wg, c, errOne)
 	}
 
 	wg.Wait()
 
-	return nil
+	return errOne.err
 }
 
-func (a *App) doDaWork(ctx context.Context, wg *sync.WaitGroup, ch chan *dflimg.ShortFormResource, errCh chan error) {
+func (a *App) doDaWork(ctx context.Context, wg *sync.WaitGroup, ch chan *dflimg.ShortFormResource, errOne *errOnce) {
 	defer wg.Done()
 
 	for {
@@ -57,13 +61,17 @@ func (a *App) doDaWork(ctx context.Context, wg *sync.WaitGroup, ch chan *dflimg.
 			// if SaveHash returns an error, whack it on the channel
 			err := a.db.SaveHash(ctx, r.Serial, hash)
 			if err != nil {
-				errCh <- err
+				errOne.Do(func() {
+					errOne.err = err
+				})
 				return
 			}
 
 		case <-ctx.Done():
 			// ctx is cancelled, throw the error on the channel
-			errCh <- ctx.Err()
+			errOne.Do(func() {
+				errOne.err = ctx.Err()
+			})
 			return
 		}
 	}
