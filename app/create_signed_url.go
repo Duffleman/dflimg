@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"dflimg"
+	"dflimg/dflerr"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -18,6 +19,11 @@ import (
 func (a *App) CreateSignedURL(ctx context.Context, username string, req *dflimg.CreateSignedURLRequest) (*dflimg.CreateSignedURLResponse, error) {
 	fileID := ksuid.Generate("file").String()
 	fileKey := fmt.Sprintf("%s/%s", dflimg.S3RootKey, fileID)
+
+	err := a.db.FindShortcutConflicts(ctx, req.Shortcuts)
+	if err != nil {
+		return nil, dflerr.New("shortcut_conflict", dflerr.M{"shortcuts": req.Shortcuts}, dflerr.Parse(err))
+	}
 
 	fileRes, err := a.db.NewPendingFile(ctx, fileID, fileKey, req.ContentType, username, req.Shortcuts, req.NSFW)
 	if err != nil {
