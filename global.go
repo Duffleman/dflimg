@@ -47,6 +47,11 @@ type Resource struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
+type ShortFormResource struct {
+	ID     string
+	Serial int
+}
+
 type Label struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`

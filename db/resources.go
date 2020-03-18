@@ -231,3 +231,41 @@ func (db *DB) SaveHash(ctx context.Context, serial int, hash string) error {
 	_, err = conn.Exec(ctx, query, values...)
 	return err
 }
+
+func (db *DB) ListResourcesWithoutHash(ctx context.Context) ([]*dflimg.ShortFormResource, error) {
+	b := NewQueryBuilder()
+
+	query, values, err := b.
+		Select("id, serial").
+		From("resources").
+		Where(sq.Eq{
+			"hash": nil,
+		}).
+		ToSql()
+
+	conn, err := db.pg.Acquire(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	rows, err := conn.Query(ctx, query, values...)
+	if err != nil {
+		return nil, err
+	}
+
+	resources := []*dflimg.ShortFormResource{}
+
+	for rows.Next() {
+		o := &dflimg.ShortFormResource{}
+
+		err := rows.Scan(&o.ID, &o.Serial)
+		if err != nil {
+			return nil, err
+		}
+
+		resources = append(resources, o)
+	}
+
+	return resources, nil
+}

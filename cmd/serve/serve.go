@@ -98,6 +98,7 @@ func main() {
 	rpc.Get("/list_labels", rpc.ListLabels)
 	rpc.Post("/tag_resource", rpc.TagResource)
 	rpc.Post("/delete_resource", rpc.DeleteResource)
+	rpc.Post("/resave_hashes", rpc.ResaveHashes)
 	rpc.Get("/{query}", rpc.GetResource)
 
 	// serve
