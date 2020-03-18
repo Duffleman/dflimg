@@ -36,6 +36,7 @@ type Resource struct {
 	ID        string     `json:"id"`
 	Type      string     `json:"type"`
 	Serial    int        `json:"serial"`
+	Hash      string     `json:"hash"`
 	Owner     string     `json:"owner"`
 	Link      string     `json:"link"`
 	NSFW      bool       `json:"nsfw"`

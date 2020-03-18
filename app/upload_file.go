@@ -59,6 +59,9 @@ func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateResourceRequest)
 	hash := a.makeHash(fileRes.Serial)
 	fullURL := fmt.Sprintf("%s/%s", rootURL, hash)
 
+	gctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	go a.saveHash(gctx, cancel, fileRes.Serial, hash)
+
 	return &dflimg.CreateResourceResponse{
 		ResourceID: fileRes.ID,
 		Type:       fileRes.Type,

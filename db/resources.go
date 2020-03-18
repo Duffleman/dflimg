@@ -209,3 +209,25 @@ func (db *DB) DeleteResource(ctx context.Context, resourceID string) error {
 	_, err = conn.Exec(ctx, query, values...)
 	return err
 }
+
+func (db *DB) SaveHash(ctx context.Context, serial int, hash string) error {
+	b := NewQueryBuilder()
+
+	query, values, err := b.
+		Update("resources").
+		Set("hash", hash).
+		Where(sq.Eq{"serial": serial}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	conn, err := db.pg.Acquire(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(ctx, query, values...)
+	return err
+}

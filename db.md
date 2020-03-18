@@ -6,14 +6,15 @@ Uses a postgres database, configurable in `cmd/main.go`
 CREATE TABLE resources (
     id text PRIMARY KEY,
     serial SERIAL UNIQUE,
+    hash text,
+    type text NOT NULL,
     owner text NOT NULL,
     link text NOT NULL,
     mime_type text,
-    created_at timestamp with time zone NOT NULL DEFAULT now(),
     shortcuts text[],
     nsfw boolean NOT NULL DEFAULT false,
-    type text NOT NULL,
-    deleted_at timestamp with time zone,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    deleted_at timestamp with time zone
 );
 
 CREATE TABLE labels (

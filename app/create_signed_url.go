@@ -39,6 +39,9 @@ func (a *App) CreateSignedURL(ctx context.Context, username string, req *dflimg.
 	hash := a.makeHash(fileRes.Serial)
 	fullURL := fmt.Sprintf("%s/%s", rootURL, hash)
 
+	gctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	go a.saveHash(gctx, cancel, fileRes.Serial, hash)
+
 	return &dflimg.CreateSignedURLResponse{
 		ResourceID: fileRes.ID,
 		Type:       fileRes.Type,
@@ -46,4 +49,10 @@ func (a *App) CreateSignedURL(ctx context.Context, username string, req *dflimg.
 		URL:        fullURL,
 		S3Link:     url,
 	}, nil
+}
+
+func (a *App) saveHash(ctx context.Context, c context.CancelFunc, serial int, hash string) error {
+	defer c()
+
+	return a.db.SaveHash(ctx, serial, hash)
 }
