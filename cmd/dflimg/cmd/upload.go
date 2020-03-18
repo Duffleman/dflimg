@@ -20,11 +20,10 @@ import (
 )
 
 var UploadCmd = &cobra.Command{
-	Use:     "upload",
-	Aliases: []string{"u"},
-	Short:   "Upload a file",
-	Long:    "Upload a file from your local machine to a dflimg server",
-	Args:    cobra.ExactArgs(1),
+	Use:   "upload",
+	Short: "Upload a file",
+	Long:  "Upload a file from your local machine to a dflimg server",
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		startTime := time.Now()
 
