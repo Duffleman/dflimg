@@ -18,7 +18,6 @@ func main() {
 	viper.AutomaticEnv()
 
 	// Register commands
-	rootCmd.AddCommand(cli.UploadCmd)
 	rootCmd.AddCommand(cli.UploadSignedCmd)
 	rootCmd.AddCommand(cli.ShortenURLCmd)
 	rootCmd.AddCommand(cli.CopyURLCmd)
@@ -26,8 +25,8 @@ func main() {
 	rootCmd.AddCommand(cli.DeleteResourceCmd)
 
 	// handle command argumetns
-	cli.UploadCmd.Flags().StringP("shortcuts", "s", "", "A CSV of shortcuts to apply to the uploaded file")
-	cli.UploadCmd.Flags().BoolP("nsfw", "n", false, "Is the file NSFW?")
+	cli.UploadSignedCmd.Flags().StringP("shortcuts", "s", "", "A CSV of shortcuts to apply to the uploaded file")
+	cli.UploadSignedCmd.Flags().BoolP("nsfw", "n", false, "Is the file NSFW?")
 
 	cli.ShortenURLCmd.Flags().StringP("shortcuts", "s", "", "A CSV of shortcuts to apply to the shortened URL")
 	cli.ShortenURLCmd.Flags().BoolP("nsfw", "n", false, "Is the link NSFW?")
