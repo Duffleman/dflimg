@@ -63,15 +63,15 @@ func (db *DB) FindResource(ctx context.Context, id string) (*dflimg.Resource, er
 	return db.queryOne(ctx, query, values)
 }
 
-// FindResourceBySerial retrieves a resource from the database by it's serial allocation
-func (db *DB) FindResourceBySerial(ctx context.Context, serial int) (*dflimg.Resource, error) {
+// FindResourceByHash retrieves a resource from the database by it's hash
+func (db *DB) FindResourceByHash(ctx context.Context, hash string) (*dflimg.Resource, error) {
 	b := NewQueryBuilder()
 
 	query, values, err := b.
 		Select("id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at, deleted_at").
 		From("resources").
 		Where(sq.Eq{
-			"serial": serial,
+			"hash": hash,
 		}).
 		ToSql()
 	if err != nil {

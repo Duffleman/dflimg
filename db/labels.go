@@ -39,8 +39,8 @@ func (db *DB) GetLabelsByName(ctx context.Context, names []string) ([]*dflimg.La
 	return db.queryLabels(ctx, query, values)
 }
 
-// GetLabelsBySerial returns labels associated with a resource
-func (db *DB) GetLabelsBySerial(ctx context.Context, serial int) ([]*dflimg.Label, error) {
+// GetLabelsByHash returns labels associated with a resource
+func (db *DB) GetLabelsByHash(ctx context.Context, hash string) ([]*dflimg.Label, error) {
 	b := NewQueryBuilder()
 
 	query, values, err := b.
@@ -49,7 +49,7 @@ func (db *DB) GetLabelsBySerial(ctx context.Context, serial int) ([]*dflimg.Labe
 		Join("labels_resources lr ON lr.resource_id = r.id").
 		Join("labels l ON l.id = lr.label_id").
 		Where(sq.Eq{
-			"r.serial": serial,
+			"r.hash": hash,
 		}).
 		ToSql()
 	if err != nil {

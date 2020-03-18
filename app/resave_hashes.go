@@ -7,6 +7,7 @@ import (
 	"dflimg"
 )
 
+// ResaveHashes finds all resources without a saved hash and saves it to the DB
 func (a *App) ResaveHashes(ctx context.Context) error {
 	resources, err := a.db.ListResourcesWithoutHash(ctx)
 	if err != nil {
