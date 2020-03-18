@@ -2,10 +2,11 @@ package rpc
 
 import (
 	"bytes"
-	"dflimg/dflerr"
 	"errors"
 	"html/template"
 	"net/http"
+
+	"dflimg/dflerr"
 
 	"github.com/go-chi/chi"
 )
@@ -23,7 +24,7 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if resource.DeletedAt != nil {
-		r.handleError(w, req, dflerr.New("not_found", nil))
+		r.handleError(w, req, dflerr.New(dflerr.NotFound, nil))
 		return
 	}
 
@@ -49,13 +50,26 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 
 	switch resource.Type {
 	case "file":
-		w.Header().Set("Content-Type", *resource.MimeType)
-
 		b, modtime, err := r.app.GetS3File(ctx, resource)
 		if err != nil {
+			if err == dflerr.ErrNotFound {
+				tpl, err := template.ParseFiles("resources/not_found.html")
+				if err != nil {
+					r.handleError(w, req, err)
+					return
+				}
+				err = tpl.Execute(w, nil)
+				if err != nil {
+					r.handleError(w, req, err)
+				}
+				return
+			}
+
 			r.handleError(w, req, err)
 			return
 		}
+
+		w.Header().Set("Content-Type", *resource.MimeType)
 
 		reader := bytes.NewReader(b)
 		http.ServeContent(w, req, query, *modtime, reader)

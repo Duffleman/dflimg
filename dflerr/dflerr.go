@@ -1,10 +1,16 @@
 package dflerr
 
+import "errors"
+
 const (
 	RequestFailure = "request_failure"
 	AccessDenied   = "access_denied"
 	NotFound       = "not_found"
 	Unknown        = "unknown"
+)
+
+var (
+	ErrNotFound = errors.New(NotFound)
 )
 
 type M map[string]interface{}

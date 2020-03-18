@@ -5,9 +5,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"dflimg"
+	"dflimg/dflerr"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -26,6 +28,10 @@ func (a *App) GetS3File(ctx context.Context, resource *dflimg.Resource) ([]byte,
 		Key:    aws.String(resource.Link),
 	})
 	if err != nil {
+		if strings.Contains(err.Error(), "NoSuchKey") {
+			return nil, nil, dflerr.ErrNotFound
+		}
+
 		return nil, nil, err
 	}
 
