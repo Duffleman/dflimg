@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"dflimg"
@@ -12,6 +13,7 @@ import (
 	"github.com/atotto/clipboard"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
@@ -34,6 +36,8 @@ var UploadSignedCmd = &cobra.Command{
 		rootURL, authToken := setup()
 
 		localFile := args[0]
+		shortcuts := cmd.Flag("shortcuts")
+		nsfw := cmd.Flag("nsfw")
 
 		file, err := ioutil.ReadFile(localFile)
 		if err != nil {
@@ -41,7 +45,7 @@ var UploadSignedCmd = &cobra.Command{
 		}
 
 		filePrepStart := time.Now()
-		resource, err := prepareUpload(rootURL, authToken, file)
+		resource, err := prepareUpload(rootURL, authToken, file, shortcuts, nsfw)
 		if err != nil {
 			return err
 		}
@@ -65,11 +69,26 @@ var UploadSignedCmd = &cobra.Command{
 	},
 }
 
-func prepareUpload(rootURL, authToken string, file []byte) (*dflimg.CreateSignedURLResponse, error) {
+func prepareUpload(rootURL, authToken string, file []byte, shortcuts, nsfw *pflag.Flag) (*dflimg.CreateSignedURLResponse, error) {
 	contentType := http.DetectContentType(file)
 
 	reqBody := &dflimg.CreateSignedURLRequest{
 		ContentType: contentType,
+	}
+
+	if shortcuts != nil {
+		shortcutsStr := shortcuts.Value.String()
+		if shortcutsStr != "" {
+			reqBody.Shortcuts = strings.Split(shortcutsStr, ",")
+		}
+	}
+
+	if nsfw != nil {
+		nsfwStr := nsfw.Value.String()
+
+		if nsfwStr == "true" {
+			reqBody.NSFW = true
+		}
 	}
 
 	c := dhttp.New(rootURL, authToken)
