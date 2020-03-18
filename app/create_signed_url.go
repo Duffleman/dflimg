@@ -48,6 +48,10 @@ func (a *App) CreateSignedURL(ctx context.Context, username string, req *dflimg.
 	gctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	go a.saveHash(gctx, cancel, fileRes.Serial, hash)
 
+	if len(req.Shortcuts) == 1 {
+		fullURL = fmt.Sprintf("%s/:%s", rootURL, req.Shortcuts[0])
+	}
+
 	return &dflimg.CreateSignedURLResponse{
 		ResourceID: fileRes.ID,
 		Type:       fileRes.Type,
