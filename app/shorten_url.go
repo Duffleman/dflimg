@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"dflimg"
 	"dflimg/dflerr"
@@ -30,6 +31,9 @@ func (a *App) ShortenURL(ctx context.Context, req *dflimg.CreateResourceRequest)
 	rootURL := dflimg.GetEnv("root_url")
 	hash := a.makeHash(urlRes.Serial)
 	fullURL := fmt.Sprintf("%s/%s", rootURL, hash)
+
+	gctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	go a.saveHash(gctx, cancel, urlRes.Serial, hash)
 
 	return &dflimg.CreateResourceResponse{
 		ResourceID: urlRes.ID,
