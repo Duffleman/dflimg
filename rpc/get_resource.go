@@ -4,10 +4,19 @@ import (
 	"bytes"
 	"errors"
 	"html/template"
+	"io"
+	"io/ioutil"
 	"net/http"
+	"strings"
+	"time"
 
+	"dflimg"
 	"dflimg/dflerr"
 
+	"github.com/alecthomas/chroma"
+	"github.com/alecthomas/chroma/formatters"
+	"github.com/alecthomas/chroma/lexers"
+	"github.com/alecthomas/chroma/styles"
 	"github.com/go-chi/chi"
 )
 
@@ -69,10 +78,48 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		w.Header().Set("Content-Type", *resource.MimeType)
-
 		reader := bytes.NewReader(b)
-		http.ServeContent(w, req, query, *modtime, reader)
+
+		if strings.Contains(*resource.MimeType, "text/plain") {
+			lexer := lexers.Analyse(string(b))
+			if lexer == nil {
+				lexer = lexers.Fallback
+			}
+
+			lexer = chroma.Coalesce(lexer)
+
+			formatter := formatters.Get("html")
+			if formatter == nil {
+				formatter = formatters.Fallback
+			}
+
+			style := styles.Get("vs")
+			if style == nil {
+				style = styles.Fallback
+			}
+
+			contents, err := ioutil.ReadAll(reader)
+			if err != nil {
+				fallback(resource, w, req, query, *modtime, reader)
+				return
+			}
+
+			iterator, err := lexer.Tokenise(nil, string(contents))
+			if err != nil {
+				fallback(resource, w, req, query, *modtime, reader)
+				return
+			}
+
+			err = formatter.Format(w, style, iterator)
+			if err != nil {
+				fallback(resource, w, req, query, *modtime, reader)
+				return
+			}
+
+			return
+		}
+
+		fallback(resource, w, req, query, *modtime, reader)
 		return
 	case "url":
 		w.Header().Set("Content-Type", "") // Needed for redirect to work
@@ -82,4 +129,12 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 		r.handleError(w, req, errors.New("unknown resource type"))
 		return
 	}
+}
+
+func fallback(resource *dflimg.Resource, w http.ResponseWriter, req *http.Request, query string, modtime time.Time, reader io.ReadSeeker) {
+	w.Header().Set("Content-Type", *resource.MimeType)
+
+	http.ServeContent(w, req, query, modtime, reader)
+
+	return
 }

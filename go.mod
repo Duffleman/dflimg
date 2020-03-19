@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/Masterminds/squirrel v1.1.0
+	github.com/alecthomas/chroma v0.7.1
 	github.com/atotto/clipboard v0.1.2
 	github.com/aws/aws-sdk-go v1.17.14
 	github.com/cuvva/ksuid v0.0.0-20180927155307-ce1cfadb1c4a
