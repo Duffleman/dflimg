@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"time"
@@ -22,19 +22,24 @@ var ScreenshotCmd = &cobra.Command{
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		tmpDir := fmt.Sprintf("/tmp/%s.png", ksuid.Generate("file").String())
-
-		err := exec.CommandContext(ctx, "screencapture", "-i", tmpDir).Run()
+		tmpName := ksuid.Generate("file").String()
+		out, err := ioutil.TempFile("", tmpName)
 		if err != nil {
 			return err
 		}
-		defer os.Remove(tmpDir)
+		defer out.Close()
 
-		_, err = os.Stat(tmpDir)
+		err = exec.CommandContext(ctx, "screencapture", "-i", out.Name()).Run()
+		if err != nil {
+			return err
+		}
+		defer os.Remove(out.Name())
+
+		_, err = os.Stat(out.Name())
 		if os.IsNotExist(err) {
 			return nil
 		}
 
-		return UploadSignedCmd.RunE(cmd, []string{tmpDir})
+		return UploadSignedCmd.RunE(cmd, []string{out.Name()})
 	},
 }

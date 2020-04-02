@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -35,9 +35,8 @@ func downloadFile(urlStr string) (*string, error) {
 	defer fileToCopyRes.Body.Close()
 
 	tmpName := ksuid.Generate("tmpfile").String()
-	tmpPath := fmt.Sprintf("/tmp/%s", tmpName)
 
-	out, err := os.Create(tmpPath)
+	out, err := ioutil.TempFile("", tmpName)
 	if err != nil {
 		return nil, err
 	}
@@ -48,5 +47,7 @@ func downloadFile(urlStr string) (*string, error) {
 		return nil, err
 	}
 
-	return &tmpPath, nil
+	path := out.Name()
+
+	return &path, nil
 }
