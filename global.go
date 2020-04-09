@@ -2,7 +2,6 @@ package dflimg
 
 import (
 	"bytes"
-	"strings"
 	"time"
 )
 
@@ -36,13 +35,12 @@ type Resource struct {
 	ID        string     `json:"id"`
 	Type      string     `json:"type"`
 	Serial    int        `json:"serial"`
-	Hash      string     `json:"hash"`
+	Hash      *string    `json:"hash"`
 	Owner     string     `json:"owner"`
 	Link      string     `json:"link"`
 	NSFW      bool       `json:"nsfw"`
 	MimeType  *string    `json:"mime_type"`
 	Shortcuts []string   `json:"shortcuts"`
-	Labels    []*Label   `json:"labels"`
 	CreatedAt time.Time  `json:"created_at"`
 	DeletedAt *time.Time `json:"deleted_at"`
 }
@@ -52,35 +50,14 @@ type ShortFormResource struct {
 	Serial int
 }
 
-type Label struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type CreateFileRequest struct {
+	File bytes.Buffer `json:"file"`
 }
 
-// StringifyLabels returns the labels for display
-func (r *Resource) StringifyLabels() []string {
-	if len(r.Labels) == 0 {
-		return nil
-	}
-
-	labels := make([]string, len(r.Labels))
-
-	for k, l := range r.Labels {
-		switch l.Name {
-		case "nsfw":
-			fallthrough
-		case "nsfl":
-			labels[k] = strings.ToUpper(l.Name)
-			break
-		default:
-			labels[k] = strings.ToTitle(l.Name)
-		}
-	}
-
-	return labels
+type CreateURLRequest struct {
+	URL string `json:"url"`
 }
 
-// CreateResourceResponse is a response for creating resources
 type CreateResourceResponse struct {
 	ResourceID string `json:"resource_id"`
 	Type       string `json:"type"`
@@ -88,18 +65,8 @@ type CreateResourceResponse struct {
 	URL        string `json:"url"`
 }
 
-type CreateResourceRequest struct {
-	Type      string       `json:"type"`
-	File      bytes.Buffer `json:"file"`
-	URL       string       `json:"url"`
-	Shortcuts []string     `json:"shortcuts"`
-	NSFW      bool         `json:"nsfw"`
-}
-
 type CreateSignedURLRequest struct {
-	ContentType string   `json:"content_type"`
-	Shortcuts   []string `json:"shortcuts"`
-	NSFW        bool     `json:"nsfw"`
+	ContentType string `json:"content_type"`
 }
 
 type CreateSignedURLResponse struct {
@@ -114,8 +81,7 @@ type IdentifyResource struct {
 	Query string `json:"query"`
 }
 
-type TagResourceRequest struct {
+type SetNSFWRequest struct {
 	IdentifyResource
-	Labels []string
-	NSFW   bool
+	NSFW bool `json:"nsfw"`
 }

@@ -2,19 +2,21 @@ package db
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"dflimg"
 )
 
 // NewFile inserts a new file into the database
-func (db *DB) NewFile(ctx context.Context, id, s3, mimetype, owner string, shortcuts []string, nsfw bool) (*dflimg.Resource, error) {
+func (db *DB) NewFile(ctx context.Context, id, s3, owner, mimetype string) (*dflimg.Resource, error) {
 	b := NewQueryBuilder()
 
 	query, values, err := b.
 		Insert("resources").
-		Columns("id, type, owner, link, mime_type, shortcuts, nsfw").
-		Values(id, "file", owner, s3, mimetype, shortcuts, nsfw).
-		Suffix("RETURNING id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at, deleted_at").
+		Columns("id, type, owner, link, mime_type").
+		Values(id, "file", owner, s3, mimetype).
+		Suffix(fmt.Sprintf("RETURNING %s", strings.Join(resourceColumns, ","))).
 		ToSql()
 	if err != nil {
 		return nil, err
@@ -24,14 +26,14 @@ func (db *DB) NewFile(ctx context.Context, id, s3, mimetype, owner string, short
 }
 
 // NewPendingFile inserts a new pending file into the database
-func (db *DB) NewPendingFile(ctx context.Context, id, s3, mimetype, owner string, shortcuts []string, nsfw bool) (*dflimg.Resource, error) {
+func (db *DB) NewPendingFile(ctx context.Context, id, s3, owner, mimetype string) (*dflimg.Resource, error) {
 	b := NewQueryBuilder()
 
 	query, values, err := b.
 		Insert("resources").
-		Columns("id, type, owner, link, mime_type, shortcuts, nsfw").
-		Values(id, "file", owner, s3, mimetype, shortcuts, nsfw).
-		Suffix("RETURNING id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at, deleted_at").
+		Columns("id, type, owner, link, mime_type").
+		Values(id, "file", owner, s3, mimetype).
+		Suffix(fmt.Sprintf("RETURNING %s", strings.Join(resourceColumns, ","))).
 		ToSql()
 	if err != nil {
 		return nil, err

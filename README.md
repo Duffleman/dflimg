@@ -31,7 +31,9 @@ AWS_DEFAULT_REGION=AWSREGION
 
 #### `POST /upload_file`
 
-Takes a file in the form of multipart/form-data, returns  a short URL that links to the file. You can set the "Accept" header to modify the response.
+Legacy, really only here to support programs like ShareX on Windows.
+
+Takes a file in the form of multipart/form-data, returns  a short URL that links to the file. You can set the "Accept" header to modify the response. Defaults to JSON for the response.
 
 ##### Request
 
@@ -54,17 +56,93 @@ If the "Accept" header is set to "text/plain":
 
 `https://dfl.mn/q3A`
 
-#### `POST /tag_resource`
+#### `POST /create_signed_url`
 
-Tags a resource with a label. It requires `tags` which is a CSV set of tags, and `url` which is either a full URL or just the hash of a resource.
+##### Request
 
-See [`POST /upload_file`](https://github.com/Duffleman/dflimg-go#post-upload_file) for the expected response.
+```json
+{
+	"content_type": "image/png"
+}
+```
+
+##### Response
+
+```json
+{
+	"resource_id": "file_aaa000",
+	"type": "file",
+	"hash": "xAx",
+	"url": "https://dfl.mn/xAx",
+	"s3link": "https://s3.amazon.com/eu-west-1/..."
+}
+```
+
+You must then post the content of the file to the S3 link returned to you.
+
+#### `POST /delete_resource`
+
+```json
+{
+	"query": "aVA"
+}
+```
+
+#### `POST /set_nsfw`
+
+##### Request
+
+```json
+{
+	"query": "aAb",
+	"nsfw": true
+}
+```
+
+#### `POST /add_shortcut`
+
+##### Request
+
+```json
+{
+	"query": "aCw",
+	"shortcut": "scott"
+}
+```
+
+#### `POST /remove_shortcut`
+
+##### Request
+
+```json
+{
+	"query": "aCw",
+	"shortcut": "scott"
+}
+```
 
 #### `POST /shorten_url`
 
-Shorten a URL. It requires `url` which is the URL to shorten. You can apply `nsfw` and `shortcuts` here too.
+Shorten a URL. It requires `url` which is the URL to shorten.
 
-See [`POST /upload_file`](https://github.com/Duffleman/dflimg-go#post-upload_file) for the expected response.
+##### Request
+
+```json
+{
+	"url": "https://google.com"
+}
+```
+
+##### Response
+
+```json
+{
+    "resource_id": "url_000000BdAf7MWsYZ6r5wc18cV2sAS",
+    "type": "url",
+    "hash": "aaB",
+    "url": "https://dfl.mn/aaB"
+}
+```
 
 #### `GET /{hash}`
 
@@ -73,21 +151,6 @@ Links to the resource. Serves the content directly!
 #### `GET /:{shortcut}`
 
 Links to the resource through one of it's shortcuts. Serves the content directly!
-
-#### `GET /list_labels`
-
-Returns a list of usable labels
-
-##### Response
-
-```json
-[
-    {
-        "id": "label_000000Bjb0S6DSIaTiW8hSaAo6OOy",
-        "name": "education"
-    }
-]
-```
 
 ## client/cli
 
@@ -129,12 +192,6 @@ Shorten a URL
 `dflimg s {url}`
 
 See other params above.
-
-### Tag a resource
-
-`dflimg t {url} {labels}`
-
-Where labels is a CSV of labels to apply. The labels must exist on the server.
 
 ### Copy a URL
 

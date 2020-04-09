@@ -95,8 +95,6 @@ func main() {
 	rpc.Post("/upload_file", rpc.UploadFile)
 	rpc.Post("/create_signed_url", rpc.CreateSignedURL)
 	rpc.Post("/shorten_url", rpc.ShortenURL)
-	rpc.Get("/list_labels", rpc.ListLabels)
-	rpc.Post("/tag_resource", rpc.TagResource)
 	rpc.Post("/delete_resource", rpc.DeleteResource)
 	rpc.Post("/resave_hashes", rpc.ResaveHashes)
 	rpc.Get("/{query}", rpc.GetResource)

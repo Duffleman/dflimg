@@ -6,24 +6,18 @@ import (
 	"time"
 
 	"dflimg"
-	"dflimg/dflerr"
 	"dflimg/rpc/middleware"
 
 	"github.com/cuvva/ksuid"
 )
 
 // ShortenURL shortens a URL
-func (a *App) ShortenURL(ctx context.Context, req *dflimg.CreateResourceRequest) (*dflimg.CreateResourceResponse, error) {
+func (a *App) ShortenURL(ctx context.Context, url string) (*dflimg.CreateResourceResponse, error) {
 	username := ctx.Value(middleware.UsernameKey).(string)
 	urlID := ksuid.Generate("url").String()
 
-	err := a.db.FindShortcutConflicts(ctx, req.Shortcuts)
-	if err != nil {
-		return nil, dflerr.New("shortcuts already taken", dflerr.M{"shortcuts": req.Shortcuts}, dflerr.Parse(err))
-	}
-
 	// save to DB
-	urlRes, err := a.db.NewURL(ctx, urlID, req.URL, username, req.Shortcuts, req.NSFW)
+	urlRes, err := a.db.NewURL(ctx, urlID, username, url)
 	if err != nil {
 		return nil, err
 	}

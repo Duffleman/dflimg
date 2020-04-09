@@ -28,7 +28,7 @@ func (r *RPC) CreateSignedURL(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res, err := r.app.CreateSignedURL(ctx, username, body)
+	res, err := r.app.CreateSignedURL(ctx, username, body.ContentType)
 	if err != nil {
 		r.handleError(w, req, err)
 		return

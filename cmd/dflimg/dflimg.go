@@ -43,7 +43,7 @@ func main() {
 var rootCmd = &cobra.Command{
 	Use:   "dflimg",
 	Short: "CLI tool to upload images to a dflimg server",
-	Long:  "A CLI tool to manage files being uploaded, labeled, and removed from your chosen dflimg server",
+	Long:  "A CLI tool to manage files and URLs being uploaded and removed from your chosen dflimg server",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"dflimg"
@@ -12,6 +13,9 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4"
 )
+
+// resourceColumns is the set of columns to populate into the struct
+var resourceColumns = []string{"id", "type", "serial", "hash", "owner", "link", "nsfw", "mime_type", "shortcuts", "created_at", "deleted_at"}
 
 // FindShortcutConflicts returns error if a shortcut is already taken
 func (db *DB) FindShortcutConflicts(ctx context.Context, shortcuts []string) error {
@@ -45,30 +49,12 @@ func (db *DB) FindShortcutConflicts(ctx context.Context, shortcuts []string) err
 	return errors.New("shortcut conflict")
 }
 
-// FindResource retrieves a resource from the database by it's ID
-func (db *DB) FindResource(ctx context.Context, id string) (*dflimg.Resource, error) {
-	b := NewQueryBuilder()
-
-	query, values, err := b.
-		Select("id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at, deleted_at").
-		From("resources").
-		Where(sq.Eq{
-			"id": id,
-		}).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	return db.queryOne(ctx, query, values)
-}
-
 // FindResourceByHash retrieves a resource from the database by it's hash
 func (db *DB) FindResourceByHash(ctx context.Context, hash string) (*dflimg.Resource, error) {
 	b := NewQueryBuilder()
 
 	query, values, err := b.
-		Select("id, type, serial, owner, link, nsfw, mime_type, shortcuts, created_at, deleted_at").
+		Select(strings.Join(resourceColumns, ",")).
 		From("resources").
 		Where(sq.Eq{
 			"hash": hash,
@@ -88,9 +74,9 @@ func (db *DB) FindResourceByShortcut(ctx context.Context, shortcut string) (*dfl
 	s := fmt.Sprintf("{%s}", shortcut[1:])
 
 	query, values, err := b.
-		Select("r.id, r.type, r.serial, r.owner, r.link, r.nsfw, r.mime_type, r.shortcuts, r.created_at, r.deleted_at").
-		From("resources r").
-		Where("r.shortcuts @> $1::text[]", s).
+		Select(strings.Join(resourceColumns, ", ")).
+		From("resources").
+		Where("shortcuts @> $1::text[]", s).
 		Limit(1).
 		ToSql()
 	if err != nil {
@@ -113,6 +99,7 @@ func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) 
 		&res.ID,
 		&res.Type,
 		&res.Serial,
+		&res.Hash,
 		&res.Owner,
 		&res.Link,
 		&res.NSFW,
@@ -152,39 +139,6 @@ func (db *DB) SetNSFW(ctx context.Context, resourceID string, state bool) error 
 
 	_, err = conn.Exec(ctx, query, values...)
 	return err
-}
-
-// TagResource tags a resource with a label, it is idempotant
-func (db *DB) TagResource(ctx context.Context, resourceID string, tags []*dflimg.Label) error {
-	b := NewQueryBuilder()
-
-	builder := b.
-		Insert("labels_resources").
-		Columns("label_id, resource_id")
-
-	for _, t := range tags {
-		builder = builder.Values(t.ID, resourceID)
-	}
-
-	builder = builder.Suffix("ON CONFLICT (label_id, resource_id) DO NOTHING")
-
-	query, values, err := builder.ToSql()
-	if err != nil {
-		return err
-	}
-
-	conn, err := db.pg.Acquire(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Release()
-
-	_, err = conn.Exec(ctx, query, values...)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // DeleteResource soft-deletes a resource
