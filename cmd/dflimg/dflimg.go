@@ -22,6 +22,7 @@ func main() {
 	rootCmd.AddCommand(cli.ShortenURLCmd)
 	rootCmd.AddCommand(cli.CopyURLCmd)
 	rootCmd.AddCommand(cli.ScreenshotCmd)
+	rootCmd.AddCommand(cli.SetNSFWCmd)
 	rootCmd.AddCommand(cli.DeleteResourceCmd)
 
 	// handle command argumetns
