@@ -98,6 +98,7 @@ func main() {
 	rpc.Post("/shorten_url", rpc.ShortenURL)
 	rpc.Post("/delete_resource", rpc.DeleteResource)
 	rpc.Post("/resave_hashes", rpc.ResaveHashes)
+	rpc.Post("/set_nsfw", rpc.SetNSFW)
 	rpc.Get("/{query}", rpc.GetResource)
 
 	// serve
