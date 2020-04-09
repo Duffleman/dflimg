@@ -164,6 +164,7 @@ func (db *DB) DeleteResource(ctx context.Context, resourceID string) error {
 	return err
 }
 
+// SaveHash saves the hash of a resource into the DB
 func (db *DB) SaveHash(ctx context.Context, serial int, hash string) error {
 	b := NewQueryBuilder()
 
@@ -186,6 +187,7 @@ func (db *DB) SaveHash(ctx context.Context, serial int, hash string) error {
 	return err
 }
 
+// ListResourcesWithoutHash lists all resources where the hash is not saved
 func (db *DB) ListResourcesWithoutHash(ctx context.Context) ([]*dflimg.ShortFormResource, error) {
 	b := NewQueryBuilder()
 
