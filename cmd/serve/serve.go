@@ -92,6 +92,7 @@ func main() {
 	})
 	rpc.Get("/health", rpc.HealthCheck)
 	rpc.Get("/robots.txt", rpc.Robots)
+	rpc.Post("/view_details", rpc.ViewDetails)
 	rpc.Post("/upload_file", rpc.UploadFile)
 	rpc.Post("/create_signed_url", rpc.CreateSignedURL)
 	rpc.Post("/shorten_url", rpc.ShortenURL)

@@ -34,10 +34,10 @@ const (
 type Resource struct {
 	ID        string     `json:"id"`
 	Type      string     `json:"type"`
-	Serial    int        `json:"serial"`
+	Serial    int        `json:"-"`
 	Hash      *string    `json:"hash"`
 	Owner     string     `json:"owner"`
-	Link      string     `json:"link"`
+	Link      string     `json:"-"`
 	NSFW      bool       `json:"nsfw"`
 	MimeType  *string    `json:"mime_type"`
 	Shortcuts []string   `json:"shortcuts"`

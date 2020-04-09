@@ -45,10 +45,10 @@ curl -X POST -H "Authorization: test" -F file=@duffleman.png https://dfl.mn/uplo
 
 ```json
 {
-    "resource_id": "file_000000BdAf7MWsYZ6r5wc18cV2sAS",
-    "type": "file",
-    "hash": "q3A",
-    "url": "https://dfl.mn/q3A"
+	"resource_id": "file_000000BdAf7MWsYZ6r5wc18cV2sAS",
+	"type": "file",
+	"hash": "q3A",
+	"url": "https://dfl.mn/q3A"
 }
 ```
 
@@ -137,10 +137,38 @@ Shorten a URL. It requires `url` which is the URL to shorten.
 
 ```json
 {
-    "resource_id": "url_000000BdAf7MWsYZ6r5wc18cV2sAS",
-    "type": "url",
-    "hash": "aaB",
-    "url": "https://dfl.mn/aaB"
+	"resource_id": "url_000000BdAf7MWsYZ6r5wc18cV2sAS",
+	"type": "url",
+	"hash": "aaB",
+	"url": "https://dfl.mn/aaB"
+}
+```
+
+#### `POST /view_details`
+
+##### Request
+
+```json
+{
+	"query":  "dZM"
+}
+```
+
+##### Response
+
+```json
+{
+	"id": "file_000000BslGI66pAIjV27Uvh4ofWKG",
+	"type": "file",
+	"hash": "dZM",
+	"owner": "Duffleman",
+	"nsfw": true,
+	"mime_type": "image/png",
+	"shortcuts": [
+		"hello"
+	],
+	"created_at": "2020-04-10T00:35:44.793661+01:00",
+	"deleted_at": null
 }
 ```
 
