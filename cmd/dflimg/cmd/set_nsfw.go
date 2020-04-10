@@ -11,9 +11,10 @@ import (
 )
 
 var SetNSFWCmd = &cobra.Command{
-	Use:   "nsfw",
-	Short: "Toggle the NSFW flag",
-	Args:  cobra.ExactArgs(1),
+	Use:     "nsfw",
+	Aliases: []string{"n"},
+	Short:   "Toggle the NSFW flag",
+	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		startTime := time.Now()
 
