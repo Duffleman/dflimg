@@ -97,28 +97,6 @@ You must then post the content of the file to the S3 link returned to you.
 }
 ```
 
-#### `POST /add_shortcut`
-
-##### Request
-
-```json
-{
-	"query": "aCw",
-	"shortcut": "scott"
-}
-```
-
-#### `POST /remove_shortcut`
-
-##### Request
-
-```json
-{
-	"query": "aCw",
-	"shortcut": "scott"
-}
-```
-
 #### `POST /shorten_url`
 
 Shorten a URL. It requires `url` which is the URL to shorten.
