@@ -85,3 +85,8 @@ type SetNSFWRequest struct {
 	IdentifyResource
 	NSFW bool `json:"nsfw"`
 }
+
+type ChangeShortcutRequest struct {
+	IdentifyResource
+	Shortcut string `json:"shortcut"`
+}

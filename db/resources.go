@@ -14,6 +14,13 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
+type ArrayOperation string
+
+const (
+	ArrayAdd    ArrayOperation = "array_append"
+	ArrayRemove ArrayOperation = "array_remove"
+)
+
 // resourceColumns is the set of columns to populate into the struct
 var resourceColumns = []string{"id", "type", "serial", "hash", "owner", "link", "nsfw", "mime_type", "shortcuts", "created_at", "deleted_at"}
 
@@ -224,4 +231,26 @@ func (db *DB) ListResourcesWithoutHash(ctx context.Context) ([]*dflimg.ShortForm
 	}
 
 	return resources, nil
+}
+
+func (db *DB) ChangeShortcut(ctx context.Context, operation ArrayOperation, resourceID, shortcut string) error {
+	b := NewQueryBuilder()
+
+	query, values, err := b.
+		Update("resources").
+		Set("shortcuts", sq.Expr(fmt.Sprintf("%s(shortcuts, ?)", operation), shortcut)).
+		Where(sq.Eq{"id": resourceID}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	conn, err := db.pg.Acquire(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+
+	_, err = conn.Exec(ctx, query, values...)
+	return err
 }

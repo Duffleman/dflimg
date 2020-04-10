@@ -92,13 +92,17 @@ func main() {
 	})
 	rpc.Get("/health", rpc.HealthCheck)
 	rpc.Get("/robots.txt", rpc.Robots)
-	rpc.Post("/view_details", rpc.ViewDetails)
-	rpc.Post("/upload_file", rpc.UploadFile)
+
+	rpc.Post("/add_shortcut", rpc.AddShortcut)
 	rpc.Post("/create_signed_url", rpc.CreateSignedURL)
-	rpc.Post("/shorten_url", rpc.ShortenURL)
 	rpc.Post("/delete_resource", rpc.DeleteResource)
+	rpc.Post("/remove_shortcut", rpc.RemoveShortcut)
 	rpc.Post("/resave_hashes", rpc.ResaveHashes)
 	rpc.Post("/set_nsfw", rpc.SetNSFW)
+	rpc.Post("/shorten_url", rpc.ShortenURL)
+	rpc.Post("/upload_file", rpc.UploadFile)
+	rpc.Post("/view_details", rpc.ViewDetails)
+
 	rpc.Get("/{query}", rpc.GetResource)
 
 	// serve

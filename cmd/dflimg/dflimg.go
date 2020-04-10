@@ -18,22 +18,14 @@ func main() {
 	viper.AutomaticEnv()
 
 	// Register commands
-	rootCmd.AddCommand(cli.UploadSignedCmd)
-	rootCmd.AddCommand(cli.ShortenURLCmd)
+	rootCmd.AddCommand(cli.AddShortcutCmd)
 	rootCmd.AddCommand(cli.CopyURLCmd)
+	rootCmd.AddCommand(cli.DeleteResourceCmd)
+	rootCmd.AddCommand(cli.RemoveShortcutCmd)
 	rootCmd.AddCommand(cli.ScreenshotCmd)
 	rootCmd.AddCommand(cli.SetNSFWCmd)
-	rootCmd.AddCommand(cli.DeleteResourceCmd)
-
-	// handle command argumetns
-	cli.UploadSignedCmd.Flags().StringP("shortcuts", "s", "", "A CSV of shortcuts to apply to the uploaded file")
-	cli.UploadSignedCmd.Flags().BoolP("nsfw", "n", false, "Is the file NSFW?")
-
-	cli.ShortenURLCmd.Flags().StringP("shortcuts", "s", "", "A CSV of shortcuts to apply to the shortened URL")
-	cli.ShortenURLCmd.Flags().BoolP("nsfw", "n", false, "Is the link NSFW?")
-
-	cli.CopyURLCmd.Flags().StringP("shortcuts", "s", "", "A CSV of shortcuts to apply to the URL/file")
-	cli.CopyURLCmd.Flags().BoolP("nsfw", "n", false, "Is the link NSFW?")
+	rootCmd.AddCommand(cli.ShortenURLCmd)
+	rootCmd.AddCommand(cli.UploadSignedCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
