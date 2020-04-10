@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"fmt"
 	"time"
 
 	"dflimg"
 	"dflimg/cmd/dflimg/http"
 
+	"github.com/atotto/clipboard"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -28,6 +30,11 @@ var AddShortcutCmd = &cobra.Command{
 		err := addShortcut(rootURL, authToken, query, shortcut)
 		if err != nil {
 			return err
+		}
+
+		err = clipboard.WriteAll(fmt.Sprintf("%s/:%s", rootURL, shortcut))
+		if err != nil {
+			log.Warn("Could not copy to clipboard.")
 		}
 
 		duration := time.Now().Sub(startTime)
