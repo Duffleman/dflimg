@@ -3,15 +3,13 @@ package rpc
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"dflimg"
 	"dflimg/dflerr"
 	"dflimg/rpc/middleware"
 )
 
-// CreateSignedURL creates a signed URL for file uploads
-func (r *RPC) CreateSignedURL(w http.ResponseWriter, req *http.Request) {
+func (r *RPC) SetNSFW(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
 	key := ctx.Value(middleware.UsernameKey)
@@ -21,28 +19,26 @@ func (r *RPC) CreateSignedURL(w http.ResponseWriter, req *http.Request) {
 	}
 	username := ctx.Value(middleware.UsernameKey).(string)
 
-	body := &dflimg.CreateSignedURLRequest{}
+	body := &dflimg.SetNSFWRequest{}
 	err := json.NewDecoder(req.Body).Decode(body)
 	if err != nil {
 		r.handleError(w, req, err)
 		return
 	}
 
-	res, err := r.app.CreateSignedURL(ctx, username, body.ContentType)
+	resource, err := r.app.GetResource(ctx, body.Query)
 	if err != nil {
 		r.handleError(w, req, err)
 		return
 	}
 
-	accept := req.Header.Get("Accept")
-
-	if strings.Contains(accept, "text/plain") {
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte(res.URL))
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(res)
+	if resource.Owner != username {
+		r.handleError(w, req, dflerr.New(dflerr.AccessDenied, nil))
+		return
 	}
+
+	err = r.app.SetNSFW(ctx, resource.ID, body.NSFW)
+	r.handleError(w, req, err)
 
 	return
 }

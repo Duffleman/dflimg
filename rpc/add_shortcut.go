@@ -9,17 +9,17 @@ import (
 	"dflimg/rpc/middleware"
 )
 
-func (r *RPC) TagResource(w http.ResponseWriter, req *http.Request) {
+func (r *RPC) AddShortcut(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
 	key := ctx.Value(middleware.UsernameKey)
 	if key == nil || key == "" {
-		r.handleError(w, req, dflerr.New(dflerr.AccessDenied, dflerr.M{"username": key}))
+		r.handleError(w, req, dflerr.New(dflerr.AccessDenied, nil))
 		return
 	}
 	username := ctx.Value(middleware.UsernameKey).(string)
 
-	body := &dflimg.TagResourceRequest{}
+	body := &dflimg.ChangeShortcutRequest{}
 	err := json.NewDecoder(req.Body).Decode(body)
 	if err != nil {
 		r.handleError(w, req, err)
@@ -37,10 +37,8 @@ func (r *RPC) TagResource(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = r.app.TagResource(ctx, resource.ID, body.Labels, body.NSFW)
-	if err != nil {
-		r.handleError(w, req, err)
-	}
+	err = r.app.AddShortcut(ctx, resource, body.Shortcut)
+	r.handleError(w, req, err)
 
 	return
 }

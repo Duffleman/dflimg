@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"dflimg"
-	"dflimg/dflerr"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -16,16 +15,11 @@ import (
 
 // CreateSignedURL creates a file resource, but instead of accepting the file
 // it generates a signed URL
-func (a *App) CreateSignedURL(ctx context.Context, username string, req *dflimg.CreateSignedURLRequest) (*dflimg.CreateSignedURLResponse, error) {
+func (a *App) CreateSignedURL(ctx context.Context, username string, contentType string) (*dflimg.CreateSignedURLResponse, error) {
 	fileID := ksuid.Generate("file").String()
 	fileKey := fmt.Sprintf("%s/%s", dflimg.S3RootKey, fileID)
 
-	err := a.db.FindShortcutConflicts(ctx, req.Shortcuts)
-	if err != nil {
-		return nil, dflerr.New("shortcut_conflict", dflerr.M{"shortcuts": req.Shortcuts}, dflerr.Parse(err))
-	}
-
-	fileRes, err := a.db.NewPendingFile(ctx, fileID, fileKey, req.ContentType, username, req.Shortcuts, req.NSFW)
+	fileRes, err := a.db.NewPendingFile(ctx, fileID, fileKey, username, contentType)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +27,7 @@ func (a *App) CreateSignedURL(ctx context.Context, username string, req *dflimg.
 	s3req, _ := s3.New(a.aws).PutObjectRequest(&s3.PutObjectInput{
 		Bucket:      aws.String(dflimg.S3Bucket),
 		Key:         aws.String(fileKey),
-		ContentType: aws.String(req.ContentType),
+		ContentType: aws.String(contentType),
 	})
 
 	url, err := s3req.Presign(15 * time.Minute)
@@ -47,10 +41,6 @@ func (a *App) CreateSignedURL(ctx context.Context, username string, req *dflimg.
 
 	gctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	go a.saveHash(gctx, cancel, fileRes.Serial, hash)
-
-	if len(req.Shortcuts) == 1 {
-		fullURL = fmt.Sprintf("%s/:%s", rootURL, req.Shortcuts[0])
-	}
 
 	return &dflimg.CreateSignedURLResponse{
 		ResourceID: fileRes.ID,

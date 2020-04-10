@@ -11,25 +11,24 @@ import (
 	"github.com/spf13/viper"
 )
 
-var DeleteResourceCmd = &cobra.Command{
-	Use:     "delete",
-	Aliases: []string{"d"},
-	Short:   "Delete a resource",
-	Long:    "Delete a resource",
-	Args:    cobra.ExactArgs(1),
+var AddShortcutCmd = &cobra.Command{
+	Use:     "add-shortcut",
+	Aliases: []string{"asc"},
+	Short:   "Add a shortcut",
+	Args:    cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		startTime := time.Now()
 
-		urlStr := args[0]
+		query := args[0]
+		shortcut := args[1]
 
 		rootURL := viper.Get("ROOT_URL").(string)
 		authToken := viper.Get("AUTH_TOKEN").(string)
 
-		err := deleteResource(rootURL, authToken, urlStr)
+		err := addShortcut(rootURL, authToken, query, shortcut)
 		if err != nil {
 			return err
 		}
-		notify("Resource deleted", urlStr)
 
 		duration := time.Now().Sub(startTime)
 
@@ -39,12 +38,15 @@ var DeleteResourceCmd = &cobra.Command{
 	},
 }
 
-func deleteResource(rootURL, authToken, urlStr string) error {
-	body := &dflimg.IdentifyResource{
-		Query: urlStr,
+func addShortcut(rootURL, authToken, query, shortcut string) error {
+	body := &dflimg.ChangeShortcutRequest{
+		IdentifyResource: dflimg.IdentifyResource{
+			Query: query,
+		},
+		Shortcut: shortcut,
 	}
 
 	c := http.New(rootURL, authToken)
 
-	return c.JSONRequest("POST", "delete_resource", body, nil)
+	return c.JSONRequest("POST", "add_shortcut", body, nil)
 }

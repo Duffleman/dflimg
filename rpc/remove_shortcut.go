@@ -9,7 +9,7 @@ import (
 	"dflimg/rpc/middleware"
 )
 
-func (r *RPC) DeleteResource(w http.ResponseWriter, req *http.Request) {
+func (r *RPC) RemoveShortcut(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
 	key := ctx.Value(middleware.UsernameKey)
@@ -19,7 +19,7 @@ func (r *RPC) DeleteResource(w http.ResponseWriter, req *http.Request) {
 	}
 	username := ctx.Value(middleware.UsernameKey).(string)
 
-	body := &dflimg.IdentifyResource{}
+	body := &dflimg.ChangeShortcutRequest{}
 	err := json.NewDecoder(req.Body).Decode(body)
 	if err != nil {
 		r.handleError(w, req, err)
@@ -37,7 +37,7 @@ func (r *RPC) DeleteResource(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = r.app.DeleteResource(ctx, resource)
+	err = r.app.RemoveShortcut(ctx, resource, body.Shortcut)
 	r.handleError(w, req, err)
 
 	return

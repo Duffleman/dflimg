@@ -31,7 +31,9 @@ AWS_DEFAULT_REGION=AWSREGION
 
 #### `POST /upload_file`
 
-Takes a file in the form of multipart/form-data, returns  a short URL that links to the file. You can set the "Accept" header to modify the response.
+Legacy, really only here to support programs like ShareX on Windows.
+
+Takes a file in the form of multipart/form-data, returns  a short URL that links to the file. You can set the "Accept" header to modify the response. Defaults to JSON for the response.
 
 ##### Request
 
@@ -43,28 +45,152 @@ curl -X POST -H "Authorization: test" -F file=@duffleman.png https://dfl.mn/uplo
 
 ```json
 {
-    "resource_id": "file_000000BdAf7MWsYZ6r5wc18cV2sAS",
-    "type": "file",
-    "hash": "q3A",
-    "url": "https://dfl.mn/q3A"
+	"resource_id": "file_000000BdAf7MWsYZ6r5wc18cV2sAS",
+	"type": "file",
+	"hash": "q3A",
+	"url": "https://dfl.mn/q3A"
 }
 ```
 
-If the "Accept" header is set to "text/plain":
+Respects the `Accept` request header.
 
-`https://dfl.mn/q3A`
+#### `POST /create_signed_url`
 
-#### `POST /tag_resource`
+##### Request
 
-Tags a resource with a label. It requires `tags` which is a CSV set of tags, and `url` which is either a full URL or just the hash of a resource.
+```json
+{
+	"content_type": "image/png"
+}
+```
 
-See [`POST /upload_file`](https://github.com/Duffleman/dflimg-go#post-upload_file) for the expected response.
+##### Response
+
+```json
+{
+	"resource_id": "file_aaa000",
+	"type": "file",
+	"hash": "xAx",
+	"url": "https://dfl.mn/xAx",
+	"s3link": "https://s3.amazon.com/eu-west-1/..."
+}
+```
+
+You must then post the content of the file to the S3 link returned to you.
+
+#### `POST /delete_resource`
+
+```json
+{
+	"query": "aVA"
+}
+```
+
+#### `POST /set_nsfw`
+
+##### Request
+
+```json
+{
+	"query": "aAb",
+	"nsfw": true
+}
+```
+
+#### `POST /add_shortcut`
+
+##### Request
+
+```json
+{
+	"query": "aCw",
+	"shortcut": "scott"
+}
+```
+
+#### `POST /remove_shortcut`
+
+##### Request
+
+```json
+{
+	"query": "aCw",
+	"shortcut": "scott"
+}
+```
 
 #### `POST /shorten_url`
 
-Shorten a URL. It requires `url` which is the URL to shorten. You can apply `nsfw` and `shortcuts` here too.
+Shorten a URL. It requires `url` which is the URL to shorten.
 
-See [`POST /upload_file`](https://github.com/Duffleman/dflimg-go#post-upload_file) for the expected response.
+##### Request
+
+```json
+{
+	"url": "https://google.com"
+}
+```
+
+##### Response
+
+```json
+{
+	"resource_id": "url_000000BdAf7MWsYZ6r5wc18cV2sAS",
+	"type": "url",
+	"hash": "aaB",
+	"url": "https://dfl.mn/aaB"
+}
+```
+
+#### `POST /add_shortcut`
+
+##### Request
+
+```json
+{
+	"query": "axA",
+	"shortcut": "hello"
+}
+```
+
+#### `POST /remove_shortcut`
+
+##### Request
+
+```json
+{
+	"query": "axA",
+	"shortcut": "hello"
+}
+```
+
+#### `POST /view_details`
+
+##### Request
+
+```json
+{
+	"query":  "dZM"
+}
+```
+
+##### Response
+
+```json
+{
+	"id": "file_000000BslGI66pAIjV27Uvh4ofWKG",
+	"type": "file",
+	"hash": "dZM",
+	"owner": "Duffleman",
+	"nsfw": true,
+	"mime_type": "image/png",
+	"shortcuts": [
+		"hello"
+	],
+	"created_at": "2020-04-10T00:35:44.793661+01:00",
+	"deleted_at": null
+}
+```
 
 #### `GET /{hash}`
 
@@ -73,21 +199,6 @@ Links to the resource. Serves the content directly!
 #### `GET /:{shortcut}`
 
 Links to the resource through one of it's shortcuts. Serves the content directly!
-
-#### `GET /list_labels`
-
-Returns a list of usable labels
-
-##### Response
-
-```json
-[
-    {
-        "id": "label_000000Bjb0S6DSIaTiW8hSaAo6OOy",
-        "name": "education"
-    }
-]
-```
 
 ## client/cli
 
@@ -110,15 +221,9 @@ DFLIMG_AUTH_TOKEN=some-token-thats-on-the-server
 
 Upload a single file:
 
-`dflimg u {file}`
+`dflimg signed-upload {file}`
 
-Upload a file with some shorcuts, you can give it a CSV for the shortcuts (`-s`)
-
-`dflimg u -s test,srs {file}`
-
-Upload a file, mark it as NSFW (`-n`)
-
-`dflimg u -n {file}`
+`dflimg u my-file.png`
 
 It will attempt to automatically put the URL in your clipboard too!
 
@@ -126,20 +231,46 @@ It will attempt to automatically put the URL in your clipboard too!
 
 Shorten a URL
 
-`dflimg s {url}`
+`dflimg shorten {url}`
+
+`dflimg s https://google.com/?query=something-long`
 
 See other params above.
-
-### Tag a resource
-
-`dflimg t {url} {labels}`
-
-Where labels is a CSV of labels to apply. The labels must exist on the server.
 
 ### Copy a URL
 
 When given a long URL leading to an image, it'll attempt to download the file and reupload it to the dflimg server.
 
-`dflimg c {url}`
+`dflimg copy {url}`
 
-`-n` for NSFW works here, along with `-s` for shortcuts.
+`dflimg c mLd`
+
+### Set it as NSFW
+
+Set the file as NSFW so a NSFW primer appears before the content. The user must agree before they continue.
+
+`dflimg nsfw {url or hash}`
+
+`dflimg n ddA`
+
+### Add a shortcut
+
+Add a shortcut to the resource, so there is an easy way to access the resource
+
+`dflimg add-shortcut {url or hash} {shortcut}`
+
+`dflimg asc https://dfl.mn/aaA yolo`
+
+### Remove a shortcut
+
+Remove a shortcut from the resource
+
+`dflimg remove-shortcut {url or hash} {shortcut}`
+
+`dflimg rsc aaA yolo`
+
+### Screenshot
+
+macOS only so far, this one handles the whole screenshot process for you. Bind this to a shortcut on your mac so you can quickly take a snippet of a program and the link appears in your clipboard
+
+`dflimg screenshot`

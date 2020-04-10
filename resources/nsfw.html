@@ -49,13 +49,6 @@
         <h1 class="red">!! Warning !!</h1>
         <h2>NSFW Primer</h2>
         <p>This link leads to content that isn't safe to open with friends.</p>
-        {{if .labels}}
-            <p>Labels:
-                {{range .labels}}
-                    <span class="badge">{{.}}</span>
-                {{end}}
-            </p>
-        {{end}}
         <p><a href="?primed">Click here to continue</a></p>
     </body>
 </html>

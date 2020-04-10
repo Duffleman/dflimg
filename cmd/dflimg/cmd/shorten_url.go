@@ -1,10 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+
 	"dflimg"
 	"dflimg/cmd/dflimg/http"
-	"fmt"
-	"strings"
 
 	"github.com/atotto/clipboard"
 	log "github.com/sirupsen/logrus"
@@ -20,21 +20,11 @@ var ShortenURLCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		urlStr := args[0]
-		shortcutsPf := cmd.Flag("shortcuts")
-		nsfwPf := cmd.Flag("nsfw")
-		nsfw := false
-
-		if strings.ToLower(nsfwPf.Value.String()) == "true" {
-			nsfw = true
-		}
-
-		shortcutsStr := shortcutsPf.Value.String()
-		shortcuts := strings.Split(shortcutsStr, ",")
 
 		rootURL := viper.Get("ROOT_URL").(string)
 		authToken := viper.Get("AUTH_TOKEN").(string)
 
-		body, err := shortenURL(rootURL, authToken, urlStr, shortcuts, nsfw)
+		body, err := shortenURL(rootURL, authToken, urlStr)
 		if err != nil {
 			return err
 		}
@@ -51,12 +41,9 @@ var ShortenURLCmd = &cobra.Command{
 	},
 }
 
-func shortenURL(rootURL, authToken, urlStr string, shortcuts []string, nsfw bool) (*dflimg.CreateResourceResponse, error) {
-	body := &dflimg.CreateResourceRequest{
-		Type:      "url",
-		URL:       urlStr,
-		Shortcuts: shortcuts,
-		NSFW:      nsfw,
+func shortenURL(rootURL, authToken, urlStr string) (*dflimg.CreateResourceResponse, error) {
+	body := &dflimg.CreateURLRequest{
+		URL: urlStr,
 	}
 
 	c := http.New(rootURL, authToken)

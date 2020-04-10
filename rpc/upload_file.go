@@ -22,22 +22,6 @@ func (r *RPC) UploadFile(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	shortcutsStr := req.FormValue("shortcuts")
-	nsfwStr := req.FormValue("nsfw")
-	var shortcuts []string
-	var nsfw bool
-
-	switch nsfwStr {
-	case "true":
-		nsfw = true
-	default:
-		nsfw = false
-	}
-
-	if shortcutsStr != "" {
-		shortcuts = strings.Split(shortcutsStr, ",")
-	}
-
 	file, _, err := req.FormFile("file")
 	if err != nil {
 		r.handleError(w, req, err)
@@ -48,14 +32,9 @@ func (r *RPC) UploadFile(w http.ResponseWriter, req *http.Request) {
 	var buf bytes.Buffer
 	io.Copy(&buf, file)
 
-	resourceReq := &dflimg.CreateResourceRequest{
-		Type:      "file",
-		File:      buf,
-		Shortcuts: shortcuts,
-		NSFW:      nsfw,
-	}
-
-	res, err := r.app.UploadFile(ctx, resourceReq)
+	res, err := r.app.UploadFile(ctx, &dflimg.CreateFileRequest{
+		File: buf,
+	})
 	if err != nil {
 		r.handleError(w, req, err)
 		return

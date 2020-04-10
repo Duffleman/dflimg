@@ -25,10 +25,8 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/speps/go-hashids v2.0.0+incompatible
 	github.com/spf13/cobra v0.0.3
-	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.2
 	github.com/tadvi/systray v0.0.0-20190226123456-11a2b8fa57af // indirect
-	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	google.golang.org/appengine v1.6.4 // indirect
 	gopkg.in/toast.v1 v1.0.0-20180812000517-0a84660828b2 // indirect
 )

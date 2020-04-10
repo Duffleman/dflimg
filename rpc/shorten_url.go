@@ -20,7 +20,7 @@ func (r *RPC) ShortenURL(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	body := &dflimg.CreateResourceRequest{}
+	body := &dflimg.CreateURLRequest{}
 	err := json.NewDecoder(req.Body).Decode(body)
 	if err != nil {
 		r.handleError(w, req, err)
@@ -28,14 +28,12 @@ func (r *RPC) ShortenURL(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if body.URL == "" {
-		err := errors.New("missing url")
+		err := errors.New("missing_url")
 		r.handleError(w, req, err)
 		return
 	}
 
-	body.Type = "URL"
-
-	res, err := r.app.ShortenURL(ctx, body)
+	res, err := r.app.ShortenURL(ctx, body.URL)
 	if err != nil {
 		r.handleError(w, req, err)
 		return

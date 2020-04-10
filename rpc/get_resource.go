@@ -39,8 +39,6 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 
 	if resource.NSFW {
 		if _, ok := req.URL.Query()["primed"]; !ok {
-			labelStr := resource.StringifyLabels()
-
 			tpl, err := template.ParseFiles("resources/nsfw.html")
 			if err != nil {
 				r.handleError(w, req, err)
@@ -48,7 +46,6 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 			}
 			err = tpl.Execute(w, map[string]interface{}{
 				"resource": resource,
-				"labels":   labelStr,
 			})
 			if err != nil {
 				r.handleError(w, req, err)

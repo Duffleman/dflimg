@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"dflimg"
-	"dflimg/dflerr"
 	"dflimg/rpc/middleware"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -17,20 +16,15 @@ import (
 )
 
 // UploadFile is an app method that takes in a file and stores it
-func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateResourceRequest) (*dflimg.CreateResourceResponse, error) {
+func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateFileRequest) (*dflimg.CreateResourceResponse, error) {
 	// get user
 	username := ctx.Value(middleware.UsernameKey).(string)
 	contentType := http.DetectContentType(req.File.Bytes())
 	fileID := ksuid.Generate("file").String()
 	fileKey := fmt.Sprintf("%s/%s", dflimg.S3RootKey, fileID)
 
-	err := a.db.FindShortcutConflicts(ctx, req.Shortcuts)
-	if err != nil {
-		return nil, dflerr.New("shortcuts already taken", dflerr.M{"shortcuts": req.Shortcuts}, dflerr.Parse(err))
-	}
-
 	// upload to S3
-	_, err = s3.New(a.aws).PutObjectWithContext(ctx, &s3.PutObjectInput{
+	_, err := s3.New(a.aws).PutObjectWithContext(ctx, &s3.PutObjectInput{
 		Bucket:        aws.String(dflimg.S3Bucket),
 		Key:           aws.String(fileKey),
 		ACL:           aws.String("private"),
@@ -43,7 +37,7 @@ func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateResourceRequest)
 	}
 
 	// save to DB
-	fileRes, err := a.db.NewFile(ctx, fileID, fileKey, contentType, username, req.Shortcuts, req.NSFW)
+	fileRes, err := a.db.NewFile(ctx, fileID, fileKey, username, contentType)
 	if err != nil {
 		return nil, err
 	}
