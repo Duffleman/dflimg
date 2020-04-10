@@ -52,13 +52,11 @@ curl -X POST -H "Authorization: test" -F file=@duffleman.png https://dfl.mn/uplo
 }
 ```
 
-If the "Accept" header is set to "text/plain":
-
-`https://dfl.mn/q3A`
+Respects the `Accept` request header.
 
 #### `POST /create_signed_url`
 
-##### Request
+##### Request
 
 ```json
 {
@@ -80,7 +78,7 @@ If the "Accept" header is set to "text/plain":
 
 You must then post the content of the file to the S3 link returned to you.
 
-#### `POST /delete_resource`
+#### `POST /delete_resource`
 
 ```json
 {
@@ -144,9 +142,31 @@ Shorten a URL. It requires `url` which is the URL to shorten.
 }
 ```
 
+#### `POST /add_shortcut`
+
+##### Request
+
+```json
+{
+	"query": "axA",
+	"shortcut": "hello"
+}
+```
+
+#### `POST /remove_shortcut`
+
+##### Request
+
+```json
+{
+	"query": "axA",
+	"shortcut": "hello"
+}
+```
+
 #### `POST /view_details`
 
-##### Request
+##### Request
 
 ```json
 {
@@ -201,15 +221,9 @@ DFLIMG_AUTH_TOKEN=some-token-thats-on-the-server
 
 Upload a single file:
 
-`dflimg u {file}`
+`dflimg signed-upload {file}`
 
-Upload a file with some shorcuts, you can give it a CSV for the shortcuts (`-s`)
-
-`dflimg u -s test,srs {file}`
-
-Upload a file, mark it as NSFW (`-n`)
-
-`dflimg u -n {file}`
+`dflimg u my-file.png`
 
 It will attempt to automatically put the URL in your clipboard too!
 
@@ -217,7 +231,9 @@ It will attempt to automatically put the URL in your clipboard too!
 
 Shorten a URL
 
-`dflimg s {url}`
+`dflimg shorten {url}`
+
+`dflimg s https://google.com/?query=something-long`
 
 See other params above.
 
@@ -225,6 +241,36 @@ See other params above.
 
 When given a long URL leading to an image, it'll attempt to download the file and reupload it to the dflimg server.
 
-`dflimg c {url}`
+`dflimg copy {url}`
 
-`-n` for NSFW works here, along with `-s` for shortcuts.
+`dflimg c mLd`
+
+### Set it as NSFW
+
+Set the file as NSFW so a NSFW primer appears before the content. The user must agree before they continue.
+
+`dflimg nsfw {url or hash}`
+
+`dflimg n ddA`
+
+### Add a shortcut
+
+Add a shortcut to the resource, so there is an easy way to access the resource
+
+`dflimg add-shortcut {url or hash} {shortcut}`
+
+`dflimg asc https://dfl.mn/aaA yolo`
+
+### Remove a shortcut
+
+Remove a shortcut from the resource
+
+`dflimg remove-shortcut {url or hash} {shortcut}`
+
+`dflimg rsc aaA yolo`
+
+### Screenshot
+
+macOS only so far, this one handles the whole screenshot process for you. Bind this to a shortcut on your mac so you can quickly take a snippet of a program and the link appears in your clipboard
+
+`dflimg screenshot`
