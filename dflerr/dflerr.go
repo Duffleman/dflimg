@@ -1,6 +1,8 @@
 package dflerr
 
-import "errors"
+import (
+	"errors"
+)
 
 const (
 	RequestFailure = "request_failure"

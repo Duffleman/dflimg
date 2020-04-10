@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"dflimg"
 	"time"
 
+	"dflimg"
 	"dflimg/cmd/dflimg/http"
 
 	log "github.com/sirupsen/logrus"

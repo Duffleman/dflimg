@@ -1,9 +1,10 @@
 package cmd
 
 import (
+	"time"
+
 	"dflimg"
 	"dflimg/cmd/dflimg/http"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

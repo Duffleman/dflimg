@@ -1,9 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+
 	"dflimg"
 	"dflimg/cmd/dflimg/http"
-	"fmt"
 
 	"github.com/atotto/clipboard"
 	log "github.com/sirupsen/logrus"
