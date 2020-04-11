@@ -45,7 +45,7 @@ var UploadSignedCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		log.Infof("File prepared: %s (%s)\n", resource.URL, time.Now().Sub(filePrepStart))
+		log.Infof("File prepared: %s (%s)", resource.URL, time.Now().Sub(filePrepStart))
 
 		err = clipboard.WriteAll(resource.URL)
 		if err != nil {
@@ -59,7 +59,7 @@ var UploadSignedCmd = &cobra.Command{
 		}
 		notify("Image uploaded", "")
 
-		log.Infof("Done in %s\n", time.Now().Sub(startTime))
+		log.Infof("Done in %s", time.Now().Sub(startTime))
 
 		return nil
 	},

@@ -33,7 +33,7 @@ var DeleteResourceCmd = &cobra.Command{
 
 		duration := time.Now().Sub(startTime)
 
-		log.Infof("Done in %s\n", duration)
+		log.Infof("Done in %s", duration)
 
 		return nil
 	},

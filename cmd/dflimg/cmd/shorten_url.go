@@ -35,7 +35,7 @@ var ShortenURLCmd = &cobra.Command{
 		}
 		notify("URL Shortened", body.URL)
 
-		log.Infof("Done: %s\n", body.URL)
+		log.Infof("Done: %s", body.URL)
 
 		return nil
 	},
