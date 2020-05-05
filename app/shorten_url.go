@@ -8,7 +8,7 @@ import (
 	"dflimg"
 	"dflimg/rpc/middleware"
 
-	"github.com/cuvva/ksuid"
+	"github.com/cuvva/ksuid-go"
 )
 
 // ShortenURL shortens a URL

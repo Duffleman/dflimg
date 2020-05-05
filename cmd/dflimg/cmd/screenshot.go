@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/cuvva/ksuid"
+	"github.com/cuvva/ksuid-go"
 	"github.com/spf13/cobra"
 )
 

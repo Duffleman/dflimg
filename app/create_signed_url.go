@@ -9,7 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/cuvva/ksuid"
+	"github.com/cuvva/ksuid-go"
 	pkgerr "github.com/pkg/errors"
 )
 

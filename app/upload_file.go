@@ -12,7 +12,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/cuvva/ksuid"
+	"github.com/cuvva/ksuid-go"
 )
 
 // UploadFile is an app method that takes in a file and stores it
