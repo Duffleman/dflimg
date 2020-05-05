@@ -26,7 +26,7 @@ func (r *RPC) RemoveShortcut(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	resource, err := r.app.GetResource(ctx, body.Query)
+	resource, _, err := r.app.GetResource(ctx, body.Query)
 	if err != nil {
 		r.handleError(w, req, err)
 		return

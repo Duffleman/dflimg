@@ -3,6 +3,7 @@ package rpc
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -25,8 +26,9 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
 	query := chi.URLParam(req, "query")
+	accept := req.Header.Get("Accept")
 
-	resource, err := r.app.GetResource(ctx, query)
+	resource, ext, err := r.app.GetResource(ctx, query)
 	if err != nil {
 		r.handleError(w, req, err)
 		return
@@ -77,8 +79,27 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 
 		reader := bytes.NewReader(b)
 
-		if strings.Contains(*resource.MimeType, "text/plain") {
-			lexer := lexers.Analyse(string(b))
+		// Let's try to format the output if possible
+		// - you must accept text/html
+		// - it must be a text document
+		if strings.Contains(*resource.MimeType, "text/plain") && strings.Contains(accept, "text/html") {
+			var lexer chroma.Lexer
+
+			// if you provide an extension, format the doc accordingly
+			if ext != nil {
+				// if you're looking for .txt, keep it to text, no HTML
+				if *ext == "txt" {
+					fallback(resource, w, req, query, *modtime, reader)
+					return
+				} else {
+					// match the lexer to the extension given
+					lexer = lexers.Match(fmt.Sprintf("file.%s", *ext))
+				}
+			} else {
+				// analyse the document to figure out what it may be
+				lexer = lexers.Analyse(string(b))
+			}
+
 			if lexer == nil {
 				lexer = lexers.Fallback
 			}
