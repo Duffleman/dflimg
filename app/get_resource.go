@@ -27,9 +27,9 @@ func (a *App) GetResource(ctx context.Context, input string) (res *dflimg.Resour
 
 	if strings.HasPrefix(input, ShortcutCharacter) {
 		res, err = a.GetResourceByShortcut(ctx, input)
+		return
 	}
 
 	res, err = a.GetResourceByHash(ctx, input)
-
 	return
 }
