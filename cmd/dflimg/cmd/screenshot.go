@@ -36,8 +36,13 @@ var ScreenshotCmd = &cobra.Command{
 		}
 		defer os.Remove(out.Name())
 
-		_, err = os.Stat(out.Name())
+		tmpFile, err := os.Stat(out.Name())
 		if os.IsNotExist(err) {
+			return nil
+		}
+
+		if tmpFile.Size() == 0 {
+			notify("Cancelled", "No image was captured.")
 			return nil
 		}
 
