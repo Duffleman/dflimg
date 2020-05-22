@@ -12,6 +12,7 @@ import (
 )
 
 const screenshotCmd = "screencapture -i"
+const timeout = 1 * time.Minute
 
 var ScreenshotCmd = &cobra.Command{
 	Use:   "screenshot",
@@ -19,7 +20,7 @@ var ScreenshotCmd = &cobra.Command{
 	Long:  "Take a screenshot and upload it to a DFLIMG server",
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, _ []string) error {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 
 		tmpName := ksuid.Generate("file").String()
