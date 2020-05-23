@@ -75,8 +75,8 @@ func (a *AWS) CheckEnvVariables() error {
 	return nil
 }
 
-// SupportsTwoStage returns whether this provider supports URL signing
-func (a *AWS) SupportsTwoStage() bool {
+// SupportsSignedURLs returns whether this provider supports URL signing
+func (a *AWS) SupportsSignedURLs() bool {
 	return true
 }
 

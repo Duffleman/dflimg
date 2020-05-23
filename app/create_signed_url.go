@@ -2,11 +2,11 @@ package app
 
 import (
 	"context"
-	"dflimg/dflerr"
 	"fmt"
 	"time"
 
 	"dflimg"
+	"dflimg/dflerr"
 
 	"github.com/cuvva/ksuid-go"
 	pkgerr "github.com/pkg/errors"
@@ -15,7 +15,7 @@ import (
 // CreateSignedURL creates a file resource, but instead of accepting the file
 // it generates a signed URL
 func (a *App) CreateSignedURL(ctx context.Context, username string, contentType string) (*dflimg.CreateSignedURLResponse, error) {
-	if !a.fileProvider.SupportsTwoStage() {
+	if !a.fileProvider.SupportsSignedURLs() {
 		return nil, dflerr.New("signed_urls_unsupported", nil)
 	}
 
