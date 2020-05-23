@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
 	"time"
 
 	"dflimg"
@@ -29,15 +30,15 @@ func main() {
 	}
 
 	// setup app dependancies
-	// fileprovider
-	fileProvider := dflimg.GetEnv("file_provider")
+	// storage provider
+	storageProvider := os.Getenv("STORAGE_PROVIDER")
 
 	var err error
-	var fp storageproviders.StorageProvider
+	var sp storageproviders.StorageProvider
 
-	switch fileProvider {
+	switch storageProvider {
 	case "aws":
-		fp, err = storageproviders.NewAWSProviderFromEnv()
+		sp, err = storageproviders.NewAWSProviderFromEnv()
 		if err != nil {
 			logger.Fatal(err)
 		}
@@ -45,7 +46,7 @@ func main() {
 		logger.Fatal(errors.New("unsupported_provider"))
 	}
 
-	err = fp.CheckEnvVariables()
+	err = sp.CheckEnvVariables()
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -89,7 +90,7 @@ func main() {
 
 	// Setup app & rpc
 	router := chi.NewRouter()
-	app := app.New(db, fp, hasher, redis)
+	app := app.New(db, sp, hasher, redis)
 	rpc := dflrpc.New(logger, router, app)
 
 	// Add middleware
