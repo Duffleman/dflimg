@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"time"
 
@@ -46,6 +47,22 @@ func NewAWSProviderFromEnv() (StorageProvider, error) {
 	aws := NewAWSProvider(awsDriver)
 
 	return aws, nil
+}
+
+// CheckEnvVariables checks for the minimum required AWS variables
+func (a *AWS) CheckEnvVariables() error {
+	requiredEnvVars := []string{
+		"AWS_ACCESS_KEY",
+		"AWS_SECRET_KEY",
+	}
+
+	for _, k := range requiredEnvVars {
+		if val := os.Getenv(k); val == "" {
+			return fmt.Errorf("missing env variable (%s)", k)
+		}
+	}
+
+	return nil
 }
 
 // SupportsTwoStage returns whether this provider supports URL signing

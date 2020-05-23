@@ -10,6 +10,7 @@ import (
 
 // StorageProvider is an interface all custom defined storage providers must conform to
 type StorageProvider interface {
+	CheckEnvVariables() error
 	GenerateKey(string) string
 	SupportsTwoStage() bool
 	Get(context.Context, *dflimg.Resource) ([]byte, *time.Time, error)
