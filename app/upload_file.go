@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/http"
@@ -10,8 +9,6 @@ import (
 	"dflimg"
 	"dflimg/rpc/middleware"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/cuvva/ksuid-go"
 )
 
@@ -21,17 +18,10 @@ func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateFileRequest) (*d
 	username := ctx.Value(middleware.UsernameKey).(string)
 	contentType := http.DetectContentType(req.File.Bytes())
 	fileID := ksuid.Generate("file").String()
-	fileKey := fmt.Sprintf("%s/%s", dflimg.S3RootKey, fileID)
+	fileKey := a.fileProvider.GenerateKey(fileID)
 
-	// upload to S3
-	_, err := s3.New(a.aws).PutObjectWithContext(ctx, &s3.PutObjectInput{
-		Bucket:        aws.String(dflimg.S3Bucket),
-		Key:           aws.String(fileKey),
-		ACL:           aws.String("private"),
-		Body:          bytes.NewReader(req.File.Bytes()),
-		ContentLength: aws.Int64(int64(req.File.Len())),
-		ContentType:   aws.String(contentType),
-	})
+	// upload to the file provider
+	err := a.fileProvider.Upload(ctx, fileKey, contentType, req.File)
 	if err != nil {
 		return nil, err
 	}

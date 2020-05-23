@@ -58,7 +58,7 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 
 	switch resource.Type {
 	case "file":
-		b, modtime, err := r.app.GetS3File(ctx, resource)
+		b, modtime, err := r.app.GetFile(ctx, resource)
 		if err != nil {
 			if err == dflerr.ErrNotFound {
 				tpl, err := template.ParseFiles("resources/not_found.html")

@@ -9,6 +9,8 @@ import (
 func GetEnv(key string) string {
 	var v string
 	switch key {
+	case "file_provider":
+		v = os.Getenv("FILE_PROVIDER")
 	case "salt":
 		v = os.Getenv("DFL_SALT")
 		if v == "" {
