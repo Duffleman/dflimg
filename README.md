@@ -192,6 +192,16 @@ AWS_ROOT=files
 AWS_REGION=eu-west-1
 ```
 
+#### local filesystem
+
+Save to the local filesystem. Please make sure the folder you give it already exists and is writable!
+
+```bash
+STORAGE_PROVIDER=lfs
+LFS_FOLDER=/Users/duffleman/Downloads/dflimg
+LFS_PERMISSIONS=0777
+```
+
 ## client/cli
 
 A CLI tool that allows you to upload files to the above server! More information on this soon.

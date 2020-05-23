@@ -42,6 +42,11 @@ func main() {
 		if err != nil {
 			logger.Fatal(err)
 		}
+	case "lfs":
+		sp, err = storageproviders.NewLFSProviderFromEnv()
+		if err != nil {
+			logger.Fatal(err)
+		}
 	default:
 		logger.Fatal(errors.New("unsupported_provider"))
 	}

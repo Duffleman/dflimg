@@ -11,3 +11,11 @@ func TestAWSConformsToInterface(t *testing.T) {
 		t.Error("not possible")
 	}
 }
+
+func TestLFSConformsToInterface(t *testing.T) {
+	var sp StorageProvider = &LocalFileSystem{}
+
+	if sp == nil {
+		t.Error("not possible")
+	}
+}
