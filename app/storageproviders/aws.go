@@ -70,11 +70,6 @@ func NewAWSProviderFromEnv() (StorageProvider, error) {
 	return aws, nil
 }
 
-// CheckEnvVariables checks for the minimum required AWS variables
-func (a *AWS) CheckEnvVariables() error {
-	return nil
-}
-
 // SupportsSignedURLs returns whether this provider supports URL signing
 func (a *AWS) SupportsSignedURLs() bool {
 	return true

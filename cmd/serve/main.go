@@ -46,11 +46,6 @@ func main() {
 		logger.Fatal(errors.New("unsupported_provider"))
 	}
 
-	err = sp.CheckEnvVariables()
-	if err != nil {
-		logger.Fatal(err)
-	}
-
 	// database (postgres)
 	poolConfig, err := pgxpool.ParseConfig(dflimg.GetEnv("pg_connection_string"))
 	if err != nil {
