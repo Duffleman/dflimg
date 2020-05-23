@@ -36,7 +36,7 @@ func main() {
 	var fp storageproviders.StorageProvider
 
 	switch fileProvider {
-	case "AWS":
+	case "aws":
 		fp, err = storageproviders.NewAWSProviderFromEnv()
 		if err != nil {
 			logger.Fatal(err)
