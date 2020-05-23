@@ -6,9 +6,8 @@ import (
 	"time"
 
 	"dflimg"
+	"dflimg/dflerr"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/cuvva/ksuid-go"
 	pkgerr "github.com/pkg/errors"
 )
@@ -16,23 +15,21 @@ import (
 // CreateSignedURL creates a file resource, but instead of accepting the file
 // it generates a signed URL
 func (a *App) CreateSignedURL(ctx context.Context, username string, contentType string) (*dflimg.CreateSignedURLResponse, error) {
+	if !a.fileProvider.SupportsSignedURLs() {
+		return nil, dflerr.New("signed_urls_unsupported", nil)
+	}
+
 	fileID := ksuid.Generate("file").String()
-	fileKey := fmt.Sprintf("%s/%s", dflimg.S3RootKey, fileID)
+	fileKey := a.fileProvider.GenerateKey(fileID)
 
 	fileRes, err := a.db.NewPendingFile(ctx, fileID, fileKey, username, contentType)
 	if err != nil {
 		return nil, err
 	}
 
-	s3req, _ := s3.New(a.aws).PutObjectRequest(&s3.PutObjectInput{
-		Bucket:      aws.String(dflimg.S3Bucket),
-		Key:         aws.String(fileKey),
-		ContentType: aws.String(contentType),
-	})
-
-	url, err := s3req.Presign(15 * time.Minute)
+	url, err := a.fileProvider.PrepareUpload(ctx, fileKey, contentType, 15*time.Minute)
 	if err != nil {
-		return nil, pkgerr.Wrap(err, "unable to create presigned s3 url")
+		return nil, pkgerr.Wrap(err, "unable to create presigned url")
 	}
 
 	rootURL := dflimg.GetEnv("root_url")

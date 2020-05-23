@@ -4,27 +4,26 @@
 
 [DockerHub](https://hub.docker.com/r/duffleman/dflimg)
 
-Quick file sharing platform. Accepts images, and files.
+Quick file sharing and URL shortening platform. Accepts images, files, pretty much anything.
 
-This is built from scratch in Go, so you need a public facing server to handle requests and the server will need to run Go with postgres (see [db.md](db.md)).
+This is built from scratch in Go, so you'll need to handle the dependancies yourself for now. It requires
 
-Requires an AWS account, it uses S3 as a host for the uploaded files.
+- redis
+- web-ingress (TLS termination)
+- postgres (see [db.md](db.md))
 
 When you run this, the shorter your domain is, the better.
 
-Inspired by starbs/yeh
+Inspired by [starbs/yeh](https://github.com/starbs/yeh)
 
 ### Env variables to set
 
-```
+```bash
 PG_OPTS=postgresql://postgres/dflimg?sslmode=prefer
 DFL_USERS={"USERNAME": "PASSWORD"}
 DFL_ROOT_URL=https://dfl.mn
 DFL_SALT=some-long-string-that-works-as-a-salt-for-the-hasher
 ADDR=:8001
-AWS_ACCESS_KEY_ID=AWSKEY
-AWS_SECRET_ACCESS_KEY=AWSSECRET
-AWS_DEFAULT_REGION=AWSREGION
 ```
 
 ### Endpoints
@@ -178,6 +177,21 @@ Links to the resource. Serves the content directly!
 
 Links to the resource through one of it's shortcuts. Serves the content directly!
 
+### storage providers
+
+#### aws s3
+
+I personally use this one, so you can argue it's well tested. You need to set the following environment variables and the rest works itself out.
+
+```bash
+STORAGE_PROVIDER=aws
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_BUCKET_NAME=dflimg
+AWS_ROOT=files
+AWS_REGION=eu-west-1
+```
+
 ## client/cli
 
 A CLI tool that allows you to upload files to the above server! More information on this soon.
@@ -186,7 +200,7 @@ A CLI tool that allows you to upload files to the above server! More information
 
 Install it into your PATH
 
-`go install cmd/dflimg/...`
+`go install ./cmd/dflimg/...`
 
 ### Env variables to set
 

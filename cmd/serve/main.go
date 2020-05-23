@@ -2,17 +2,18 @@ package main
 
 import (
 	"context"
+	"errors"
 	"net/http"
+	"os"
 	"time"
 
 	"dflimg"
 	"dflimg/app"
+	"dflimg/app/storageproviders"
 	dfldb "dflimg/db"
 	dflrpc "dflimg/rpc"
 	dflmw "dflimg/rpc/middleware"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-redis/redis"
@@ -29,8 +30,23 @@ func main() {
 	}
 
 	// setup app dependancies
-	// aws
-	s, err := session.NewSession(&aws.Config{Region: aws.String(dflimg.S3Region)})
+	// storage provider
+	storageProvider := os.Getenv("STORAGE_PROVIDER")
+
+	var err error
+	var sp storageproviders.StorageProvider
+
+	switch storageProvider {
+	case "aws":
+		sp, err = storageproviders.NewAWSProviderFromEnv()
+		if err != nil {
+			logger.Fatal(err)
+		}
+	default:
+		logger.Fatal(errors.New("unsupported_provider"))
+	}
+
+	err = sp.CheckEnvVariables()
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -74,7 +90,7 @@ func main() {
 
 	// Setup app & rpc
 	router := chi.NewRouter()
-	app := app.New(db, s, hasher, redis)
+	app := app.New(db, sp, hasher, redis)
 	rpc := dflrpc.New(logger, router, app)
 
 	// Add middleware
