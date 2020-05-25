@@ -28,9 +28,11 @@ ADDR=:8001
 
 ### Endpoints
 
+Any case where the response is ommited, the response should be a 204 (No content). Any case where the request is ommited, you are not expected to provide a body.
+
 #### `POST /upload_file`
 
-Legacy, really only here to support programs like ShareX on Windows.
+This endpoint should be used as little as you can, it's better to use `POST /create_signed_url` where you can. This is for cases when the storage provider cannot provide a signed URL.
 
 Takes a file in the form of multipart/form-data, returns  a short URL that links to the file. You can set the "Accept" header to modify the response. Defaults to JSON for the response.
 
@@ -54,6 +56,8 @@ curl -X POST -H "Authorization: test" -F file=@duffleman.png https://dfl.mn/uplo
 Respects the `Accept` request header.
 
 #### `POST /create_signed_url`
+
+Creates a signed URL to upload a file to directly.
 
 ##### Request
 
@@ -181,7 +185,7 @@ Links to the resource through one of it's shortcuts. Serves the content directly
 
 #### aws s3
 
-I personally use this one, so you can argue it's well tested. You need to set the following environment variables and the rest works itself out.
+I personally use this one, so you can argue it's well tested. You need to set the following environment variables and the rest works itself out. It also supports URL signing so you get the best speed and results with this one!
 
 ```bash
 STORAGE_PROVIDER=aws
@@ -204,7 +208,7 @@ LFS_PERMISSIONS=0777
 
 ## client/cli
 
-A CLI tool that allows you to upload files to the above server! More information on this soon.
+A CLI tool that allows you to upload files to the above server!
 
 ### Install
 
@@ -245,7 +249,7 @@ When given a long URL leading to an image, it'll attempt to download the file an
 
 `dflimg copy {url}`
 
-`dflimg c mLd`
+`dflimg c https://avatars1.githubusercontent.com/u/1222340?s=460&v=4`
 
 ### Set it as NSFW
 
