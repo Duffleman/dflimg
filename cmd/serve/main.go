@@ -118,6 +118,7 @@ func main() {
 	rpc.Post("/shorten_url", rpc.ShortenURL)
 	rpc.Post("/upload_file", rpc.UploadFile)
 	rpc.Post("/view_details", rpc.ViewDetails)
+	rpc.Post("/list_resources", rpc.ListResources)
 
 	rpc.Get("/{query}", rpc.GetResource)
 

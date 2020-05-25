@@ -31,7 +31,7 @@ type Resource struct {
 	Serial    int        `json:"-"`
 	Hash      *string    `json:"hash"`
 	Owner     string     `json:"owner"`
-	Link      string     `json:"-"`
+	Link      string     `json:"link"`
 	NSFW      bool       `json:"nsfw"`
 	MimeType  *string    `json:"mime_type"`
 	Shortcuts []string   `json:"shortcuts"`
@@ -83,4 +83,9 @@ type SetNSFWRequest struct {
 type ChangeShortcutRequest struct {
 	IdentifyResource
 	Shortcut string `json:"shortcut"`
+}
+
+type ListResourcesRequest struct {
+	Username       string `json:"username"`
+	IncludeDeleted bool   `json:"include_deleted"`
 }

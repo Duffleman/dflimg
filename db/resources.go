@@ -194,6 +194,55 @@ func (db *DB) SaveHash(ctx context.Context, serial int, hash string) error {
 	return err
 }
 
+func (db *DB) ListResources(ctx context.Context, username string, includeDeleted bool) ([]*dflimg.Resource, error) {
+	b := NewQueryBuilder()
+
+	builder := b.
+		Select(strings.Join(resourceColumns, ",")).
+		From("resources")
+
+	if !includeDeleted {
+		builder = builder.Where(sq.Eq{"deleted_at": nil})
+	}
+
+	if username != "" {
+		builder = builder.Where(sq.Eq{"owner": username})
+	}
+
+	query, values, err := builder.
+		OrderBy("created_at DESC").
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	conn, err := db.pg.Acquire(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	rows, err := conn.Query(ctx, query, values...)
+	if err != nil {
+		return nil, err
+	}
+
+	resources := []*dflimg.Resource{}
+
+	for rows.Next() {
+		o := &dflimg.Resource{}
+
+		err := rows.Scan(&o.ID, &o.Type, &o.Serial, &o.Hash, &o.Owner, &o.Link, &o.NSFW, &o.MimeType, &o.Shortcuts, &o.CreatedAt, &o.DeletedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		resources = append(resources, o)
+	}
+
+	return resources, nil
+}
+
 // ListResourcesWithoutHash lists all resources where the hash is not saved
 func (db *DB) ListResourcesWithoutHash(ctx context.Context) ([]*dflimg.ShortFormResource, error) {
 	b := NewQueryBuilder()

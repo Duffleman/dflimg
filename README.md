@@ -163,6 +163,7 @@ Shorten a URL. It requires `url` which is the URL to shorten.
 	"type": "file",
 	"hash": "dZM",
 	"owner": "Duffleman",
+	"link": "i.dfl.mn/file_aaa00",
 	"nsfw": true,
 	"mime_type": "image/png",
 	"shortcuts": [
@@ -171,6 +172,48 @@ Shorten a URL. It requires `url` which is the URL to shorten.
 	"created_at": "2020-04-10T00:35:44.793661+01:00",
 	"deleted_at": null
 }
+```
+
+#### `POST /list_resources`
+
+##### Request
+
+```json
+{
+	"username": "Duffleman",
+	"include_deleted": false
+}
+```
+
+##### Response
+
+```json
+[
+	{
+		"id": "url_000000BuamNqpeZr10FkIPg7HQ4Aa",
+		"type": "url",
+		"hash": "Leb",
+		"owner": "Duffleman",
+		"link": "https://google.co.uk",
+		"nsfw": false,
+		"mime_type": null,
+		"shortcuts": [],
+		"created_at": "2020-05-25T15:44:57.552207+01:00",
+		"deleted_at": null
+	},
+	{
+		"id": "file_000000BualrJMCkEO46lamPFHTwEi",
+		"type": "file",
+		"hash": "GkQ",
+		"owner": "Duffleman",
+		"link": "i.dfl.mn/file_000000BualrJMCkEO46lamPFHTwEi",
+		"nsfw": true,
+		"mime_type": "text/plain; charset=utf-8",
+		"shortcuts": [],
+		"created_at": "2020-05-25T15:40:03.424727+01:00",
+		"deleted_at": "2020-05-25T15:40:20.962144+01:00"
+	}
+]
 ```
 
 #### `GET /{hash}`
