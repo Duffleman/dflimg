@@ -77,9 +77,10 @@ func main() {
 	// Cache
 	// cache := cache.New(30*time.Minute, 1*time.Hour)
 	redisAddr := dflimg.GetEnv("redis_addr")
+	redisPw := dflimg.GetEnv("redis_pw")
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     redisAddr,
-		Password: "",
+		Password: redisPw,
 		DB:       0,
 	})
 	_, err = redisClient.Ping().Result()

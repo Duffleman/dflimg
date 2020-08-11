@@ -23,6 +23,8 @@ const (
 	DefaultAddr = ":3000"
 	// DefaultRedisAddr is the default redis instance to connect to
 	DefaultRedisAddr = "localhost:6379"
+	// DefaultRedisPw is the default redis password
+	DefaultRedisPw = ""
 )
 
 type Resource struct {
