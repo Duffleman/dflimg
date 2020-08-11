@@ -79,13 +79,13 @@ func main() {
 	redisAddr := dflimg.GetEnv("redis_uri")
 	redisOpts, err := redis.ParseURL(redisAddr)
 	if err != nil {
-		logger.Fatalf("cannot parse redis uri: %w", err)
+		logger.Fatal(err)
 	}
 
 	redisClient := redis.NewClient(redisOpts)
 	_, err = redisClient.Ping().Result()
 	if err != nil {
-		logger.Fatalf("cannot connect to redis: %w", err)
+		logger.Fatal(err)
 	}
 
 	redis := app.NewCache(redisClient)
