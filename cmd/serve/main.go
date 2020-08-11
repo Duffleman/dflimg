@@ -76,17 +76,18 @@ func main() {
 
 	// Cache
 	// cache := cache.New(30*time.Minute, 1*time.Hour)
-	redisAddr := dflimg.GetEnv("redis_addr")
-	redisPw := dflimg.GetEnv("redis_pw")
-	redisClient := redis.NewClient(&redis.Options{
-		Addr:     redisAddr,
-		Password: redisPw,
-		DB:       0,
-	})
+	redisAddr := dflimg.GetEnv("redis_uri")
+	redisOpts, err := redis.ParseURL(redisAddr)
+	if err != nil {
+		logger.Fatalf("cannot parse redis uri: %w", err)
+	}
+
+	redisClient := redis.NewClient(redisOpts)
 	_, err = redisClient.Ping().Result()
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatalf("cannot connect to redis: %w", err)
 	}
+
 	redis := app.NewCache(redisClient)
 
 	// Setup app & rpc

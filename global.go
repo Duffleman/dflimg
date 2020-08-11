@@ -21,10 +21,8 @@ const (
 	PostgresCS = "postgres://postgres@localhost:5432/dflimg?sslmode=disable"
 	// DefaultAddr is the default address to listen on
 	DefaultAddr = ":3000"
-	// DefaultRedisAddr is the default redis instance to connect to
-	DefaultRedisAddr = "localhost:6379"
-	// DefaultRedisPw is the default redis password
-	DefaultRedisPw = ""
+	// DefaultRedisURI is the default redis instance to connect to
+	DefaultRedisURI = "redis://localhost:6379"
 )
 
 type Resource struct {
