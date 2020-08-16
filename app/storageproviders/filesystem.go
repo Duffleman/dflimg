@@ -97,3 +97,15 @@ func (fs *LocalFileSystem) PrepareUpload(ctx context.Context, key, contentType s
 func (fs *LocalFileSystem) Upload(_ context.Context, key, contentType string, file bytes.Buffer) error {
 	return ioutil.WriteFile(key, file.Bytes(), fs.permissions)
 }
+
+// GetSize returns the size of the byte content of a file
+func (fs *LocalFileSystem) GetSize(_ context.Context, resource *dflimg.Resource) (int, error) {
+	fileInfo, err := os.Stat(resource.Link)
+	if err != nil {
+		return 0, err
+	}
+
+	size := fileInfo.Size()
+
+	return int(size), nil
+}

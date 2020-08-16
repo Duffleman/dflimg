@@ -135,3 +135,22 @@ func (a *AWS) Upload(ctx context.Context, key, contentType string, file bytes.Bu
 
 	return err
 }
+
+// GetSize returns the size of the byte content of a file
+func (a *AWS) GetSize(ctx context.Context, resource *dflimg.Resource) (int, error) {
+	info, err := s3.New(a.driver).HeadObjectWithContext(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(a.bucket),
+		Key:    aws.String(resource.Link),
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	if info.ContentLength == nil {
+		return 0, dflerr.New("missing_file_size", nil)
+	}
+
+	size := *info.ContentLength
+
+	return int(size), nil
+}
