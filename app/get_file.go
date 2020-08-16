@@ -17,6 +17,9 @@ const byteJump = 1024
 // MaxCacheSize is the maximum size of a file for it to skip the cache: 536,870,912
 const MaxCacheSize = byteJump * byteJump * maxCacheSize
 
+// MaxFileSize is the maximum file size it will file
+const MaxFileSize = byteJump * byteJump * maxFileSize
+
 // GetFile returns a file from the cache,or the file provider
 func (a *App) GetFile(ctx context.Context, resource *dflimg.Resource) ([]byte, *time.Time, error) {
 	cacheKey := fmt.Sprintf("file/%s", resource.Link)
@@ -30,7 +33,7 @@ func (a *App) GetFile(ctx context.Context, resource *dflimg.Resource) ([]byte, *
 		return nil, nil, err
 	}
 
-	if size >= maxFileSize {
+	if size >= MaxFileSize {
 		return nil, nil, dflerr.ErrTooBig
 	}
 
