@@ -10,11 +10,12 @@ import (
 	"dflimg/dflerr"
 )
 
-const maxSizeInMB = 32
+const maxFileSize = 64
+const maxCacheSize = 32
 const byteJump = 1024
 
 // MaxCacheSize is the maximum size of a file for it to skip the cache: 536,870,912
-const MaxCacheSize = byteJump * byteJump * maxSizeInMB
+const MaxCacheSize = byteJump * byteJump * maxCacheSize
 
 // GetFile returns a file from the cache,or the file provider
 func (a *App) GetFile(ctx context.Context, resource *dflimg.Resource) ([]byte, *time.Time, error) {
