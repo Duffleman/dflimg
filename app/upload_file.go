@@ -16,7 +16,8 @@ import (
 func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateFileRequest) (*dflimg.CreateResourceResponse, error) {
 	// get user
 	username := ctx.Value(middleware.UsernameKey).(string)
-	contentType := http.DetectContentType(req.File.Bytes())
+	bytes := req.File.Bytes()
+	contentType := http.DetectContentType(bytes)
 	fileID := ksuid.Generate("file").String()
 	fileKey := a.fileProvider.GenerateKey(fileID)
 
@@ -34,10 +35,13 @@ func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateFileRequest) (*d
 
 	cacheKey := fmt.Sprintf("file/%s", fileRes.Link)
 	now := time.Now()
-	a.redis.Set(cacheKey, &CacheItem{
-		Content: req.File.Bytes(),
-		ModTime: &now,
-	})
+
+	if len(bytes) < MaxCacheSize {
+		a.redis.Set(cacheKey, &CacheItem{
+			Content: bytes,
+			ModTime: &now,
+		})
+	}
 
 	rootURL := dflimg.GetEnv("root_url")
 	hash := a.makeHash(fileRes.Serial)
