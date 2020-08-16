@@ -9,10 +9,12 @@ const (
 	AccessDenied   = "access_denied"
 	NotFound       = "not_found"
 	Unknown        = "unknown"
+	TooBig         = "too_big"
 )
 
 var (
 	ErrNotFound = errors.New(NotFound)
+	ErrTooBig   = New(TooBig, nil)
 )
 
 type M map[string]interface{}

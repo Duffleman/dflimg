@@ -25,6 +25,15 @@ func (a *App) GetFile(ctx context.Context, resource *dflimg.Resource) ([]byte, *
 		return item.Content, item.ModTime, nil
 	}
 
+	size, err := a.fileProvider.GetSize(ctx, resource)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if size >= maxFileSize {
+		return nil, nil, dflerr.ErrTooBig
+	}
+
 	bytes, lastModified, err := a.fileProvider.Get(ctx, resource)
 	if err != nil {
 		if strings.Contains(err.Error(), "NoSuchKey") {
