@@ -9,7 +9,7 @@ import (
 )
 
 // DefaultExpiration is the default expiration of items stored in redis
-const DefaultExpiration = 1 * time.Hour
+const DefaultExpiration = 10 * time.Minute
 
 // CacheItem is an item that can be stored in the cache
 type CacheItem struct {
