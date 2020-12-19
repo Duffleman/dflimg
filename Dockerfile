@@ -19,5 +19,6 @@ WORKDIR /usr/local/app
 ENTRYPOINT ["./serve"]
 COPY --from=builder /usr/local/app/resources/nsfw.html resources/
 COPY --from=builder /usr/local/app/resources/not_found.html resources/
+COPY --from=builder /usr/local/app/resources/code.html resources/
 COPY --from=builder /usr/local/app/resources/robots.txt resources/
 COPY --from=builder /go/bin/serve .

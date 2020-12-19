@@ -4,7 +4,6 @@ go 1.14
 
 require (
 	github.com/Masterminds/squirrel v1.4.0
-	github.com/alecthomas/chroma v0.7.3
 	github.com/atotto/clipboard v0.1.2
 	github.com/aws/aws-sdk-go v1.31.4
 	github.com/cuvva/ksuid-go v0.0.0-20190704133525-91309d40e0f0

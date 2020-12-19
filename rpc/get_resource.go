@@ -3,21 +3,12 @@ package rpc
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"html/template"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
-	"time"
 
-	"dflimg"
 	"dflimg/dflerr"
 
-	"github.com/alecthomas/chroma"
-	"github.com/alecthomas/chroma/formatters"
-	"github.com/alecthomas/chroma/lexers"
-	"github.com/alecthomas/chroma/styles"
 	"github.com/go-chi/chi"
 )
 
@@ -79,65 +70,38 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 
 		reader := bytes.NewReader(b)
 
-		// Let's try to format the output if possible
-		// - you must accept text/html
-		// - it must be a text document
-		if strings.Contains(*resource.MimeType, "text/plain") && strings.Contains(accept, "text/html") {
-			var lexer chroma.Lexer
+		isPlainText := strings.Contains(*resource.MimeType, "text/plain")
+		acceptsHTML := strings.Contains(accept, "text/html")
+		hasNoExt := ext == nil
 
-			// if you provide an extension, format the doc accordingly
+		if isPlainText && acceptsHTML && !hasNoExt {
+			// do the formatting
+			tpl, err := template.ParseFiles("resources/code.html")
+			if err != nil {
+				r.handleError(w, req, err)
+				return
+			}
+
+			language := *resource.MimeType
+
 			if ext != nil {
-				// if you're looking for .txt, keep it to text, no HTML
-				if *ext == "txt" {
-					fallback(resource, w, req, query, *modtime, reader)
-					return
-				} else {
-					// match the lexer to the extension given
-					lexer = lexers.Match(fmt.Sprintf("file.%s", *ext))
-				}
-			} else {
-				// analyse the document to figure out what it may be
-				lexer = lexers.Analyse(string(b))
+				language = *ext
 			}
 
-			if lexer == nil {
-				lexer = lexers.Fallback
-			}
-
-			lexer = chroma.Coalesce(lexer)
-
-			formatter := formatters.Get("html")
-			if formatter == nil {
-				formatter = formatters.Fallback
-			}
-
-			style := styles.Get("vs")
-			if style == nil {
-				style = styles.Fallback
-			}
-
-			contents, err := ioutil.ReadAll(reader)
+			err = tpl.Execute(w, map[string]interface{}{
+				"language": language,
+				"title":    resource.Hash,
+				"author":   resource.Owner,
+				"content":  string(b),
+			})
 			if err != nil {
-				fallback(resource, w, req, query, *modtime, reader)
-				return
+				r.handleError(w, req, err)
 			}
-
-			iterator, err := lexer.Tokenise(nil, string(contents))
-			if err != nil {
-				fallback(resource, w, req, query, *modtime, reader)
-				return
-			}
-
-			err = formatter.Format(w, style, iterator)
-			if err != nil {
-				fallback(resource, w, req, query, *modtime, reader)
-				return
-			}
-
 			return
 		}
 
-		fallback(resource, w, req, query, *modtime, reader)
+		w.Header().Set("Content-Type", *resource.MimeType)
+		http.ServeContent(w, req, query, *modtime, reader)
 		return
 	case "url":
 		w.Header().Set("Content-Type", "") // Needed for redirect to work
@@ -147,12 +111,4 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 		r.handleError(w, req, errors.New("unknown resource type"))
 		return
 	}
-}
-
-func fallback(resource *dflimg.Resource, w http.ResponseWriter, req *http.Request, query string, modtime time.Time, reader io.ReadSeeker) {
-	w.Header().Set("Content-Type", *resource.MimeType)
-
-	http.ServeContent(w, req, query, modtime, reader)
-
-	return
 }
