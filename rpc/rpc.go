@@ -42,6 +42,11 @@ func (r *RPC) Post(pattern string, handlerFn http.HandlerFunc) {
 	r.router.Post(pattern, handlerFn)
 }
 
+// Head is a wrapper for chi's head func
+func (r *RPC) Head(pattern string, handlerFn http.HandlerFunc) {
+	r.router.Head(pattern, handlerFn)
+}
+
 // Serve starts the HTTP server
 func (r *RPC) Serve(port string) {
 	r.logger.Info("starting web server")

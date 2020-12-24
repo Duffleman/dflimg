@@ -21,6 +21,8 @@ func (a *App) GetResource(ctx context.Context, input string) (res *dflimg.Resour
 		input = strings.TrimPrefix(input, rootURL)
 	}
 
+	// We intentionally have this above extension mappings
+	// Because we want no formatting on exact name matches
 	if strings.HasPrefix(input, NameCharacter) {
 		input = strings.TrimPrefix(input, NameCharacter)
 		res, err = a.GetResourceByName(ctx, input)

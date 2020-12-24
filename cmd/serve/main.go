@@ -123,6 +123,8 @@ func main() {
 	rpc.Post("/view_details", rpc.ViewDetails)
 	rpc.Post("/list_resources", rpc.ListResources)
 
+	rpc.Head(fmt.Sprintf("/%s{query}", dflapp.NameCharacter), rpc.GetResource)
+	rpc.Head("/{query}", rpc.HeadResource)
 	rpc.Get(fmt.Sprintf("/%s{query}", dflapp.NameCharacter), rpc.GetResource)
 	rpc.Get("/{query}", rpc.GetResource)
 

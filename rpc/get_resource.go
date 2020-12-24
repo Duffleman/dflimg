@@ -31,12 +31,16 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if resource.Type == "url" {
+		forceDownload = false
+	}
+
 	if resource.DeletedAt != nil {
 		r.handleError(w, req, dflerr.New(dflerr.NotFound, nil))
 		return
 	}
 
-	if resource.NSFW {
+	if resource.NSFW && !forceDownload {
 		if _, ok := req.URL.Query()["primed"]; !ok {
 			tpl, err := template.ParseFiles("resources/nsfw.html")
 			if err != nil {
@@ -97,6 +101,7 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 			if err != nil {
 				r.handleError(w, req, err)
 			}
+
 			return
 		}
 
