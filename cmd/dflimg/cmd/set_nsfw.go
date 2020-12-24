@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"dflimg"
+	"dflimg/lib/cher"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -14,13 +15,22 @@ var SetNSFWCmd = &cobra.Command{
 	Use:     "nsfw {query}",
 	Aliases: []string{"n"},
 	Short:   "Toggle the NSFW flag",
-	Args:    cobra.ExactArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 1 || len(args) == 0 {
+			return nil
+		}
+
+		return cher.New("missing_arguments", nil)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		startTime := time.Now()
 
-		query := args[0]
+		query, err := handleQueryInput(args)
+		if err != nil {
+			return err
+		}
 
 		newState, err := toggleNSFW(ctx, query)
 		if err != nil {
@@ -29,9 +39,7 @@ var SetNSFWCmd = &cobra.Command{
 
 		log.Infof("NSFW flag is now %s", newState)
 
-		duration := time.Now().Sub(startTime)
-
-		log.Infof("Done in %s", duration)
+		log.Infof("Done in %s", time.Now().Sub(startTime))
 
 		return nil
 	},

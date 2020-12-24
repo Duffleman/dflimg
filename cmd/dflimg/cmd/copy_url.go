@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"dflimg/lib/cher"
+
 	"github.com/cuvva/ksuid-go"
 	"github.com/spf13/cobra"
 )
@@ -15,9 +17,20 @@ var CopyURLCmd = &cobra.Command{
 	Aliases: []string{"c"},
 	Short:   "Copy from a URL",
 	Long:    "Copy from a URL to the dflimg server",
-	Args:    cobra.ExactArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 1 || len(args) == 0 {
+			return nil
+		}
+
+		return cher.New("missing_arguments", nil)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		filePath, err := downloadFile(args[0])
+		url, err := handleURLInput(args)
+		if err != nil {
+			return err
+		}
+
+		filePath, err := downloadFile(url)
 		if err != nil {
 			return err
 		}
@@ -50,4 +63,17 @@ func downloadFile(urlStr string) (*string, error) {
 	path := out.Name()
 
 	return &path, nil
+}
+
+func handleURLInput(args []string) (string, error) {
+	if len(args) == 1 {
+		return args[0], nil
+	}
+
+	url, err := urlPrompt.Run()
+	if err != nil {
+		return "", err
+	}
+
+	return url, nil
 }

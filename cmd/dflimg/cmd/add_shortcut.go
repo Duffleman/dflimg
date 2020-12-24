@@ -8,7 +8,6 @@ import (
 	"dflimg"
 	"dflimg/lib/cher"
 
-	"github.com/manifoldco/promptui"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -62,28 +61,6 @@ func addShortcut(ctx context.Context, query, shortcut string) error {
 func handleShortcutInput(args []string) (string, string, error) {
 	if len(args) == 2 {
 		return args[0], args[1], nil
-	}
-
-	queryPrompt := promptui.Prompt{
-		Label: "Query",
-		Validate: func(input string) error {
-			if len(input) >= 1 {
-				return nil
-			}
-
-			return cher.New("missing_query", nil)
-		},
-	}
-
-	shortcutPrompt := promptui.Prompt{
-		Label: "Shortcut",
-		Validate: func(input string) error {
-			if len(input) >= 1 {
-				return nil
-			}
-
-			return cher.New("missing_shortcut", nil)
-		},
 	}
 
 	query, err := queryPrompt.Run()

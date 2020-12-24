@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"dflimg"
+	"dflimg/lib/cher"
 
-	"github.com/atotto/clipboard"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -17,25 +16,31 @@ var ShortenURLCmd = &cobra.Command{
 	Aliases: []string{"s"},
 	Short:   "Shorten a URL",
 	Long:    "Shorten a URL",
-	Args:    cobra.ExactArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 1 || len(args) == 0 {
+			return nil
+		}
+
+		return cher.New("missing_arguments", nil)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		startTime := time.Now()
 
-		urlStr := args[0]
+		url, err := handleURLInput(args)
+		if err != nil {
+			return err
+		}
 
 		body, err := makeClient().ShortenURL(ctx, &dflimg.CreateURLRequest{
-			URL: urlStr,
+			URL: url,
 		})
 		if err != nil {
 			return err
 		}
 
-		err = clipboard.WriteAll(body.URL)
-		if err != nil {
-			fmt.Println("Could not copy to clipboard. Please copy the URL manually")
-		}
+		writeClipboard(body.URL)
 		notify("URL Shortened", body.URL)
 
 		log.Infof("Done in %s: %s", time.Now().Sub(startTime), body.URL)

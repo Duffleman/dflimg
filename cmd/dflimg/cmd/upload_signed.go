@@ -12,7 +12,6 @@ import (
 	"dflimg"
 	"dflimg/lib/cher"
 
-	"github.com/atotto/clipboard"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -22,13 +21,22 @@ var UploadSignedCmd = &cobra.Command{
 	Aliases: []string{"u"},
 	Short:   "Upload a file to a signed URL",
 	Long:    "Upload a file from your local machine to AWS",
-	Args:    cobra.ExactArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 1 || len(args) == 0 {
+			return nil
+		}
+
+		return cher.New("missing_arguments", nil)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
 		startTime := time.Now()
 
-		localFile := args[0]
+		localFile, err := handleLocalFileInput(args)
+		if err != nil {
+			return err
+		}
 
 		filePaths, err := scanDirectory(localFile)
 		if err != nil {
@@ -36,7 +44,7 @@ var UploadSignedCmd = &cobra.Command{
 		}
 
 		if len(filePaths) == 0 {
-			return cher.New("no_fies", nil)
+			return cher.New("no_files", nil)
 		}
 
 		singleFile := len(filePaths) == 1
@@ -51,17 +59,16 @@ var UploadSignedCmd = &cobra.Command{
 			}
 
 			filePrepStart := time.Now()
+
 			resource, err := prepareUpload(ctx, filename, file)
 			if err != nil {
 				return err
 			}
+
 			log.Infof("File prepared: %s (%s)", resource.URL, time.Now().Sub(filePrepStart))
 
 			if singleFile {
-				err = clipboard.WriteAll(resource.URL)
-				if err != nil {
-					log.Warn("Could not copy to clipboard. Please copy the URL manually")
-				}
+				writeClipboard(resource.URL)
 				notify("Image prepared", resource.URL)
 			}
 
@@ -140,4 +147,17 @@ func scanDirectory(rootFile string) (filePaths []string, err error) {
 	})
 
 	return
+}
+
+func handleLocalFileInput(args []string) (string, error) {
+	if len(args) == 1 {
+		return args[0], nil
+	}
+
+	file, err := filePrompt.Run()
+	if err != nil {
+		return "", err
+	}
+
+	return file, nil
 }
