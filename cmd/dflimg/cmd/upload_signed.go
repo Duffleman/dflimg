@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"dflimg"
@@ -68,9 +69,15 @@ var UploadSignedCmd = &cobra.Command{
 func prepareUpload(rootURL, authToken string, filename string, file []byte) (*dflimg.CreateSignedURLResponse, error) {
 	contentType := http.DetectContentType(file)
 
+	var name *string
+
+	if filename != "" && !strings.Contains(filename, "/") {
+		name = &filename
+	}
+
 	reqBody := &dflimg.CreateSignedURLRequest{
 		ContentType: contentType,
-		Name:        &filename,
+		Name:        name,
 	}
 
 	c := dhttp.New(rootURL, authToken)
