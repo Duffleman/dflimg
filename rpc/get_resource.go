@@ -10,18 +10,16 @@ import (
 
 	"dflimg"
 	"dflimg/dflerr"
-
-	"github.com/go-chi/chi"
 )
 
 // GetResource gets a resource and handles the response for it
 func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	var forceDownload bool
-
-	query := chi.URLParam(req, "query")
+	query := strings.TrimPrefix(req.URL.Path, "/")
 	accept := req.Header.Get("Accept")
+
+	var forceDownload bool
 
 	if fd := req.URL.Query()["d"]; len(fd) >= 1 {
 		forceDownload = true
@@ -80,9 +78,9 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 
 		isPlainText := strings.Contains(*resource.MimeType, "text/plain")
 		acceptsHTML := strings.Contains(accept, "text/html")
-		hasNoExt := ext == nil
+		hasExt := ext != nil
 
-		if isPlainText && acceptsHTML && !hasNoExt {
+		if isPlainText && acceptsHTML && hasExt && !forceDownload {
 			// do the formatting
 			tpl, err := template.ParseFiles("resources/code.html")
 			if err != nil {
@@ -90,14 +88,8 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			language := *resource.MimeType
-
-			if ext != nil {
-				language = *ext
-			}
-
 			err = tpl.Execute(w, map[string]interface{}{
-				"language": language,
+				"language": *ext,
 				"title":    resource.Hash,
 				"author":   resource.Owner,
 				"content":  string(b),
@@ -112,7 +104,7 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 		http.ServeContent(w, req, query, *modtime, reader)
 		return
 	case "url":
-		w.Header().Set("Content-Type", "") // Needed for redirect to work
+		writeHeaders(w, resource, forceDownload)
 		http.Redirect(w, req, resource.Link, http.StatusTemporaryRedirect)
 		return
 	default:

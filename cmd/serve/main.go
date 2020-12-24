@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
 
 	"dflimg"
-	"dflimg/app"
+	dflapp "dflimg/app"
 	"dflimg/app/storageproviders"
 	dfldb "dflimg/db"
 	dflrpc "dflimg/rpc"
@@ -88,11 +89,11 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	redis := app.NewCache(redisClient)
+	redis := dflapp.NewCache(redisClient)
 
 	// Setup app & rpc
 	router := chi.NewRouter()
-	app := app.New(db, sp, hasher, redis)
+	app := dflapp.New(db, sp, hasher, redis)
 	rpc := dflrpc.New(logger, router, app)
 
 	// Add middleware
@@ -122,6 +123,7 @@ func main() {
 	rpc.Post("/view_details", rpc.ViewDetails)
 	rpc.Post("/list_resources", rpc.ListResources)
 
+	rpc.Get(fmt.Sprintf("/%s{query}", dflapp.NameCharacter), rpc.GetResource)
 	rpc.Get("/{query}", rpc.GetResource)
 
 	// serve

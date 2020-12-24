@@ -63,9 +63,12 @@ Creates a signed URL to upload a file to directly.
 
 ```json
 {
-	"content_type": "image/png"
+	"content_type": "image/png",
+	"name": "my_file.png"
 }
 ```
+
+`name` is optional and can be `null` or omitted.
 
 ##### Response
 
@@ -74,6 +77,7 @@ Creates a signed URL to upload a file to directly.
 	"resource_id": "file_aaa000",
 	"type": "file",
 	"hash": "xAx",
+	"name": "my_file.png",
 	"url": "https://dfl.mn/xAx",
 	"s3link": "https://s3.amazon.com/eu-west-1/..."
 }
@@ -163,6 +167,7 @@ Shorten a URL. It requires `url` which is the URL to shorten.
 	"type": "file",
 	"hash": "dZM",
 	"owner": "Duffleman",
+	"name": "my_file.png",
 	"link": "i.dfl.mn/file_aaa00",
 	"nsfw": true,
 	"mime_type": "image/png",
@@ -193,6 +198,7 @@ Shorten a URL. It requires `url` which is the URL to shorten.
 		"id": "url_000000BuamNqpeZr10FkIPg7HQ4Aa",
 		"type": "url",
 		"hash": "Leb",
+		"name": null,
 		"owner": "Duffleman",
 		"link": "https://google.co.uk",
 		"nsfw": false,
@@ -205,6 +211,7 @@ Shorten a URL. It requires `url` which is the URL to shorten.
 		"id": "file_000000BualrJMCkEO46lamPFHTwEi",
 		"type": "file",
 		"hash": "GkQ",
+		"name": "my_file.png",
 		"owner": "Duffleman",
 		"link": "i.dfl.mn/file_000000BualrJMCkEO46lamPFHTwEi",
 		"nsfw": true,
@@ -223,6 +230,12 @@ Links to the resource. Serves the content directly!
 #### `GET /:{shortcut}`
 
 Links to the resource through one of it's shortcuts. Serves the content directly!
+
+#### `GET /n/{file_name}`
+
+Links to the resource through an exact file name match. This is considered insecure and only exists to handle legacy issues where you need to serve the file with the same name as it exists in the URL.
+
+This is insecure only because it does not force unique file names. So you can upload a file twice with the same name and it'll serve whichever is latest, and it does not limit the file to a specific user. So another user can poison your file if they know the file name. You could also make a mistake and upload a second file with the same name leading to different content, with unexpected results.
 
 ### storage providers
 

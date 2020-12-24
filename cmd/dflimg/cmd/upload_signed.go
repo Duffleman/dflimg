@@ -41,7 +41,7 @@ var UploadSignedCmd = &cobra.Command{
 		}
 
 		filePrepStart := time.Now()
-		resource, err := prepareUpload(rootURL, authToken, file)
+		resource, err := prepareUpload(rootURL, authToken, localFile, file)
 		if err != nil {
 			return err
 		}
@@ -65,11 +65,12 @@ var UploadSignedCmd = &cobra.Command{
 	},
 }
 
-func prepareUpload(rootURL, authToken string, file []byte) (*dflimg.CreateSignedURLResponse, error) {
+func prepareUpload(rootURL, authToken string, filename string, file []byte) (*dflimg.CreateSignedURLResponse, error) {
 	contentType := http.DetectContentType(file)
 
 	reqBody := &dflimg.CreateSignedURLRequest{
 		ContentType: contentType,
+		Name:        &filename,
 	}
 
 	c := dhttp.New(rootURL, authToken)

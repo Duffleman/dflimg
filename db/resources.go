@@ -93,6 +93,26 @@ func (db *DB) FindResourceByShortcut(ctx context.Context, shortcut string) (*dfl
 	return db.queryOne(ctx, query, values)
 }
 
+// FindResourceByName retrieves a resource from the database by an exact name match
+func (db *DB) FindResourceByName(ctx context.Context, name string) (*dflimg.Resource, error) {
+	b := NewQueryBuilder()
+
+	query, values, err := b.
+		Select(strings.Join(resourceColumns, ",")).
+		From("resources").
+		Where(sq.Eq{
+			"name": name,
+		}).
+		OrderBy("serial DESC").
+		Limit(1).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	return db.queryOne(ctx, query, values)
+}
+
 func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) (*dflimg.Resource, error) {
 	res := &dflimg.Resource{}
 
