@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"bytes"
+	"dflimg/lib/cher"
 	"errors"
 	"fmt"
 	"html/template"
@@ -9,7 +10,6 @@ import (
 	"strings"
 
 	"dflimg"
-	"dflimg/dflerr"
 )
 
 // GetResource gets a resource and handles the response for it
@@ -36,7 +36,7 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if resource.DeletedAt != nil {
-		r.handleError(w, req, dflerr.New(dflerr.NotFound, nil))
+		r.handleError(w, req, cher.New(cher.NotFound, nil))
 		return
 	}
 
@@ -61,7 +61,7 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 	case "file":
 		b, modtime, err := r.app.GetFile(ctx, resource)
 		if err != nil {
-			if err == dflerr.ErrNotFound {
+			if c, ok := err.(cher.E); ok && c.Code == cher.NotFound {
 				tpl, err := template.ParseFiles("resources/not_found.html")
 				if err != nil {
 					r.handleError(w, req, err)

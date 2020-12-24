@@ -1,68 +1,68 @@
 package cmd
 
 import (
+	"context"
 	"time"
 
 	"dflimg"
-	"dflimg/cmd/dflimg/http"
+	"dflimg/lib/cher"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var SetNSFWCmd = &cobra.Command{
-	Use:     "nsfw",
+	Use:     "nsfw {query}",
 	Aliases: []string{"n"},
 	Short:   "Toggle the NSFW flag",
-	Args:    cobra.ExactArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 1 || len(args) == 0 {
+			return nil
+		}
+
+		return cher.New("missing_arguments", nil)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+
 		startTime := time.Now()
 
-		query := args[0]
+		query, err := handleQueryInput(args)
+		if err != nil {
+			return err
+		}
 
-		rootURL := viper.Get("ROOT_URL").(string)
-		authToken := viper.Get("AUTH_TOKEN").(string)
-
-		newState, err := toggleNSFW(rootURL, authToken, query)
+		newState, err := toggleNSFW(ctx, query)
 		if err != nil {
 			return err
 		}
 
 		log.Infof("NSFW flag is now %s", newState)
 
-		duration := time.Now().Sub(startTime)
-
-		log.Infof("Done in %s", duration)
+		log.Infof("Done in %s", time.Now().Sub(startTime))
 
 		return nil
 	},
 }
 
-func toggleNSFW(rootURL, authToken, query string) (string, error) {
-	body := &dflimg.IdentifyResource{
+func toggleNSFW(ctx context.Context, query string) (string, error) {
+	res, err := makeClient().ViewDetails(ctx, &dflimg.IdentifyResource{
 		Query: query,
-	}
-	c := http.New(rootURL, authToken)
-	res := &dflimg.Resource{}
-
-	err := c.JSONRequest("POST", "view_details", body, &res)
+	})
 	if err != nil {
 		return "", err
 	}
 
-	swapTo := &dflimg.SetNSFWRequest{
+	newState := "ON"
+
+	if res.NSFW {
+		newState = "OFF"
+	}
+
+	return newState, makeClient().SetNSFW(ctx, &dflimg.SetNSFWRequest{
 		IdentifyResource: dflimg.IdentifyResource{
 			Query: query,
 		},
 		NSFW: !res.NSFW,
-	}
-
-	newState := "ON"
-
-	if res.NSFW == true {
-		newState = "OFF"
-	}
-
-	return newState, c.JSONRequest("POST", "set_nsfw", swapTo, nil)
+	})
 }

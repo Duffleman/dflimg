@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"dflimg"
-	"dflimg/dflerr"
+	"dflimg/lib/cher"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -104,7 +104,7 @@ func (a *AWS) Get(ctx context.Context, resource *dflimg.Resource) ([]byte, *time
 	})
 	if err != nil {
 		if strings.Contains(err.Error(), "NoSuchKey") {
-			return nil, nil, dflerr.ErrNotFound
+			return nil, nil, cher.New(cher.NotFound, nil)
 		}
 
 		return nil, nil, err
@@ -147,7 +147,7 @@ func (a *AWS) GetSize(ctx context.Context, resource *dflimg.Resource) (int, erro
 	}
 
 	if info.ContentLength == nil {
-		return 0, dflerr.New("missing_file_size", nil)
+		return 0, cher.New("missing_file_size", nil)
 	}
 
 	size := *info.ContentLength

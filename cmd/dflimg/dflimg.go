@@ -26,6 +26,7 @@ func main() {
 	rootCmd.AddCommand(cli.SetNSFWCmd)
 	rootCmd.AddCommand(cli.ShortenURLCmd)
 	rootCmd.AddCommand(cli.UploadSignedCmd)
+	rootCmd.AddCommand(cli.ViewDetailsCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

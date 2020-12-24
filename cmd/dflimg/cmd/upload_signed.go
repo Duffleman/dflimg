@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -9,34 +10,33 @@ import (
 	"time"
 
 	"dflimg"
-	dhttp "dflimg/cmd/dflimg/http"
-	"dflimg/dflerr"
+	"dflimg/lib/cher"
 
-	"github.com/atotto/clipboard"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-func setup() (rootURL, authToken string) {
-	rootURL = viper.Get("ROOT_URL").(string)
-	authToken = viper.Get("AUTH_TOKEN").(string)
-
-	return
-}
-
 var UploadSignedCmd = &cobra.Command{
-	Use:     "signed-upload",
+	Use:     "signed-upload {file}",
 	Aliases: []string{"u"},
 	Short:   "Upload a file to a signed URL",
 	Long:    "Upload a file from your local machine to AWS",
-	Args:    cobra.ExactArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 1 || len(args) == 0 {
+			return nil
+		}
+
+		return cher.New("missing_arguments", nil)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+
 		startTime := time.Now()
 
-		rootURL, authToken := setup()
-
-		localFile := args[0]
+		localFile, err := handleLocalFileInput(args)
+		if err != nil {
+			return err
+		}
 
 		filePaths, err := scanDirectory(localFile)
 		if err != nil {
@@ -44,7 +44,7 @@ var UploadSignedCmd = &cobra.Command{
 		}
 
 		if len(filePaths) == 0 {
-			return dflerr.New("no_fies", nil)
+			return cher.New("no_files", nil)
 		}
 
 		singleFile := len(filePaths) == 1
@@ -59,17 +59,16 @@ var UploadSignedCmd = &cobra.Command{
 			}
 
 			filePrepStart := time.Now()
-			resource, err := prepareUpload(rootURL, authToken, filename, file)
+
+			resource, err := prepareUpload(ctx, filename, file)
 			if err != nil {
 				return err
 			}
+
 			log.Infof("File prepared: %s (%s)", resource.URL, time.Now().Sub(filePrepStart))
 
 			if singleFile {
-				err = clipboard.WriteAll(resource.URL)
-				if err != nil {
-					log.Warn("Could not copy to clipboard. Please copy the URL manually")
-				}
+				writeClipboard(resource.URL)
 				notify("Image prepared", resource.URL)
 			}
 
@@ -92,7 +91,7 @@ var UploadSignedCmd = &cobra.Command{
 	},
 }
 
-func prepareUpload(rootURL, authToken string, filename string, file []byte) (*dflimg.CreateSignedURLResponse, error) {
+func prepareUpload(ctx context.Context, filename string, file []byte) (*dflimg.CreateSignedURLResponse, error) {
 	contentType := http.DetectContentType(file)
 
 	var name *string
@@ -102,17 +101,10 @@ func prepareUpload(rootURL, authToken string, filename string, file []byte) (*df
 		name = &tmpName
 	}
 
-	reqBody := &dflimg.CreateSignedURLRequest{
+	return makeClient().CreatedSignedURL(ctx, &dflimg.CreateSignedURLRequest{
 		ContentType: contentType,
 		Name:        name,
-	}
-
-	c := dhttp.New(rootURL, authToken)
-
-	res := &dflimg.CreateSignedURLResponse{}
-	err := c.JSONRequest("POST", "create_signed_url", reqBody, &res)
-
-	return res, err
+	})
 }
 
 // SendFileAWS uploads the file to AWS
@@ -155,4 +147,17 @@ func scanDirectory(rootFile string) (filePaths []string, err error) {
 	})
 
 	return
+}
+
+func handleLocalFileInput(args []string) (string, error) {
+	if len(args) == 1 {
+		return args[0], nil
+	}
+
+	file, err := filePrompt.Run()
+	if err != nil {
+		return "", err
+	}
+
+	return file, nil
 }

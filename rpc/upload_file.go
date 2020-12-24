@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"dflimg"
-	"dflimg/dflerr"
+	"dflimg/lib/cher"
 	"dflimg/rpc/middleware"
 )
 
@@ -18,7 +18,7 @@ func (r *RPC) UploadFile(w http.ResponseWriter, req *http.Request) {
 
 	key := ctx.Value(middleware.UsernameKey)
 	if key == nil || key == "" {
-		r.handleError(w, req, dflerr.New(dflerr.AccessDenied, dflerr.M{"username": key}))
+		r.handleError(w, req, cher.New(cher.AccessDenied, cher.M{"username": key}))
 		return
 	}
 

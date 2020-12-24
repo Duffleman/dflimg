@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"dflimg/app"
-	"dflimg/dflerr"
+	"dflimg/lib/cher"
 
 	"github.com/go-chi/chi"
 	"github.com/sirupsen/logrus"
@@ -60,12 +60,12 @@ func (r *RPC) handleError(w http.ResponseWriter, req *http.Request, err error) {
 
 	l := logrus.NewEntry(r.logger)
 
-	if v, ok := err.(dflerr.E); ok {
+	if v, ok := err.(cher.E); ok {
 		switch v.Code {
-		case dflerr.NotFound:
+		case cher.NotFound:
 			l.Info(v, v.Meta, v.Reasons)
 			w.WriteHeader(404)
-		case dflerr.AccessDenied:
+		case cher.AccessDenied:
 			l.Info(v, v.Meta, v.Reasons)
 			w.WriteHeader(403)
 		default:
@@ -78,7 +78,7 @@ func (r *RPC) handleError(w http.ResponseWriter, req *http.Request, err error) {
 		l.Warn(err)
 		w.WriteHeader(500)
 
-		json.NewEncoder(w).Encode(dflerr.New("unknown", dflerr.M{"error": err.Error()}))
+		json.NewEncoder(w).Encode(cher.New("unknown", cher.M{"error": err.Error()}))
 	}
 
 	return
