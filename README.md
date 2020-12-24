@@ -190,7 +190,7 @@ Shorten a URL. It requires `url` which is the URL to shorten.
 }
 ```
 
-##### Response
+##### Response
 
 ```json
 [
@@ -223,19 +223,30 @@ Shorten a URL. It requires `url` which is the URL to shorten.
 ]
 ```
 
-#### `GET /{hash}`
+#### `GET /{query}`
 
-Links to the resource. Serves the content directly!
+##### `xxx`
 
-#### `GET /:{shortcut}`
+Links to the resource via it's hash.
 
-Links to the resource through one of it's shortcuts. Serves the content directly!
+##### `:xxx`
 
-#### `GET /n/{file_name}`
+Any link that starts with `:` is a shortcut. You can assign many shortcuts to a resource, but they are unique, you cannot assign a shortcut to two resources.
+
+##### `n/xxx`
 
 Links to the resource through an exact file name match. This is considered insecure and only exists to handle legacy issues where you need to serve the file with the same name as it exists in the URL.
 
 This is insecure only because it does not force unique file names. So you can upload a file twice with the same name and it'll serve whichever is latest, and it does not limit the file to a specific user. So another user can poison your file if they know the file name. You could also make a mistake and upload a second file with the same name leading to different content, with unexpected results.
+
+##### `?d`
+
+Forces the file to download to your computer rather than display in your web browser.
+
+##### Extensions
+
+If the file mimetype is `text/plain`, then you can provide an extension to try and add syntax highlighting. `.php` for PHP, `.go` for Go etc.
+
 
 ### storage providers
 
