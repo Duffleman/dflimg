@@ -30,6 +30,7 @@ type Resource struct {
 	Type      string     `json:"type"`
 	Serial    int        `json:"-"`
 	Hash      *string    `json:"hash"`
+	Name      *string    `json:"name"`
 	Owner     string     `json:"owner"`
 	Link      string     `json:"link"`
 	NSFW      bool       `json:"nsfw"`
@@ -46,6 +47,7 @@ type ShortFormResource struct {
 
 type CreateFileRequest struct {
 	File bytes.Buffer `json:"file"`
+	Name *string      `json:"name"`
 }
 
 type CreateURLRequest struct {
@@ -60,15 +62,17 @@ type CreateResourceResponse struct {
 }
 
 type CreateSignedURLRequest struct {
-	ContentType string `json:"content_type"`
+	Name        *string `json:"name"`
+	ContentType string  `json:"content_type"`
 }
 
 type CreateSignedURLResponse struct {
-	ResourceID string `json:"resource_id"`
-	Type       string `json:"type"`
-	Hash       string `json:"hash"`
-	URL        string `json:"url"`
-	S3Link     string `json:"s3link"`
+	ResourceID string  `json:"resource_id"`
+	Type       string  `json:"type"`
+	Name       *string `json:"name"`
+	Hash       string  `json:"hash"`
+	URL        string  `json:"url"`
+	S3Link     string  `json:"s3link"`
 }
 
 type IdentifyResource struct {

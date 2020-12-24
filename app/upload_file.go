@@ -20,6 +20,7 @@ func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateFileRequest) (*d
 	contentType := http.DetectContentType(bytes)
 	fileID := ksuid.Generate("file").String()
 	fileKey := a.fileProvider.GenerateKey(fileID)
+	name := req.Name
 
 	// upload to the file provider
 	err := a.fileProvider.Upload(ctx, fileKey, contentType, req.File)
@@ -28,7 +29,7 @@ func (a *App) UploadFile(ctx context.Context, req *dflimg.CreateFileRequest) (*d
 	}
 
 	// save to DB
-	fileRes, err := a.db.NewFile(ctx, fileID, fileKey, username, contentType)
+	fileRes, err := a.db.NewFile(ctx, fileID, fileKey, username, name, contentType)
 	if err != nil {
 		return nil, err
 	}

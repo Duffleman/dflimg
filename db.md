@@ -8,6 +8,7 @@ CREATE TABLE resources (
     serial SERIAL UNIQUE,
     hash text UNIQUE,
     type text NOT NULL,
+    name text,
     owner text NOT NULL,
     link text NOT NULL,
     mime_type text,

@@ -22,7 +22,7 @@ const (
 )
 
 // resourceColumns is the set of columns to populate into the struct
-var resourceColumns = []string{"id", "type", "serial", "hash", "owner", "link", "nsfw", "mime_type", "shortcuts", "created_at", "deleted_at"}
+var resourceColumns = []string{"id", "type", "serial", "hash", "name", "owner", "link", "nsfw", "mime_type", "shortcuts", "created_at", "deleted_at"}
 
 // FindShortcutConflicts returns error if a shortcut is already taken
 func (db *DB) FindShortcutConflicts(ctx context.Context, shortcuts []string) error {
@@ -107,6 +107,7 @@ func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) 
 		&res.Type,
 		&res.Serial,
 		&res.Hash,
+		&res.Name,
 		&res.Owner,
 		&res.Link,
 		&res.NSFW,
@@ -232,7 +233,7 @@ func (db *DB) ListResources(ctx context.Context, username string, includeDeleted
 	for rows.Next() {
 		o := &dflimg.Resource{}
 
-		err := rows.Scan(&o.ID, &o.Type, &o.Serial, &o.Hash, &o.Owner, &o.Link, &o.NSFW, &o.MimeType, &o.Shortcuts, &o.CreatedAt, &o.DeletedAt)
+		err := rows.Scan(&o.ID, &o.Type, &o.Serial, &o.Hash, &o.Name, &o.Owner, &o.Link, &o.NSFW, &o.MimeType, &o.Shortcuts, &o.CreatedAt, &o.DeletedAt)
 		if err != nil {
 			return nil, err
 		}

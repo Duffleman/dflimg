@@ -3,10 +3,12 @@ package rpc
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"html/template"
 	"net/http"
 	"strings"
 
+	"dflimg"
 	"dflimg/dflerr"
 
 	"github.com/go-chi/chi"
@@ -16,8 +18,14 @@ import (
 func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
+	var forceDownload bool
+
 	query := chi.URLParam(req, "query")
 	accept := req.Header.Get("Accept")
+
+	if fd := req.URL.Query()["d"]; len(fd) >= 1 {
+		forceDownload = true
+	}
 
 	resource, ext, err := r.app.GetResource(ctx, query)
 	if err != nil {
@@ -100,7 +108,7 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		w.Header().Set("Content-Type", *resource.MimeType)
+		writeHeaders(w, resource, forceDownload)
 		http.ServeContent(w, req, query, *modtime, reader)
 		return
 	case "url":
@@ -111,4 +119,30 @@ func (r *RPC) GetResource(w http.ResponseWriter, req *http.Request) {
 		r.handleError(w, req, errors.New("unknown resource type"))
 		return
 	}
+}
+
+func writeHeaders(w http.ResponseWriter, resource *dflimg.Resource, forceDownload bool) {
+	var display string = "inline"
+	var mimetype string
+
+	if resource.Type == "url" {
+		w.Header().Set("Content-Type", "")
+		return
+	}
+
+	if resource.MimeType != nil {
+		mimetype = *resource.MimeType
+	}
+
+	if forceDownload {
+		display = "attachment"
+		mimetype = "application/octet-stream"
+	}
+
+	if resource.Name != nil {
+		display = fmt.Sprintf("%s; filename=%s", display, *resource.Name)
+	}
+
+	w.Header().Set("Content-Type", mimetype)
+	w.Header().Set("Content-Disposition", display)
 }

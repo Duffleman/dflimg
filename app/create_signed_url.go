@@ -14,7 +14,7 @@ import (
 
 // CreateSignedURL creates a file resource, but instead of accepting the file
 // it generates a signed URL
-func (a *App) CreateSignedURL(ctx context.Context, username string, contentType string) (*dflimg.CreateSignedURLResponse, error) {
+func (a *App) CreateSignedURL(ctx context.Context, username string, name *string, contentType string) (*dflimg.CreateSignedURLResponse, error) {
 	if !a.fileProvider.SupportsSignedURLs() {
 		return nil, dflerr.New("signed_urls_unsupported", nil)
 	}
@@ -22,7 +22,7 @@ func (a *App) CreateSignedURL(ctx context.Context, username string, contentType 
 	fileID := ksuid.Generate("file").String()
 	fileKey := a.fileProvider.GenerateKey(fileID)
 
-	fileRes, err := a.db.NewPendingFile(ctx, fileID, fileKey, username, contentType)
+	fileRes, err := a.db.NewPendingFile(ctx, fileID, fileKey, username, name, contentType)
 	if err != nil {
 		return nil, err
 	}
@@ -43,6 +43,7 @@ func (a *App) CreateSignedURL(ctx context.Context, username string, contentType 
 		ResourceID: fileRes.ID,
 		Type:       fileRes.Type,
 		Hash:       hash,
+		Name:       name,
 		URL:        fullURL,
 		S3Link:     url,
 	}, nil

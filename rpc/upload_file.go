@@ -22,6 +22,13 @@ func (r *RPC) UploadFile(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	var name *string
+
+	fileName := req.PostFormValue("name")
+	if fileName != "" {
+		name = &fileName
+	}
+
 	file, _, err := req.FormFile("file")
 	if err != nil {
 		r.handleError(w, req, err)
@@ -34,6 +41,7 @@ func (r *RPC) UploadFile(w http.ResponseWriter, req *http.Request) {
 
 	res, err := r.app.UploadFile(ctx, &dflimg.CreateFileRequest{
 		File: buf,
+		Name: name,
 	})
 	if err != nil {
 		r.handleError(w, req, err)

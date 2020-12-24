@@ -1,11 +1,12 @@
 package rpc
 
 import (
+	"encoding/json"
+	"net/http"
+
 	"dflimg"
 	"dflimg/dflerr"
 	"dflimg/rpc/middleware"
-	"encoding/json"
-	"net/http"
 )
 
 func (r *RPC) ListResources(w http.ResponseWriter, req *http.Request) {
