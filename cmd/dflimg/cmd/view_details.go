@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"dflimg"
-	dhttp "dflimg/cmd/dflimg/http"
+	"context"
 	"encoding/json"
 	"fmt"
+
+	"dflimg"
 
 	"github.com/spf13/cobra"
 )
@@ -15,17 +16,13 @@ var ViewDetailsCmd = &cobra.Command{
 	Short:   "View details of a resource",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+
 		query := args[0]
 
-		rootURL, authToken := setup()
-		c := dhttp.New(rootURL, authToken)
-
-		res := &dflimg.Resource{}
-		req := &dflimg.IdentifyResource{
+		res, err := makeClient().ViewDetails(ctx, &dflimg.IdentifyResource{
 			Query: query,
-		}
-
-		err := c.JSONRequest("POST", "view_details", req, res)
+		})
 		if err != nil {
 			return err
 		}

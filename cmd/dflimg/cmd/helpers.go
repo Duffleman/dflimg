@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"dflimg"
+
 	b "github.com/gen2brain/beeep"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -16,9 +18,13 @@ func notify(title, body string) {
 	}
 }
 
-func setup() (rootURL, authToken string) {
-	rootURL = viper.Get("ROOT_URL").(string)
-	authToken = viper.Get("AUTH_TOKEN").(string)
+func makeClient() dflimg.Service {
+	rootURL := viper.Get("ROOT_URL").(string)
+	authToken := viper.Get("AUTH_TOKEN").(string)
 
-	return
+	return dflimg.NewClient(rootURL, authToken)
+}
+
+func rootURL() string {
+	return viper.Get("ROOT_URL").(string)
 }

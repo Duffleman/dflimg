@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"dflimg"
-	dhttp "dflimg/cmd/dflimg/http"
 	"dflimg/lib/cher"
 
 	"github.com/atotto/clipboard"
@@ -24,9 +24,9 @@ var UploadSignedCmd = &cobra.Command{
 	Long:    "Upload a file from your local machine to AWS",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		startTime := time.Now()
+		ctx := context.Background()
 
-		rootURL, authToken := setup()
+		startTime := time.Now()
 
 		localFile := args[0]
 
@@ -51,7 +51,7 @@ var UploadSignedCmd = &cobra.Command{
 			}
 
 			filePrepStart := time.Now()
-			resource, err := prepareUpload(rootURL, authToken, filename, file)
+			resource, err := prepareUpload(ctx, filename, file)
 			if err != nil {
 				return err
 			}
@@ -84,7 +84,7 @@ var UploadSignedCmd = &cobra.Command{
 	},
 }
 
-func prepareUpload(rootURL, authToken string, filename string, file []byte) (*dflimg.CreateSignedURLResponse, error) {
+func prepareUpload(ctx context.Context, filename string, file []byte) (*dflimg.CreateSignedURLResponse, error) {
 	contentType := http.DetectContentType(file)
 
 	var name *string
@@ -94,17 +94,10 @@ func prepareUpload(rootURL, authToken string, filename string, file []byte) (*df
 		name = &tmpName
 	}
 
-	reqBody := &dflimg.CreateSignedURLRequest{
+	return makeClient().CreatedSignedURL(ctx, &dflimg.CreateSignedURLRequest{
 		ContentType: contentType,
 		Name:        name,
-	}
-
-	c := dhttp.New(rootURL, authToken)
-
-	res := &dflimg.CreateSignedURLResponse{}
-	err := c.JSONRequest("POST", "create_signed_url", reqBody, &res)
-
-	return res, err
+	})
 }
 
 // SendFileAWS uploads the file to AWS

@@ -1,14 +1,13 @@
 package cmd
 
 import (
+	"context"
 	"time"
 
 	"dflimg"
-	"dflimg/cmd/dflimg/http"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var DeleteResourceCmd = &cobra.Command{
@@ -18,14 +17,13 @@ var DeleteResourceCmd = &cobra.Command{
 	Long:    "Delete a resource",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+
 		startTime := time.Now()
 
 		urlStr := args[0]
 
-		rootURL := viper.Get("ROOT_URL").(string)
-		authToken := viper.Get("AUTH_TOKEN").(string)
-
-		err := deleteResource(rootURL, authToken, urlStr)
+		err := deleteResource(ctx, urlStr)
 		if err != nil {
 			return err
 		}
@@ -39,12 +37,10 @@ var DeleteResourceCmd = &cobra.Command{
 	},
 }
 
-func deleteResource(rootURL, authToken, urlStr string) error {
+func deleteResource(ctx context.Context, urlStr string) error {
 	body := &dflimg.IdentifyResource{
 		Query: urlStr,
 	}
 
-	c := http.New(rootURL, authToken)
-
-	return c.JSONRequest("POST", "delete_resource", body, nil)
+	return makeClient().DeleteResource(ctx, body)
 }
