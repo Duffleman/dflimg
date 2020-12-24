@@ -14,7 +14,7 @@ import (
 )
 
 var AddShortcutCmd = &cobra.Command{
-	Use:     "add-shortcut",
+	Use:     "add-shortcut {query} {shortcut}",
 	Aliases: []string{"asc"},
 	Short:   "Add a shortcut",
 	Args:    cobra.ExactArgs(2),

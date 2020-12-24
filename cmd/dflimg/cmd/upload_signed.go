@@ -15,18 +15,10 @@ import (
 	"github.com/atotto/clipboard"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-func setup() (rootURL, authToken string) {
-	rootURL = viper.Get("ROOT_URL").(string)
-	authToken = viper.Get("AUTH_TOKEN").(string)
-
-	return
-}
-
 var UploadSignedCmd = &cobra.Command{
-	Use:     "signed-upload",
+	Use:     "signed-upload {file}",
 	Aliases: []string{"u"},
 	Short:   "Upload a file to a signed URL",
 	Long:    "Upload a file from your local machine to AWS",
