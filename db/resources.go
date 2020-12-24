@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"dflimg"
-	"dflimg/dflerr"
+	"dflimg/lib/cher"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4"
@@ -138,7 +138,7 @@ func (db *DB) queryOne(ctx context.Context, query string, values []interface{}) 
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, dflerr.New(dflerr.NotFound, nil)
+			return nil, cher.New(cher.NotFound, nil)
 		}
 		return nil, err
 	}

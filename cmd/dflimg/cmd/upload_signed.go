@@ -10,7 +10,7 @@ import (
 
 	"dflimg"
 	dhttp "dflimg/cmd/dflimg/http"
-	"dflimg/dflerr"
+	"dflimg/lib/cher"
 
 	"github.com/atotto/clipboard"
 	log "github.com/sirupsen/logrus"
@@ -44,7 +44,7 @@ var UploadSignedCmd = &cobra.Command{
 		}
 
 		if len(filePaths) == 0 {
-			return dflerr.New("no_fies", nil)
+			return cher.New("no_fies", nil)
 		}
 
 		singleFile := len(filePaths) == 1

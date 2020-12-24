@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"dflimg"
-	"dflimg/dflerr"
+	"dflimg/lib/cher"
 	"dflimg/rpc/middleware"
 )
 
@@ -28,13 +28,13 @@ func (r *RPC) ViewDetails(w http.ResponseWriter, req *http.Request) {
 	if resource.DeletedAt != nil {
 		key := ctx.Value(middleware.UsernameKey)
 		if key == nil || key == "" {
-			r.handleError(w, req, dflerr.New(dflerr.AccessDenied, nil))
+			r.handleError(w, req, cher.New(cher.AccessDenied, nil))
 			return
 		}
 		username := ctx.Value(middleware.UsernameKey).(string)
 
 		if resource.Owner != username {
-			r.handleError(w, req, dflerr.New(dflerr.NotFound, nil))
+			r.handleError(w, req, cher.New(cher.NotFound, nil))
 			return
 		}
 	}

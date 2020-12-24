@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"dflimg"
-	"dflimg/dflerr"
+	"dflimg/lib/cher"
 
 	"github.com/cuvva/ksuid-go"
 	pkgerr "github.com/pkg/errors"
@@ -16,7 +16,7 @@ import (
 // it generates a signed URL
 func (a *App) CreateSignedURL(ctx context.Context, username string, name *string, contentType string) (*dflimg.CreateSignedURLResponse, error) {
 	if !a.fileProvider.SupportsSignedURLs() {
-		return nil, dflerr.New("signed_urls_unsupported", nil)
+		return nil, cher.New("signed_urls_unsupported", nil)
 	}
 
 	fileID := ksuid.Generate("file").String()

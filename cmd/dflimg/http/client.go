@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"dflimg/dflerr"
+	"dflimg/lib/cher"
 )
 
 type Client struct {
@@ -70,13 +70,13 @@ func (c *Client) doRequest(request *http.Request, response interface{}) error {
 	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		var dflE dflerr.E
-		err := json.Unmarshal(content, &dflE)
+		var c cher.E
+		err := json.Unmarshal(content, &c)
 		if err != nil {
 			return err
 		}
 
-		return dflE
+		return c
 	}
 
 	err = json.Unmarshal(content, response)

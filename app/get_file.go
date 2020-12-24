@@ -2,12 +2,12 @@ package app
 
 import (
 	"context"
+	"dflimg/lib/cher"
 	"fmt"
 	"strings"
 	"time"
 
 	"dflimg"
-	"dflimg/dflerr"
 )
 
 const maxFileSize = 64
@@ -34,13 +34,13 @@ func (a *App) GetFile(ctx context.Context, resource *dflimg.Resource) ([]byte, *
 	}
 
 	if size >= MaxFileSize {
-		return nil, nil, dflerr.ErrTooBig
+		return nil, nil, cher.New("too_big", nil)
 	}
 
 	bytes, lastModified, err := a.fileProvider.Get(ctx, resource)
 	if err != nil {
 		if strings.Contains(err.Error(), "NoSuchKey") {
-			return nil, nil, dflerr.ErrNotFound
+			return nil, nil, cher.New(cher.NotFound, nil)
 		}
 
 		return nil, nil, err
