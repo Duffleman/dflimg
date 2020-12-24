@@ -4,11 +4,14 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"dflimg"
 	dhttp "dflimg/cmd/dflimg/http"
+	"dflimg/dflerr"
 
 	"github.com/atotto/clipboard"
 	log "github.com/sirupsen/logrus"
@@ -36,29 +39,53 @@ var UploadSignedCmd = &cobra.Command{
 
 		localFile := args[0]
 
-		file, err := ioutil.ReadFile(localFile)
+		filePaths, err := scanDirectory(localFile)
 		if err != nil {
 			return err
 		}
 
-		filePrepStart := time.Now()
-		resource, err := prepareUpload(rootURL, authToken, localFile, file)
-		if err != nil {
-			return err
+		if len(filePaths) == 0 {
+			return dflerr.New("no_fies", nil)
 		}
-		log.Infof("File prepared: %s (%s)", resource.URL, time.Now().Sub(filePrepStart))
 
-		err = clipboard.WriteAll(resource.URL)
-		if err != nil {
-			log.Warn("Could not copy to clipboard. Please copy the URL manually")
-		}
-		notify("Image prepared", resource.URL)
+		singleFile := len(filePaths) == 1
 
-		err = sendFileAWS(resource.S3Link, file)
-		if err != nil {
-			return err
+		for _, filename := range filePaths {
+			log.Infof("Handling file: %s", filename)
+			innerStart := time.Now()
+
+			file, err := ioutil.ReadFile(filename)
+			if err != nil {
+				return err
+			}
+
+			filePrepStart := time.Now()
+			resource, err := prepareUpload(rootURL, authToken, filename, file)
+			if err != nil {
+				return err
+			}
+			log.Infof("File prepared: %s (%s)", resource.URL, time.Now().Sub(filePrepStart))
+
+			if singleFile {
+				err = clipboard.WriteAll(resource.URL)
+				if err != nil {
+					log.Warn("Could not copy to clipboard. Please copy the URL manually")
+				}
+				notify("Image prepared", resource.URL)
+			}
+
+			err = sendFileAWS(resource.S3Link, file)
+			if err != nil {
+				return err
+			}
+			if singleFile {
+				notify("Image uploaded", resource.URL)
+			} else {
+				log.Infof("File uploaded: %s", resource.URL)
+			}
+
+			log.Infof("File handled in %s", time.Now().Sub(innerStart))
 		}
-		notify("Image uploaded", resource.URL)
 
 		log.Infof("Done in %s", time.Now().Sub(startTime))
 
@@ -71,8 +98,9 @@ func prepareUpload(rootURL, authToken string, filename string, file []byte) (*df
 
 	var name *string
 
-	if filename != "" && !strings.Contains(filename, "/") {
-		name = &filename
+	if filename != "" {
+		tmpName := strings.Split(filename, "/")
+		name = &tmpName[len(tmpName)-1]
 	}
 
 	reqBody := &dflimg.CreateSignedURLRequest{
@@ -105,4 +133,27 @@ func sendFileAWS(signedURL string, file []byte) error {
 	}
 
 	return err
+}
+
+func scanDirectory(rootFile string) (filePaths []string, err error) {
+	root, err := os.Stat(rootFile)
+	if err != nil {
+		return nil, err
+	}
+
+	if !root.IsDir() {
+		return []string{rootFile}, nil
+	}
+
+	err = filepath.Walk(rootFile, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+
+		filePaths = append(filePaths, path)
+
+		return nil
+	})
+
+	return
 }
