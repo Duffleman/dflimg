@@ -11,6 +11,7 @@ require (
 	github.com/go-chi/chi v4.1.1+incompatible
 	github.com/go-redis/redis v6.15.8+incompatible
 	github.com/jackc/pgx/v4 v4.6.0
+	github.com/manifoldco/promptui v0.8.0
 	github.com/onsi/ginkgo v1.12.2 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.6.0
