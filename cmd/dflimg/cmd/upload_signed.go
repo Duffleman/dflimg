@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"dflimg"
@@ -99,8 +98,8 @@ func prepareUpload(rootURL, authToken string, filename string, file []byte) (*df
 	var name *string
 
 	if filename != "" {
-		tmpName := strings.Split(filename, "/")
-		name = &tmpName[len(tmpName)-1]
+		_, tmpName := filepath.Split(filename)
+		name = &tmpName
 	}
 
 	reqBody := &dflimg.CreateSignedURLRequest{
