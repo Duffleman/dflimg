@@ -2,6 +2,7 @@ package dflimg
 
 import (
 	"bytes"
+	"context"
 	"time"
 )
 
@@ -24,6 +25,17 @@ const (
 	// DefaultRedisURI is the default redis instance to connect to
 	DefaultRedisURI = "redis://localhost:6379"
 )
+
+type Service interface {
+	AddShortcut(context.Context, *ChangeShortcutRequest) error
+	CreatedSignedURL(context.Context, *CreateSignedURLRequest) (*CreateSignedURLResponse, error)
+	DeleteResource(context.Context, *IdentifyResource) error
+	ListResources(context.Context, *ListResourcesRequest) ([]*Resource, error)
+	RemoveShortcut(context.Context, *ChangeShortcutRequest) error
+	SetNSFW(context.Context, *SetNSFWRequest) error
+	ShortenURL(context.Context, *CreateURLRequest) (*CreateResourceResponse, error)
+	ViewDetails(context.Context, *IdentifyResource) (*Resource, error)
+}
 
 type Resource struct {
 	ID        string     `json:"id"`
@@ -92,4 +104,5 @@ type ChangeShortcutRequest struct {
 type ListResourcesRequest struct {
 	Username       string `json:"username"`
 	IncludeDeleted bool   `json:"include_deleted"`
+	Limit          uint64 `json:"limit"`
 }
