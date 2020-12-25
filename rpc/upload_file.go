@@ -22,19 +22,19 @@ func (r *RPC) UploadFile(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var name *string
-
-	fileName := req.PostFormValue("name")
-	if fileName != "" {
-		name = &fileName
-	}
-
-	file, _, err := req.FormFile("file")
+	file, header, err := req.FormFile("file")
 	if err != nil {
 		r.handleError(w, req, err)
 		return
 	}
 	defer file.Close()
+
+	var name = &header.Filename
+
+	fileName := req.PostFormValue("name")
+	if fileName != "" {
+		name = &fileName
+	}
 
 	var buf bytes.Buffer
 	io.Copy(&buf, file)
