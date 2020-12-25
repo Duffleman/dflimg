@@ -8,7 +8,7 @@ import (
 func (r *RPC) HeadResource(w http.ResponseWriter, req *http.Request) {
 	fake := NewFake()
 
-	r.GetResource(fake, req)
+	r.HandleResource(fake, req)
 
 	for key, value := range fake.headers {
 		for _, v := range value {

@@ -15,6 +15,7 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/onsi/ginkgo v1.12.2 // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/rs/cors v1.7.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/speps/go-hashids v2.0.0+incompatible
 	github.com/spf13/cobra v1.0.0

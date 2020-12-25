@@ -19,7 +19,7 @@ func (r *RPC) ViewDetails(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	resource, _, err := r.app.GetResource(ctx, body.Query)
+	resource, err := r.app.GetResource(ctx, r.app.ParseQueryType(body.Query))
 	if err != nil {
 		r.handleError(w, req, err)
 		return

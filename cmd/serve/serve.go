@@ -19,6 +19,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-redis/redis"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 	hashids "github.com/speps/go-hashids"
 )
@@ -102,6 +103,9 @@ func main() {
 	rpc.Use(middleware.Recoverer)
 	rpc.Use(dflmw.AuthMiddleware(dflimg.GetUsers()))
 	rpc.Use(middleware.Timeout(60 * time.Second))
+	rpc.Use(func(next http.Handler) http.Handler {
+		return cors.AllowAll().Handler(next)
+	})
 
 	// define routes
 	rpc.Get("/", rpc.Homepage)
@@ -123,10 +127,10 @@ func main() {
 	rpc.Post("/upload_file", rpc.UploadFile)
 	rpc.Post("/view_details", rpc.ViewDetails)
 
-	rpc.Head(fmt.Sprintf("/%s{query}", dflapp.NameCharacter), rpc.GetResource)
+	rpc.Head(fmt.Sprintf("/%s{query}", dflapp.NameCharacter), rpc.HeadResource)
 	rpc.Head("/{query}", rpc.HeadResource)
-	rpc.Get(fmt.Sprintf("/%s{query}", dflapp.NameCharacter), rpc.GetResource)
-	rpc.Get("/{query}", rpc.GetResource)
+	rpc.Get(fmt.Sprintf("/%s{query}", dflapp.NameCharacter), rpc.HandleResource)
+	rpc.Get("/{query}", rpc.HandleResource)
 
 	// serve
 	addr := dflimg.GetEnv("addr")

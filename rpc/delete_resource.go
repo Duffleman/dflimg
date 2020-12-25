@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"dflimg"
+	"dflimg/app"
 	"dflimg/lib/cher"
 	"dflimg/rpc/middleware"
 )
@@ -26,7 +27,14 @@ func (r *RPC) DeleteResource(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	resource, _, err := r.app.GetResource(ctx, body.Query)
+	qi := r.app.ParseQueryType(body.Query)
+
+	if qi.QueryType == app.Name {
+		r.handleError(w, req, cher.New("cannot_query_resource_by_name", cher.M{"query": qi}))
+		return
+	}
+
+	resource, err := r.app.GetResource(ctx, qi)
 	if err != nil {
 		r.handleError(w, req, err)
 		return
