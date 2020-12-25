@@ -115,7 +115,7 @@ func makeContext(p *Pipeline) (bool, error) {
 		p.context["primed"] = true
 	}
 
-	if strings.Contains(*p.resource.MimeType, "text/plain") {
+	if p.resource.MimeType != nil && strings.Contains(*p.resource.MimeType, "text/plain") {
 		p.context["resourceIsText"] = true
 	}
 
