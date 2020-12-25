@@ -25,7 +25,7 @@ func (qi QueryInput) Filename() string {
 		return qi.Input
 	}
 
-	return fmt.Sprintf("%s.%s", qi.Input, qi.Ext)
+	return fmt.Sprintf("%s.%s", qi.Input, *qi.Ext)
 }
 
 // ShortcutCharacter marks the character used to find shortcuts

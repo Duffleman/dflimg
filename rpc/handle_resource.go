@@ -194,7 +194,7 @@ func handleMdToHTML(p *Pipeline) (bool, error) {
 	hasExt := p.qi.Ext != nil && *p.qi.Ext == "mdhtml"
 
 	// skip if we don't meet the qualifier
-	if !hasExt || !acceptsHTML || !resourceIsText {
+	if p.qi.QueryType == app.Name || !hasExt || !acceptsHTML || !resourceIsText {
 		return true, nil
 	}
 
@@ -236,7 +236,7 @@ func handleSyntaxHighlight(p *Pipeline) (bool, error) {
 	forceDownload := p.context["forceDownload"]
 	hasExt := p.qi.Ext != nil
 
-	if forceDownload || !resourceIsText || !acceptsHTML || !hasExt {
+	if p.qi.QueryType == app.Name || forceDownload || !resourceIsText || !acceptsHTML || !hasExt {
 		return true, nil
 	}
 
