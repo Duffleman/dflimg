@@ -10,6 +10,7 @@ require (
 	github.com/gen2brain/beeep v0.0.0-20200420150314-13046a26d502
 	github.com/go-chi/chi v4.1.1+incompatible
 	github.com/go-redis/redis v6.15.8+incompatible
+	github.com/gomarkdown/markdown v0.0.0-20201113031856-722100d81a8e
 	github.com/jackc/pgx/v4 v4.6.0
 	github.com/kr/pretty v0.1.0
 	github.com/manifoldco/promptui v0.8.0

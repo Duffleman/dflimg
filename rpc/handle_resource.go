@@ -7,11 +7,14 @@ import (
 	"html/template"
 	"net/http"
 	"strings"
+	tt "text/template"
 	"time"
 
 	"dflimg"
 	"dflimg/app"
 	"dflimg/lib/cher"
+
+	"github.com/gomarkdown/markdown"
 )
 
 type handlerType func(*Pipeline) (bool, error)
@@ -44,12 +47,15 @@ func (r *RPC) HandleResource(w http.ResponseWriter, req *http.Request) {
 		w:        w,
 		qi:       qi,
 		resource: resource,
+		context:  make(map[string]bool),
 		steps: []handlerType{
 			// ordered
 			handleDeleted,
+			makeContext,
 			handleNSFWPrimer,
 			handleURLRedirect,
 			loadFile,
+			handleMdToHTML,
 			handleSyntaxHighlight,
 			serveContent,
 		},
@@ -73,7 +79,8 @@ type Pipeline struct {
 		modtime *time.Time
 		bytes   []byte
 	}
-	steps []handlerType
+	context map[string]bool
+	steps   []handlerType
 }
 
 func (p *Pipeline) Run() error {
@@ -99,6 +106,26 @@ func handleDeleted(p *Pipeline) (bool, error) {
 	return true, nil
 }
 
+func makeContext(p *Pipeline) (bool, error) {
+	if fd := p.r.URL.Query()["d"]; len(fd) >= 1 {
+		p.context["forceDownload"] = true
+	}
+
+	if _, ok := p.r.URL.Query()["primed"]; ok {
+		p.context["primed"] = true
+	}
+
+	if strings.Contains(*p.resource.MimeType, "text/plain") {
+		p.context["resourceIsText"] = true
+	}
+
+	if strings.Contains(p.r.Header.Get("Accept"), "text/html") {
+		p.context["acceptsHTML"] = true
+	}
+
+	return true, nil
+}
+
 func handleNSFWPrimer(p *Pipeline) (bool, error) {
 	// skip this step if the resource isn't NSFW
 	if !p.resource.NSFW {
@@ -106,12 +133,12 @@ func handleNSFWPrimer(p *Pipeline) (bool, error) {
 	}
 
 	// skip if we want to force a download
-	if fd := p.r.URL.Query()["d"]; len(fd) >= 1 {
+	if p.context["forceDownload"] {
 		return true, nil
 	}
 
 	// skip if we are already primed
-	if _, ok := p.r.URL.Query()["primed"]; ok {
+	if p.context["primed"] {
 		return true, nil
 	}
 
@@ -161,19 +188,55 @@ func loadFile(p *Pipeline) (bool, error) {
 	return true, nil
 }
 
-func handleSyntaxHighlight(p *Pipeline) (bool, error) {
-	accept := p.r.Header.Get("Accept")
-	forceDownload := false
+func handleMdToHTML(p *Pipeline) (bool, error) {
+	resourceIsText := p.context["resourceIsText"]
+	acceptsHTML := p.context["acceptsHTML"]
+	hasExt := p.qi.Ext != nil && *p.qi.Ext == "mdhtml"
 
-	if fd := p.r.URL.Query()["d"]; len(fd) >= 1 {
-		forceDownload = true
+	// skip if we don't meet the qualifier
+	if !hasExt || !acceptsHTML || !resourceIsText {
+		return true, nil
 	}
 
-	isPlainText := strings.Contains(*p.resource.MimeType, "text/plain")
-	acceptsHTML := strings.Contains(accept, "text/html")
+	output := markdown.ToHTML(p.contents.bytes, nil, nil)
+
+	display, _ := getContentHeaders(p.r, p.resource)
+	mimetype := "text/html; charset=utf-8"
+
+	if fd := p.r.URL.Query()["d"]; len(fd) >= 1 {
+		mimetype = "application/octet-stream"
+	}
+
+	p.w.Header().Set("Content-Type", mimetype)
+	p.w.Header().Set("Content-Disposition", display)
+
+	tpl, err := tt.ParseFiles("resources/markdown.html")
+	if err != nil {
+		return false, err
+	}
+
+	title := p.resource.Hash
+
+	if p.resource.Name != nil {
+		title = p.resource.Name
+	}
+
+	err = tpl.Execute(p.w, map[string]interface{}{
+		"title":   title,
+		"author":  p.resource.Owner,
+		"content": string(output),
+	})
+
+	return false, err
+}
+
+func handleSyntaxHighlight(p *Pipeline) (bool, error) {
+	resourceIsText := p.context["resourceIsText"]
+	acceptsHTML := p.context["acceptsHTML"]
+	forceDownload := p.context["forceDownload"]
 	hasExt := p.qi.Ext != nil
 
-	if forceDownload || !isPlainText || !acceptsHTML || !hasExt {
+	if forceDownload || !resourceIsText || !acceptsHTML || !hasExt {
 		return true, nil
 	}
 
@@ -192,21 +255,7 @@ func handleSyntaxHighlight(p *Pipeline) (bool, error) {
 }
 
 func serveContent(p *Pipeline) (bool, error) {
-	var display string = "inline"
-	var mimetype string
-
-	if p.resource.MimeType != nil {
-		mimetype = *p.resource.MimeType
-	}
-
-	if fd := p.r.URL.Query()["d"]; len(fd) >= 1 {
-		display = "attachment"
-		mimetype = "application/octet-stream"
-	}
-
-	if p.resource.Name != nil {
-		display = fmt.Sprintf("%s; filename=%s", display, *p.resource.Name)
-	}
+	display, mimetype := getContentHeaders(p.r, p.resource)
 
 	p.w.Header().Set("Content-Type", mimetype)
 	p.w.Header().Set("Content-Disposition", display)
@@ -216,4 +265,24 @@ func serveContent(p *Pipeline) (bool, error) {
 	http.ServeContent(p.w, p.r, p.qi.Filename(), *p.contents.modtime, reader)
 
 	return true, nil
+}
+
+func getContentHeaders(r *http.Request, resource *dflimg.Resource) (string, string) {
+	var display string = "inline"
+	var mimetype string
+
+	if resource.MimeType != nil {
+		mimetype = *resource.MimeType
+	}
+
+	if fd := r.URL.Query()["d"]; len(fd) >= 1 {
+		display = "attachment"
+		mimetype = "application/octet-stream"
+	}
+
+	if resource.Name != nil {
+		display = fmt.Sprintf("%s; filename=%s", display, *resource.Name)
+	}
+
+	return display, mimetype
 }
