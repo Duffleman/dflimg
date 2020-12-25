@@ -48,6 +48,7 @@ func (r *RPC) HandleResource(w http.ResponseWriter, req *http.Request) {
 			// ordered
 			handleDeleted,
 			handleNSFWPrimer,
+			handleURLRedirect,
 			loadFile,
 			handleSyntaxHighlight,
 			serveContent,
@@ -132,6 +133,7 @@ func handleURLRedirect(p *Pipeline) (bool, error) {
 	}
 
 	p.w.Header().Set("Content-Type", "")
+
 	http.Redirect(p.w, p.r, p.resource.Link, http.StatusTemporaryRedirect)
 
 	return false, nil
