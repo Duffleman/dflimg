@@ -127,18 +127,8 @@ func makeContext(p *Pipeline) (bool, error) {
 }
 
 func handleNSFWPrimer(p *Pipeline) (bool, error) {
-	// skip this step if the resource isn't NSFW
-	if !p.resource.NSFW {
-		return true, nil
-	}
-
-	// skip if we want to force a download
-	if p.context["forceDownload"] {
-		return true, nil
-	}
-
-	// skip if we are already primed
-	if p.context["primed"] {
+	// skip this step if qualifiers are met
+	if !p.resource.NSFW || p.context["forceDownload"] || p.context["primed"] {
 		return true, nil
 	}
 
@@ -200,7 +190,7 @@ func handleMdToHTML(p *Pipeline) (bool, error) {
 
 	output := markdown.ToHTML(p.contents.bytes, nil, nil)
 
-	display, _ := getContentHeaders(p.r, p.resource)
+	display, _ := p.getContentHeaders()
 	mimetype := "text/html; charset=utf-8"
 
 	if fd := p.r.URL.Query()["d"]; len(fd) >= 1 {
@@ -255,7 +245,7 @@ func handleSyntaxHighlight(p *Pipeline) (bool, error) {
 }
 
 func serveContent(p *Pipeline) (bool, error) {
-	display, mimetype := getContentHeaders(p.r, p.resource)
+	display, mimetype := p.getContentHeaders()
 
 	p.w.Header().Set("Content-Type", mimetype)
 	p.w.Header().Set("Content-Disposition", display)
@@ -267,21 +257,21 @@ func serveContent(p *Pipeline) (bool, error) {
 	return true, nil
 }
 
-func getContentHeaders(r *http.Request, resource *dflimg.Resource) (string, string) {
+func (p *Pipeline) getContentHeaders() (string, string) {
 	var display string = "inline"
 	var mimetype string
 
-	if resource.MimeType != nil {
-		mimetype = *resource.MimeType
+	if p.resource.MimeType != nil {
+		mimetype = *p.resource.MimeType
 	}
 
-	if fd := r.URL.Query()["d"]; len(fd) >= 1 {
+	if p.context["forceDownload"] {
 		display = "attachment"
 		mimetype = "application/octet-stream"
 	}
 
-	if resource.Name != nil {
-		display = fmt.Sprintf("%s; filename=%s", display, *resource.Name)
+	if p.resource.Name != nil {
+		display = fmt.Sprintf("%s; filename=%s", display, *p.resource.Name)
 	}
 
 	return display, mimetype
