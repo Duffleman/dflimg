@@ -215,27 +215,37 @@ func (db *DB) SaveHash(ctx context.Context, serial int, hash string) error {
 	return err
 }
 
-func (db *DB) ListResources(ctx context.Context, username string, includeDeleted bool) ([]*dflimg.Resource, error) {
+func (db *DB) ListResources(ctx context.Context, req *dflimg.ListResourcesRequest) ([]*dflimg.Resource, error) {
 	b := NewQueryBuilder()
 
 	builder := b.
 		Select(strings.Join(resourceColumns, ",")).
 		From("resources")
 
-	if !includeDeleted {
+	if !req.IncludeDeleted {
 		builder = builder.Where(sq.Eq{"deleted_at": nil})
 	}
 
-	if username != "" {
-		builder = builder.Where(sq.Eq{"owner": username})
+	if req.Username != nil {
+		builder = builder.Where(sq.Eq{"owner": *req.Username})
 	}
 
-	query, values, err := builder.
-		OrderBy("created_at DESC").
-		ToSql()
+	if req.FilterMime != nil {
+		builder = builder.Where(sq.Like{"mime_type": fmt.Sprintf("%s%%", *req.FilterMime)})
+	}
+
+	builder = builder.OrderBy("created_at DESC")
+
+	if req.Limit != nil {
+		builder = builder.Limit(*req.Limit)
+	}
+
+	query, values, err := builder.ToSql()
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println(query)
 
 	conn, err := db.pg.Acquire(ctx)
 	if err != nil {

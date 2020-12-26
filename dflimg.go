@@ -102,7 +102,8 @@ type ChangeShortcutRequest struct {
 }
 
 type ListResourcesRequest struct {
-	Username       string `json:"username"`
-	IncludeDeleted bool   `json:"include_deleted"`
-	Limit          uint64 `json:"limit"`
+	IncludeDeleted bool    `json:"include_deleted"`
+	Username       *string `json:"username"`
+	Limit          *uint64 `json:"limit"`
+	FilterMime     *string `json:"filter_mime"`
 }

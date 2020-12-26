@@ -26,7 +26,7 @@ func (r *RPC) ListResources(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if body.Username != username {
+	if body.Username == nil || *body.Username != username {
 		r.handleError(w, req, cher.New(cher.AccessDenied, nil))
 		return
 	}
