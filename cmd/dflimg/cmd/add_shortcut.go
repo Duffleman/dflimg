@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"dflimg"
@@ -73,5 +74,5 @@ func handleShortcutInput(args []string) (string, string, error) {
 		return "", "", err
 	}
 
-	return query, shortcut, nil
+	return strings.TrimPrefix(query, rootURL()), shortcut, nil
 }

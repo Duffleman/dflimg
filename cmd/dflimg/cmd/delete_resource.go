@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"dflimg"
@@ -63,5 +64,5 @@ func handleQueryInput(args []string) (string, error) {
 		return "", err
 	}
 
-	return query, nil
+	return strings.TrimPrefix(query, rootURL()), nil
 }

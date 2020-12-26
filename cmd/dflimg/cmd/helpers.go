@@ -20,10 +20,9 @@ func notify(title, body string) {
 }
 
 func makeClient() dflimg.Service {
-	rootURL := viper.Get("ROOT_URL").(string)
 	authToken := viper.Get("AUTH_TOKEN").(string)
 
-	return dflimg.NewClient(rootURL, authToken)
+	return dflimg.NewClient(rootURL(), authToken)
 }
 
 func rootURL() string {

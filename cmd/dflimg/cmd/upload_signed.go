@@ -3,10 +3,12 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"dflimg"
@@ -47,6 +49,8 @@ var UploadSignedCmd = &cobra.Command{
 			return cher.New("no_files", nil)
 		}
 
+		all := []string{}
+
 		singleFile := len(filePaths) == 1
 
 		for _, filename := range filePaths {
@@ -64,6 +68,8 @@ var UploadSignedCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
+
+			all = append(all, resource.Hash)
 
 			log.Infof("File prepared: %s (%s)", resource.URL, time.Now().Sub(filePrepStart))
 
@@ -86,6 +92,12 @@ var UploadSignedCmd = &cobra.Command{
 		}
 
 		log.Infof("Done in %s", time.Now().Sub(startTime))
+
+		if !singleFile {
+			jointURL := fmt.Sprintf("%s/%s", rootURL(), strings.Join(all, ","))
+			log.Infof("Download TAR at: %s", jointURL)
+			writeClipboard(jointURL)
+		}
 
 		return nil
 	},
