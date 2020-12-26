@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"dflimg"
+	"fmt"
 
 	"github.com/atotto/clipboard"
 	b "github.com/gen2brain/beeep"
@@ -26,7 +27,7 @@ func makeClient() dflimg.Service {
 }
 
 func rootURL() string {
-	return viper.Get("ROOT_URL").(string)
+	return fmt.Sprintf("%s/", viper.Get("ROOT_URL").(string))
 }
 
 func writeClipboard(in string) {

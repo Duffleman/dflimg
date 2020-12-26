@@ -28,17 +28,17 @@ var DeleteResourceCmd = &cobra.Command{
 
 		startTime := time.Now()
 
-		url, err := handleQueryInput(args)
+		query, err := handleQueryInput(args)
 		if err != nil {
 			return err
 		}
 
-		err = deleteResource(ctx, url)
+		err = deleteResource(ctx, query)
 		if err != nil {
 			return err
 		}
 
-		notify("Resource deleted", url)
+		notify("Resource deleted", query)
 
 		log.Infof("Done in %s", time.Now().Sub(startTime))
 
@@ -56,7 +56,7 @@ func deleteResource(ctx context.Context, urlStr string) error {
 
 func handleQueryInput(args []string) (string, error) {
 	if len(args) == 1 {
-		return args[0], nil
+		return strings.TrimPrefix(args[0], rootURL()), nil
 	}
 
 	query, err := queryPrompt.Run()

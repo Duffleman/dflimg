@@ -61,7 +61,7 @@ func addShortcut(ctx context.Context, query, shortcut string) error {
 
 func handleShortcutInput(args []string) (string, string, error) {
 	if len(args) == 2 {
-		return args[0], args[1], nil
+		return strings.TrimPrefix(args[0], rootURL()), args[1], nil
 	}
 
 	query, err := queryPrompt.Run()
