@@ -31,8 +31,8 @@ func (qi QueryInput) Filename() string {
 // ShortcutCharacter marks the character used to find shortcuts
 const ShortcutCharacter = ":"
 
-// NameCharacter marks the character used to find files by their names, must have a trailing slash
-const NameCharacter = "n/"
+// NameCharacter marks the character used to find files by their names
+const NameCharacter = "@"
 
 func (a *App) ParseQueryType(query string) *QueryInput {
 	var ext *string

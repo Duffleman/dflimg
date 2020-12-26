@@ -127,9 +127,17 @@ func main() {
 	rpc.Post("/upload_file", rpc.UploadFile)
 	rpc.Post("/view_details", rpc.ViewDetails)
 
-	rpc.Head(fmt.Sprintf("/%s{query}", dflapp.NameCharacter), rpc.HeadResource)
+	// Legacy support for older style names
+	rpc.Head("/n/{query}", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, fmt.Sprintf("%s/@%s", dflimg.GetEnv("root_url"), chi.URLParam(r, "query")), http.StatusPermanentRedirect)
+		return
+	})
+	rpc.Get("/n/{query}", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, fmt.Sprintf("%s/@%s", dflimg.GetEnv("root_url"), chi.URLParam(r, "query")), http.StatusPermanentRedirect)
+		return
+	})
+
 	rpc.Head("/{query}", rpc.HeadResource)
-	rpc.Get(fmt.Sprintf("/%s{query}", dflapp.NameCharacter), rpc.HandleResource)
 	rpc.Get("/{query}", rpc.HandleResource)
 
 	// serve
