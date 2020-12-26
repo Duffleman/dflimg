@@ -36,7 +36,7 @@ func MakeContext(p *Pipeline) (bool, error) {
 		p.context.acceptsHTML = true
 	}
 
-	if !p.context.multifile && p.rwqs[0].qi.Ext != nil && *p.rwqs[0].qi.Ext == "mdhtml" {
+	if !p.context.multifile && p.rwqs[0].qi.Exts.Match("md", "html") {
 		p.context.renderMD = true
 	}
 

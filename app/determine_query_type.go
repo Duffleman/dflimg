@@ -19,31 +19,54 @@ const (
 	Name
 )
 
+type Extensions []string
+
+func (e Extensions) Match(in ...string) bool {
+	if len(in) > len(e) {
+		return false
+	}
+
+	matchSet := strings.Join(e[len(e)-len(in):], ".")
+
+	return matchSet == strings.Join(in, ".")
+}
+
+func (e Extensions) Last() string {
+	if len(e) == 0 {
+		return ""
+	}
+
+	return e[len(e)-1]
+}
+
 type QueryInput struct {
 	QueryType QueryType
 	Original  string
 	Input     string
-	Ext       *string
+	Exts      Extensions
 }
 
 func (qi QueryInput) Filename() string {
-	if qi.Ext == nil {
+	if len(qi.Exts) == 0 {
 		return qi.Input
 	}
 
-	return fmt.Sprintf("%s.%s", qi.Input, *qi.Ext)
+	extensions := strings.Join(qi.Exts, ".")
+
+	return fmt.Sprintf("%s.%s", qi.Input, extensions)
 }
 
 func (a *App) ParseQueryType(inStr string) (q []*QueryInput) {
 	for _, query := range strings.Split(inStr, ",") {
-		var ext *string
+		var exts []string
 		var qt QueryType = Hash
 		var input = query
 
 		if strings.ContainsRune(query, '.') {
 			parts := strings.Split(query, ".")
-			ext = &parts[len(parts)-1]
-			input = strings.Join(parts[:len(parts)-1], ".")
+
+			input = parts[0]
+			exts = parts[1:]
 		}
 
 		if strings.HasPrefix(query, NameCharacter) {
@@ -60,7 +83,7 @@ func (a *App) ParseQueryType(inStr string) (q []*QueryInput) {
 			QueryType: qt,
 			Original:  query,
 			Input:     input,
-			Ext:       ext,
+			Exts:      Extensions(exts),
 		})
 	}
 

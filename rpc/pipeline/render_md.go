@@ -5,6 +5,8 @@ import (
 	"strings"
 	tt "text/template"
 
+	"dflimg/app"
+
 	"github.com/gomarkdown/markdown"
 )
 
@@ -15,10 +17,14 @@ func RenderMD(p *Pipeline) (bool, error) {
 	for _, i := range p.rwqs {
 		rwq := i
 
+		// skip if query types by name
+		if rwq.qi.QueryType == app.Name {
+			return true, nil
+		}
+
 		if !rwq.context.isText {
 			allAreText = false
 		}
-
 	}
 
 	switch {

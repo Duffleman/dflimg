@@ -32,6 +32,7 @@ func (r *RPC) HandleResource(w http.ResponseWriter, req *http.Request) {
 		pipeline.LoadFilesFromFS,
 		pipeline.SyntaxHighlighter,
 		pipeline.RenderMD,
+		pipeline.MakeTarball,
 		pipeline.FilterMultiFile,
 		pipeline.ServeContent,
 	})

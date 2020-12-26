@@ -3,6 +3,8 @@ package pipeline
 import (
 	"html/template"
 	"strings"
+
+	"dflimg/app"
 )
 
 // SyntaxHighlighter will apply syntax highlighitng to a set of files
@@ -17,6 +19,15 @@ func SyntaxHighlighter(p *Pipeline) (bool, error) {
 		return true, nil
 	}
 
+	// skip highlighting if we have name queries
+	for _, i := range p.rwqs {
+		rwq := i
+
+		if rwq.qi.QueryType == app.Name {
+			return true, nil
+		}
+	}
+
 	var atLeastOneExt bool
 
 	// don't highlight files where within the set, one isn't text
@@ -27,7 +38,7 @@ func SyntaxHighlighter(p *Pipeline) (bool, error) {
 			return true, nil
 		}
 
-		if rwq.qi.Ext != nil {
+		if len(rwq.qi.Exts) >= 1 {
 			atLeastOneExt = true
 		}
 	}
@@ -57,11 +68,7 @@ func SyntaxHighlighter(p *Pipeline) (bool, error) {
 		titles = append(titles, rwq.qi.Original)
 		authorMap[rwq.r.Owner] = struct{}{}
 
-		var language string
-
-		if rwq.qi.Ext != nil {
-			language = *rwq.qi.Ext
-		}
+		language := rwq.qi.Exts.Last()
 
 		if p.context.highlightLanguage != "" {
 			language = p.context.highlightLanguage
