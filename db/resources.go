@@ -78,7 +78,7 @@ func (db *DB) FindResourceByHash(ctx context.Context, hash string) (*dflimg.Reso
 func (db *DB) FindResourceByShortcut(ctx context.Context, shortcut string) (*dflimg.Resource, error) {
 	b := NewQueryBuilder()
 
-	s := fmt.Sprintf("{%s}", shortcut[1:])
+	s := fmt.Sprintf("{%s}", shortcut)
 
 	query, values, err := b.
 		Select(strings.Join(resourceColumns, ", ")).
