@@ -12,11 +12,11 @@ require (
 	github.com/go-redis/redis v6.15.8+incompatible
 	github.com/gomarkdown/markdown v0.0.0-20201113031856-722100d81a8e
 	github.com/jackc/pgx/v4 v4.6.0
-	github.com/kr/pretty v0.1.0
 	github.com/manifoldco/promptui v0.8.0
+	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/onsi/ginkgo v1.12.2 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/rs/cors v1.7.0 // indirect
+	github.com/rs/cors v1.7.0
 	github.com/sirupsen/logrus v1.6.0
 	github.com/speps/go-hashids v2.0.0+incompatible
 	github.com/spf13/cobra v1.0.0

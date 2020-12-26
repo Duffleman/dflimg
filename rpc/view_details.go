@@ -19,7 +19,14 @@ func (r *RPC) ViewDetails(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	resource, err := r.app.GetResource(ctx, r.app.ParseQueryType(body.Query))
+	qi := r.app.ParseQueryType(body.Query)
+
+	if len(qi) != 1 {
+		r.handleError(w, req, cher.New("multi_query_not_supported", cher.M{"query": qi}))
+		return
+	}
+
+	resource, err := r.app.GetResource(ctx, qi[0])
 	if err != nil {
 		r.handleError(w, req, err)
 		return

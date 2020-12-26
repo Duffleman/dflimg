@@ -29,12 +29,17 @@ func (r *RPC) SetNSFW(w http.ResponseWriter, req *http.Request) {
 
 	qi := r.app.ParseQueryType(body.Query)
 
-	if qi.QueryType == app.Name {
+	if len(qi) != 1 {
+		r.handleError(w, req, cher.New("multi_query_not_supported", cher.M{"query": qi}))
+		return
+	}
+
+	if qi[0].QueryType == app.Name {
 		r.handleError(w, req, cher.New("cannot_query_resource_by_name", cher.M{"query": qi}))
 		return
 	}
 
-	resource, err := r.app.GetResource(ctx, qi)
+	resource, err := r.app.GetResource(ctx, qi[0])
 	if err != nil {
 		r.handleError(w, req, err)
 		return
