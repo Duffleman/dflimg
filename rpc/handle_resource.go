@@ -13,6 +13,7 @@ import (
 	"dflimg"
 	"dflimg/app"
 	"dflimg/lib/cher"
+	"dflimg/lib/ptr"
 
 	"github.com/gomarkdown/markdown"
 )
@@ -190,7 +191,7 @@ func handleMdToHTML(p *Pipeline) (bool, error) {
 
 	output := markdown.ToHTML(p.contents.bytes, nil, nil)
 
-	display, _ := p.getContentHeaders()
+	display, _ := p.getContentHeaders(ptr.String("html"))
 	mimetype := "text/html; charset=utf-8"
 
 	if fd := p.r.URL.Query()["d"]; len(fd) >= 1 {
@@ -245,7 +246,7 @@ func handleSyntaxHighlight(p *Pipeline) (bool, error) {
 }
 
 func serveContent(p *Pipeline) (bool, error) {
-	display, mimetype := p.getContentHeaders()
+	display, mimetype := p.getContentHeaders(nil)
 
 	p.w.Header().Set("Content-Type", mimetype)
 	p.w.Header().Set("Content-Disposition", display)
@@ -257,7 +258,7 @@ func serveContent(p *Pipeline) (bool, error) {
 	return true, nil
 }
 
-func (p *Pipeline) getContentHeaders() (string, string) {
+func (p *Pipeline) getContentHeaders(addExt *string) (string, string) {
 	var display string = "inline"
 	var mimetype string
 
@@ -272,6 +273,10 @@ func (p *Pipeline) getContentHeaders() (string, string) {
 
 	if p.resource.Name != nil {
 		display = fmt.Sprintf("%s; filename=%s", display, *p.resource.Name)
+
+		if addExt != nil {
+			display = fmt.Sprintf("%s.%s", display, *addExt)
+		}
 	}
 
 	return display, mimetype
