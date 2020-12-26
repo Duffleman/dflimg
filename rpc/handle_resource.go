@@ -30,8 +30,9 @@ func (r *RPC) HandleResource(w http.ResponseWriter, req *http.Request) {
 		pipeline.HandleNSFWPrimer,
 		pipeline.HandleURLRedirect,
 		pipeline.LoadFilesFromFS,
+		pipeline.SyntaxHighlighter,
 		pipeline.RenderMD,
-		pipeline.HandleSyntaxHighlighting,
+		pipeline.FilterMultiFile,
 		pipeline.ServeContent,
 	})
 

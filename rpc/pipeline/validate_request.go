@@ -4,9 +4,12 @@ import (
 	"dflimg/lib/cher"
 )
 
+// ValidateRequest validates some general request rules
 func ValidateRequest(p *Pipeline) (bool, error) {
 	if p.context.multifile {
-		for _, rwq := range p.rwqs {
+		for _, i := range p.rwqs {
+			rwq := i
+
 			if rwq.r.Type == "url" {
 				return false, cher.New("multi_file_with_url", nil)
 			}

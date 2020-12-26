@@ -4,8 +4,8 @@ import (
 	"net/http"
 )
 
+// HandleURLRedirect handles URL redirects
 func HandleURLRedirect(p *Pipeline) (bool, error) {
-	// only handle URL types
 	if p.context.multifile || p.rwqs[0].r.Type != "url" {
 		return true, nil
 	}

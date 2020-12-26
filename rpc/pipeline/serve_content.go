@@ -4,15 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
-
-	"dflimg/lib/cher"
 )
 
+// ServeContent is the final step in the pipeline, it serves the file as a raw
+// file in case no other pipeline step picked it up
 func ServeContent(p *Pipeline) (bool, error) {
-	if p.context.multifile {
-		return false, cher.New("multiple_files", nil)
-	}
-
 	rwq := p.rwqs[0]
 
 	display := "inline"

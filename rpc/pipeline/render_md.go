@@ -8,22 +8,21 @@ import (
 	"github.com/gomarkdown/markdown"
 )
 
+// RenderMD renders a file set from Markdown to HTMLs
 func RenderMD(p *Pipeline) (bool, error) {
 	allAreText := true
-	atLeastOneMdHTML := false
 
-	for _, rwq := range p.rwqs {
+	for _, i := range p.rwqs {
+		rwq := i
+
 		if !rwq.context.isText {
 			allAreText = false
 		}
 
-		if rwq.qi.Ext != nil && *rwq.qi.Ext == "mdhtml" {
-			atLeastOneMdHTML = true
-		}
 	}
 
 	switch {
-	case !atLeastOneMdHTML:
+	case !p.context.renderMD:
 		return true, nil
 	case !allAreText:
 		return true, nil
@@ -36,7 +35,9 @@ func RenderMD(p *Pipeline) (bool, error) {
 
 	authors := map[string]struct{}{}
 
-	for _, rwq := range p.rwqs {
+	for _, i := range p.rwqs {
+		rwq := i
+
 		output = append(output, string(markdown.ToHTML(p.contents[rwq.r.ID].bytes, nil, nil)))
 
 		authors[rwq.r.Owner] = struct{}{}

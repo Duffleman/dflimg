@@ -3,6 +3,7 @@ package pipeline
 import (
 	"context"
 	"net/http"
+	"sync"
 	"time"
 
 	"dflimg"
@@ -39,8 +40,10 @@ type Pipeline struct {
 		highlightLanguage string
 		multifile         bool
 		acceptsHTML       bool
+		renderMD          bool
 	}
 	steps []HandlerType
+	sync.Mutex
 }
 
 type Creator struct {

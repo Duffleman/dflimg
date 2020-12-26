@@ -4,6 +4,8 @@ import (
 	"strings"
 )
 
+// MakeContext generates context info from the request to help future steps in
+// the pipeline.
 func MakeContext(p *Pipeline) (bool, error) {
 	if fd := p.r.URL.Query()["d"]; len(fd) >= 1 {
 		p.context.forceDownload = true
@@ -22,7 +24,9 @@ func MakeContext(p *Pipeline) (bool, error) {
 		p.context.multifile = true
 	}
 
-	for _, rwq := range p.rwqs {
+	for _, i := range p.rwqs {
+		rwq := i
+
 		if rwq.r.MimeType != nil && strings.Contains(*rwq.r.MimeType, "text/plain") {
 			rwq.context.isText = true
 		}
@@ -30,6 +34,14 @@ func MakeContext(p *Pipeline) (bool, error) {
 
 	if strings.Contains(p.r.Header.Get("Accept"), "text/html") {
 		p.context.acceptsHTML = true
+	}
+
+	if !p.context.multifile && p.rwqs[0].qi.Ext != nil && *p.rwqs[0].qi.Ext == "mdhtml" {
+		p.context.renderMD = true
+	}
+
+	if _, ok := p.r.URL.Query()["pmd"]; ok {
+		p.context.renderMD = true
 	}
 
 	return true, nil

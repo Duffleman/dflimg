@@ -8,15 +8,21 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// LoadFilesFromFS loads files from the filesystem into memory
 func LoadFilesFromFS(p *Pipeline) (bool, error) {
 	g, gctx := errgroup.WithContext(p.ctx)
 
-	for _, rwq := range p.rwqs {
+	for _, i := range p.rwqs {
+		rwq := i
+
 		g.Go(func() (err error) {
 			b, modtime, err := p.app.GetFile(gctx, rwq.r)
 			if err != nil {
 				return err
 			}
+
+			p.Lock()
+			defer p.Unlock()
 
 			p.contents[rwq.r.ID] = fileContent{
 				modtime: modtime,

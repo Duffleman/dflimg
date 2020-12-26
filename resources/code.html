@@ -10,9 +10,9 @@
 			margin: 0;
 			padding: 0;
 			height: 100%;
+			background-color: #272822;
 		}
 		pre {
-			min-height: 100% !important;
 			margin: 0 !important;
 			font-size: 0.9em !important;
 			border-radius: 0 !important;
@@ -24,7 +24,9 @@
 </head>
 
 <body>
-	<pre><code class="language-{{.language}} match-braces">{{.content}}</code></pre>
+	{{ range .resources }}
+	<pre><code class="language-{{.Language}} match-braces">{{.Content}}</code></pre>
+	{{ end }}
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.22.0/components/prism-core.min.js" integrity="sha512-hqRrGU7ys5tkcqxx5FIZTBb7PkO2o3mU6U5+qB9b55kgMlBUT4J2wPwQfMCxeJW1fC8pBxuatxoH//z0FInhrA==" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.22.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-Q3qGP1uJL/B0sEmu57PKXjCirgPKMbg73OLRbTJ6lfHCVU5zkHqmcTI5EV2fSoPV1MHdKsCBE7m/aS6q0pPjRQ==" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.22.0/plugins/match-braces/prism-match-braces.min.js" integrity="sha512-pKeVZJM7e/lEkXjA8IeI78jGfGT3fuwhy21qT9znmdLNS+ZlPcMS+tnTXUKXTNuGwAatSaSpXvpB8UsTBDyHFg==" crossorigin="anonymous"></script>

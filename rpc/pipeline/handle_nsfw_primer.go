@@ -4,9 +4,23 @@ import (
 	"html/template"
 )
 
+// HandleNSFWPrimer will show a NSFW primer screen if a resource has NSFW content
 func HandleNSFWPrimer(p *Pipeline) (bool, error) {
-	// skip this step if qualifiers are met
-	if p.context.forceDownload || p.context.primed || p.context.multifile || !p.rwqs[0].r.NSFW {
+	if p.context.forceDownload || p.context.primed {
+		return true, nil
+	}
+
+	var anyNSFW bool
+
+	for _, i := range p.rwqs {
+		rwq := i
+
+		if rwq.r.NSFW {
+			anyNSFW = true
+		}
+	}
+
+	if !anyNSFW {
 		return true, nil
 	}
 
