@@ -94,7 +94,7 @@ var UploadSignedCmd = &cobra.Command{
 		log.Infof("Done in %s", time.Now().Sub(startTime))
 
 		if !singleFile {
-			jointURL := fmt.Sprintf("%s/%s", rootURL(), strings.Join(all, ","))
+			jointURL := fmt.Sprintf("%s%s", rootURL(), strings.Join(all, ","))
 			log.Infof("Download TAR at: %s", jointURL)
 			writeClipboard(jointURL)
 		}
