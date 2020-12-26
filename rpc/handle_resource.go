@@ -15,6 +15,7 @@ import (
 	"dflimg/lib/cher"
 	"dflimg/lib/ptr"
 
+	"github.com/go-chi/chi"
 	"github.com/gomarkdown/markdown"
 )
 
@@ -24,16 +25,7 @@ type handlerType func(*Pipeline) (bool, error)
 func (r *RPC) HandleResource(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
-	query := strings.TrimPrefix(req.URL.Path, "/")
-
-	// remove the prefixed https://dfl.mn if present
-	rootURL := dflimg.GetEnv("root_url") + "/"
-
-	if strings.HasPrefix(query, rootURL) {
-		query = strings.TrimPrefix(query, rootURL)
-	}
-
-	qi := r.app.ParseQueryType(query)
+	qi := r.app.ParseQueryType(chi.URLParam(req, "query"))
 
 	resource, err := r.app.GetResource(ctx, qi)
 	if err != nil {
@@ -114,6 +106,10 @@ func makeContext(p *Pipeline) (bool, error) {
 
 	if _, ok := p.r.URL.Query()["primed"]; ok {
 		p.context["primed"] = true
+	}
+
+	if _, ok := p.r.URL.Query()["sh"]; ok {
+		p.context["wantsHighlighting"] = true
 	}
 
 	if p.resource.MimeType != nil && strings.Contains(*p.resource.MimeType, "text/plain") {
@@ -227,7 +223,16 @@ func handleSyntaxHighlight(p *Pipeline) (bool, error) {
 	forceDownload := p.context["forceDownload"]
 	hasExt := p.qi.Ext != nil
 
-	if p.qi.QueryType == app.Name || forceDownload || !resourceIsText || !acceptsHTML || !hasExt {
+	switch {
+	case forceDownload:
+		return true, nil
+	case !resourceIsText:
+		return true, nil
+	case !acceptsHTML:
+		return true, nil
+	case p.qi.QueryType != app.Name && !hasExt:
+		return true, nil
+	case p.qi.QueryType == app.Name && !p.context["wantsHighlighting"]:
 		return true, nil
 	}
 
@@ -236,8 +241,18 @@ func handleSyntaxHighlight(p *Pipeline) (bool, error) {
 		return false, err
 	}
 
+	var language string
+
+	if p.qi.Ext != nil {
+		language = *p.qi.Ext
+	}
+
+	if v, ok := p.r.URL.Query()["sh"]; ok {
+		language = v[0]
+	}
+
 	err = tpl.Execute(p.w, map[string]interface{}{
-		"language": *p.qi.Ext,
+		"language": language,
 		"title":    p.resource.Hash,
 		"author":   p.resource.Owner,
 		"content":  string(p.contents.bytes),
