@@ -233,20 +233,29 @@ Links to the resource via it's hash.
 
 Any link that starts with `:` is a shortcut. You can assign many shortcuts to a resource, but they are unique, you cannot assign a shortcut to two resources.
 
-##### `n/xxx`
+##### `@xxx`
 
 Links to the resource through an exact file name match. This is considered insecure and only exists to handle legacy issues where you need to serve the file with the same name as it exists in the URL.
 
 This is insecure only because it does not force unique file names. So you can upload a file twice with the same name and it'll serve whichever is latest, and it does not limit the file to a specific user. So another user can poison your file if they know the file name. You could also make a mistake and upload a second file with the same name leading to different content, with unexpected results.
 
+##### `aaa,bbb,ccc`
+
+Links to multiple files. Unless a set of extensions are given for syntax highlighting, it'll download the file as a single .tar file.
+
 ##### `?d`
 
 Forces the file to download to your computer rather than display in your web browser.
 
+##### `?pmd`
+
+Process markdown. Force markdown rendering on a collection of files. This is how you can force multiple files to be rendered as 1 HTML file.
+
 ##### Extensions
 
-If the file mimetype is `text/plain`, then you can provide an extension to try and add syntax highlighting. `.php` for PHP, `.go` for Go etc.
+If the file mimetype is `text/plain`, then you can provide an extension to try and add syntax highlighting. `.php` for PHP, `.go` for Go etc. This works for multiple files too, it'll do syntax highlighting on each file.
 
+You can add `.md.html` to any single file to render it to HTML from markdown.
 
 ### storage providers
 
