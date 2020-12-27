@@ -51,8 +51,6 @@ func SyntaxHighlighter(p *Pipeline) (bool, error) {
 		return true, nil
 	}
 
-	// TODO(gm): what do we do with named files? If anything?
-
 	tpl, err := template.ParseFiles("resources/syntax_highlight.html")
 	if err != nil {
 		return false, err

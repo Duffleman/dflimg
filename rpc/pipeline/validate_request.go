@@ -11,7 +11,7 @@ func ValidateRequest(p *Pipeline) (bool, error) {
 			rwq := i
 
 			if rwq.r.Type == "url" {
-				return false, cher.New("multi_file_with_url", nil)
+				return false, cher.New("multiple_queries_with_url", nil)
 			}
 		}
 	}
