@@ -25,6 +25,15 @@ type fileContent struct {
 	bytes   []byte
 }
 
+type pipelineContext struct {
+	forceDownload     bool
+	primed            bool
+	wantsHighlighting bool
+	highlightLanguage string
+	multifile         bool
+	renderMD          bool
+}
+
 type Pipeline struct {
 	ctx      context.Context
 	app      *app.App
@@ -33,16 +42,8 @@ type Pipeline struct {
 	qi       []*app.QueryInput
 	rwqs     []*resourceWithQuery
 	contents map[string]fileContent
-	context  struct {
-		forceDownload     bool
-		primed            bool
-		wantsHighlighting bool
-		highlightLanguage string
-		multifile         bool
-		acceptsHTML       bool
-		renderMD          bool
-	}
-	steps []HandlerType
+	context  pipelineContext
+	steps    []HandlerType
 	sync.Mutex
 }
 

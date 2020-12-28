@@ -32,16 +32,17 @@ func MakeContext(p *Pipeline) (bool, error) {
 		}
 	}
 
-	if strings.Contains(p.r.Header.Get("Accept"), "text/html") {
-		p.context.acceptsHTML = true
-	}
-
 	if !p.context.multifile && p.rwqs[0].qi.Exts.Match("md", "html") {
 		p.context.renderMD = true
 	}
 
 	if _, ok := p.r.URL.Query()["pmd"]; ok {
 		p.context.renderMD = true
+	}
+
+	if !strings.Contains(p.r.Header.Get("Accept"), "text/html") {
+		p.context.wantsHighlighting = false
+		p.context.renderMD = false
 	}
 
 	return true, nil

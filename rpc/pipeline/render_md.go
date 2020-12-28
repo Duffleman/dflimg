@@ -32,8 +32,6 @@ func RenderMD(p *Pipeline) (bool, error) {
 		return true, nil
 	case !allAreText:
 		return true, nil
-	case !p.context.acceptsHTML:
-		return true, nil
 	}
 
 	var output []string

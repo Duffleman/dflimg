@@ -14,11 +14,6 @@ func SyntaxHighlighter(p *Pipeline) (bool, error) {
 		return true, nil
 	}
 
-	// we can't use HTML & CSS to highlight the files if its not accepted
-	if !p.context.acceptsHTML {
-		return true, nil
-	}
-
 	// skip highlighting if we have name queries
 	for _, i := range p.rwqs {
 		rwq := i
