@@ -7,7 +7,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// ListFromDB loads all queries and finds matching rsources in the DB. It will
+// ListFromDB loads all queries and finds matching resources in the DB. It will
 // maintain the exact order too!
 func ListFromDB(p *Pipeline) (bool, error) {
 	g, gctx := errgroup.WithContext(p.ctx)

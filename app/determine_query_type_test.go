@@ -99,6 +99,12 @@ func TestQIFileName(t *testing.T) {
 			OutcomeSet:    []string{"af3", "gM2.md.html", "a66"},
 		},
 		{
+			Name:          "single query but bad input",
+			Input:         "dfl,",
+			ExpectedCount: 1,
+			OutcomeSet:    []string{"dfl"},
+		},
+		{
 			Name:          "multi type, varied",
 			Input:         ":alva,a2T.md,@kyle.md,:summin.txt,aaB",
 			ExpectedCount: 5,

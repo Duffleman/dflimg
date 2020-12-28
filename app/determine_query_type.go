@@ -57,6 +57,9 @@ func (qi QueryInput) Filename() string {
 }
 
 func (a *App) ParseQueryType(inStr string) (q []*QueryInput) {
+	inStr = strings.TrimPrefix(inStr, ",")
+	inStr = strings.TrimSuffix(inStr, ",")
+
 	for _, query := range strings.Split(inStr, ",") {
 		var exts []string
 		var qt QueryType = Hash

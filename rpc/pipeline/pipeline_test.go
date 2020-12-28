@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"dflimg"
@@ -60,6 +59,11 @@ func TestParsesContext(t *testing.T) {
 			MatchContext: pipelineContext{multifile: true},
 		},
 		{
+			Name:         "understands single files with tricks",
+			Input:        "aMb,",
+			MatchContext: pipelineContext{multifile: false},
+		},
+		{
 			Name:         "will render MD for single files with .md.html if accepts html",
 			Input:        "@hello.md.html",
 			MatchContext: pipelineContext{renderMD: true},
@@ -108,13 +112,12 @@ func TestParsesContext(t *testing.T) {
 			R:   request,
 		})
 
-		parts := strings.Split(test.Input, ",")
 		qis := pipe.app.ParseQueryType(test.Input)
 
-		for i := range parts {
+		for _, qi := range qis {
 			pipe.rwqs = append(pipe.rwqs, &resourceWithQuery{
 				r:  &dflimg.Resource{},
-				qi: qis[i],
+				qi: qi,
 			})
 		}
 
